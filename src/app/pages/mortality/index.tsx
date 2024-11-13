@@ -10,6 +10,10 @@ export default function Mortality() {
   const mortalitiesByYearPlotRef = useRef()
   const countryMortalitiesByYearPlotRef = useRef()
   const causeOfDeathMortalitiesByYearPlotRef = useRef()
+  const countryCODPlotRef = useRef()
+  const calvingTotalsPlotRef = useRef()
+  const injuryTotalsPlotRef = useRef()
+  const entanglementSeverityStackedBarPlotRef = useRef()
 
   useEffect(() => {
     const runtime = new Runtime()
@@ -22,13 +26,21 @@ export default function Mortality() {
         return new Inspector(countryMortalitiesByYearPlotRef.current)
       if (name === 'causeOfDeathMortalitiesByYearPlot')
         return new Inspector(causeOfDeathMortalitiesByYearPlotRef.current)
+      if (name === 'countryCODPlot')
+        return new Inspector(countryCODPlotRef.current)
+      if (name === 'calvingTotalsPlot')
+        return new Inspector(calvingTotalsPlotRef.current)
+      if (name === 'injuryTotalsPlot')
+        return new Inspector(injuryTotalsPlotRef.current)
+      if (name === 'entanglementSeverityStackedBarPlot')
+        return new Inspector(entanglementSeverityStackedBarPlotRef.current)
       return [
         'filteredRows',
+        'filteredCalvingRows',
+        'filteredInjuryRows',
         'thresholds',
-        'groupedData',
-        'countries',
-        'flatData',
-        'stackedData',
+        'entanglementSeverityProcessedData',
+        'entanglementSeverityFormattedData',
       ].includes(name)
     })
     return () => runtime.dispose()
@@ -59,14 +71,39 @@ export default function Mortality() {
         >
           <p className={listItemClassName}>By Cause of Death</p>
         </ScrollIntoView>
-        <p className={listItemClassName}>By Cause of Death and Country</p>
-        <p className='uppercase font-semibold text-slate-500'>Calving</p>
+        <ScrollIntoView
+          selector='#countryCODPlot'
+          scrollOptions={{ block: 'center' }}
+        >
+          <p className={listItemClassName}>By Cause of Death and Country</p>
+        </ScrollIntoView>
+        <ScrollIntoView
+          selector='#calvingTotalsPlot'
+          scrollOptions={{ block: 'center' }}
+        >
+          <p className='uppercase font-semibold text-slate-500 hover:cursor-pointer hover:text-blue-500 active:text-blue-800'>
+            Calving
+          </p>
+        </ScrollIntoView>
         <p className='uppercase font-semibold text-slate-500'>Injury</p>
-        <p className={listItemClassName}>Total</p>
-        <p className={listItemClassName}>Entanglement: Gear VS No Gear</p>
+        <ScrollIntoView
+          selector='#injuryTotalsPlot'
+          scrollOptions={{ block: 'center' }}
+        >
+          <p className={listItemClassName}>Total</p>
+        </ScrollIntoView>
+        <ScrollIntoView
+          selector='#entanglementSeverityStackedBarPlot'
+          scrollOptions={{ block: 'center' }}
+        >
+          <p className={listItemClassName}>Entanglement: Gear VS No Gear</p>
+        </ScrollIntoView>
       </div>
       <div className='flex flex-col gap-4 items-center'>
-        <div ref={viewofYearSliderRef} className='sticky top-0 pt-8' />
+        <div
+          ref={viewofYearSliderRef}
+          className='sticky top-8 mt-8 bg-slate-100 outline outline-slate-200 rounded-md px-8 py-4 shadow-md'
+        />
         <div id='mortalitiesByYearPlot' ref={mortalitiesByYearPlotRef} />
         <div
           id='countryMortalitiesByYearPlot'
@@ -75,6 +112,13 @@ export default function Mortality() {
         <div
           id='causeOfDeathMortalitiesByYearPlot'
           ref={causeOfDeathMortalitiesByYearPlotRef}
+        />
+        <div id='countryCODPlot' ref={countryCODPlotRef} />
+        <div id='calvingTotalsPlot' ref={calvingTotalsPlotRef} />
+        <div id='injuryTotalsPlot' ref={injuryTotalsPlotRef} />
+        <div
+          id='entanglementSeverityStackedBarPlot'
+          ref={entanglementSeverityStackedBarPlotRef}
         />
       </div>
     </div>
