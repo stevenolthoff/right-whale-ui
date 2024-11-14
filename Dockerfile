@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 # TODO: Maybe revisit this, as we probably shouldn't be relying on
 # legacy-peer-deps
-RUN npm ci
+RUN npm ci --force
 
 # Rebuild the source code only when needed
 FROM node:18-alpine AS builder
