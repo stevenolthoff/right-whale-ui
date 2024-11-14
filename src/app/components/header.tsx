@@ -2,12 +2,13 @@ export default function Header() {
   return (
     <header className='flex shadow-md py-4 px-4 sm:px-10 bg-white font-[sans-serif] min-h-[70px] tracking-wide relative z-50'>
       <div className='flex flex-wrap items-center justify-between gap-5 w-full'>
-        <a href='javascript:void(0)'>
-          <img
+        <a href='javascript:void(0)' className='font-bold'>
+          NARW Anthropogenic Injury Event Visualization Site
+          {/* <img
             src='https://readymadeui.com/readymadeui.svg'
             alt='logo'
             className='w-36'
-          />
+          /> */}
         </a>
 
         <div
@@ -49,7 +50,7 @@ export default function Header() {
                 href='javascript:void(0)'
                 className='hover:text-[#007bff] text-[#007bff] block font-semibold text-[15px]'
               >
-                Home
+                Monitoring
               </a>
             </li>
             <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
@@ -57,7 +58,7 @@ export default function Header() {
                 href='javascript:void(0)'
                 className='hover:text-[#007bff] text-gray-500 block font-semibold text-[15px]'
               >
-                Team
+                Injury
               </a>
             </li>
             <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
@@ -65,7 +66,7 @@ export default function Header() {
                 href='javascript:void(0)'
                 className='hover:text-[#007bff] text-gray-500 block font-semibold text-[15px]'
               >
-                Feature
+                Whale Pages
               </a>
             </li>
             <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
@@ -73,10 +74,10 @@ export default function Header() {
                 href='javascript:void(0)'
                 className='hover:text-[#007bff] text-gray-500 block font-semibold text-[15px]'
               >
-                Blog
+                Resources
               </a>
             </li>
-            <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
+            {/* <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
               <a
                 href='javascript:void(0)'
                 className='hover:text-[#007bff] text-gray-500 block font-semibold text-[15px]'
@@ -91,7 +92,7 @@ export default function Header() {
               >
                 Contact
               </a>
-            </li>
+            </li> */}
           </ul>
         </div>
 

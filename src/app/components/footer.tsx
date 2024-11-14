@@ -1,17 +1,18 @@
 export default function Footer() {
   return (
-    <footer className='font-sans tracking-wide bg-black px-8 py-12'>
+    <footer className='font-sans tracking-wide bg-blue-950 px-8 py-12'>
       <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-10'>
         <div>
-          <a href='javascript:void(0)'>
-            <img
+          <a href='javascript:void(0)' className='text-white font-bold'>
+            NARW Anthropogenic Injury Event Visualization Site
+            {/* <img
               src='https://readymadeui.com/readymadeui-white.svg'
               alt='logo'
               className='w-44'
-            />
+            /> */}
           </a>
 
-          <ul className='mt-10 flex space-x-5'>
+          {/* <ul className='mt-10 flex space-x-5'>
             <li>
               <a href='javascript:void(0)'>
                 <svg
@@ -68,253 +69,14 @@ export default function Footer() {
                 </svg>
               </a>
             </li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 className='text-white font-semibold text-lg relative max-sm:cursor-pointer'>
-            Services{' '}
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              width='16px'
-              height='16px'
-              className='sm:hidden absolute right-0 top-1 fill-[#d6d6d6]'
-              viewBox='0 0 24 24'
-            >
-              <path
-                d='M12 16a1 1 0 0 1-.71-.29l-6-6a1 1 0 0 1 1.42-1.42l5.29 5.3 5.29-5.29a1 1 0 0 1 1.41 1.41l-6 6a1 1 0 0 1-.7.29z'
-                data-name='16'
-                data-original='#000000'
-              ></path>
-            </svg>
-          </h4>
-
-          <ul className='mt-6 space-y-5'>
-            <li>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-white text-gray-300 text-sm'
-              >
-                Web Development
-              </a>
-            </li>
-            <li>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-white text-gray-300 text-sm'
-              >
-                Pricing
-              </a>
-            </li>
-            <li>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-white text-gray-300 text-sm'
-              >
-                Support
-              </a>
-            </li>
-            <li>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-white text-gray-300 text-sm'
-              >
-                Client Portal
-              </a>
-            </li>
-            <li>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-white text-gray-300 text-sm'
-              >
-                Resources
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 className='text-white font-semibold text-lg relative max-sm:cursor-pointer'>
-            Platforms{' '}
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              width='16px'
-              height='16px'
-              className='sm:hidden absolute right-0 top-1 fill-[#d6d6d6]'
-              viewBox='0 0 24 24'
-            >
-              <path
-                d='M12 16a1 1 0 0 1-.71-.29l-6-6a1 1 0 0 1 1.42-1.42l5.29 5.3 5.29-5.29a1 1 0 0 1 1.41 1.41l-6 6a1 1 0 0 1-.7.29z'
-                data-name='16'
-                data-original='#000000'
-              ></path>
-            </svg>
-          </h4>
-          <ul className='space-y-5 mt-6 max-sm:hidden'>
-            <li>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-white text-gray-300 text-sm'
-              >
-                Hubspot
-              </a>
-            </li>
-            <li>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-white text-gray-300 text-sm'
-              >
-                Integration Services
-              </a>
-            </li>
-            <li>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-white text-gray-300 text-sm'
-              >
-                Marketing Glossar
-              </a>
-            </li>
-            <li>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-white text-gray-300 text-sm'
-              >
-                UIPath
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 className='text-white font-semibold text-lg relative max-sm:cursor-pointer'>
-            Company{' '}
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              width='16px'
-              height='16px'
-              className='sm:hidden absolute right-0 top-1 fill-[#d6d6d6]'
-              viewBox='0 0 24 24'
-            >
-              <path
-                d='M12 16a1 1 0 0 1-.71-.29l-6-6a1 1 0 0 1 1.42-1.42l5.29 5.3 5.29-5.29a1 1 0 0 1 1.41 1.41l-6 6a1 1 0 0 1-.7.29z'
-                data-name='16'
-                data-original='#000000'
-              ></path>
-            </svg>
-          </h4>
-
-          <ul className='space-y-5 mt-6 max-sm:hidden'>
-            <li>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-white text-gray-300 text-sm'
-              >
-                About us
-              </a>
-            </li>
-            <li>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-white text-gray-300 text-sm'
-              >
-                Careers
-              </a>
-            </li>
-            <li>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-white text-gray-300 text-sm'
-              >
-                Blog
-              </a>
-            </li>
-            <li>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-white text-gray-300 text-sm'
-              >
-                Portfolio
-              </a>
-            </li>
-            <li>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-white text-gray-300 text-sm'
-              >
-                Events
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 className='text-white font-semibold text-lg relative max-sm:cursor-pointer'>
-            Additional{' '}
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              width='16px'
-              height='16px'
-              className='sm:hidden absolute right-0 top-1 fill-[#d6d6d6]'
-              viewBox='0 0 24 24'
-            >
-              <path
-                d='M12 16a1 1 0 0 1-.71-.29l-6-6a1 1 0 0 1 1.42-1.42l5.29 5.3 5.29-5.29a1 1 0 0 1 1.41 1.41l-6 6a1 1 0 0 1-.7.29z'
-                data-name='16'
-                data-original='#000000'
-              ></path>
-            </svg>
-          </h4>
-
-          <ul className='space-y-5 mt-6 max-sm:hidden'>
-            <li>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-white text-gray-300 text-sm'
-              >
-                FAQ
-              </a>
-            </li>
-            <li>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-white text-gray-300 text-sm'
-              >
-                Partners
-              </a>
-            </li>
-            <li>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-white text-gray-300 text-sm'
-              >
-                Sitemap
-              </a>
-            </li>
-            <li>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-white text-gray-300 text-sm'
-              >
-                Contact
-              </a>
-            </li>
-            <li>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-white text-gray-300 text-sm'
-              >
-                News
-              </a>
-            </li>
-          </ul>
+          </ul> */}
         </div>
       </div>
 
       <hr className='my-10 border-gray-400' />
 
       <div className='flex flex-wrap max-md:flex-col gap-4'>
-        <ul className='md:flex md:space-x-6 max-md:space-y-2'>
+        {/* <ul className='md:flex md:space-x-6 max-md:space-y-2'>
           <li>
             <a
               href='javascript:void(0)'
@@ -339,10 +101,10 @@ export default function Footer() {
               Security
             </a>
           </li>
-        </ul>
+        </ul> */}
 
         <p className='text-gray-300 text-sm md:ml-auto'>
-          © ReadymadeUI. All rights reserved.
+          © Organization Name. All rights reserved.
         </p>
       </div>
     </footer>
