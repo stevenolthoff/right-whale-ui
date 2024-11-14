@@ -14,7 +14,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY public  public
 COPY src  src
-COPY .eslintrc.json tailwind.config.js postcss.config.mjs tsconfig.json ./
+COPY .eslintrc.json tailwind.config.ts postcss.config.mjs tsconfig.json ./
 COPY --from=deps /app/node_modules ./node_modules
 RUN npm run build
 
