@@ -1,23 +1,24 @@
 'use client' // This is a client component 👈🏽
 
 import React, { useRef, useEffect } from 'react'
+
 import { Runtime, Inspector } from '@observablehq/runtime'
 import notebook from 'f38218f71bb1a1f8'
 import ScrollIntoView from 'react-scroll-into-view'
 
 export default function Mortality() {
-  const viewofYearSliderRef = useRef()
-  const mortalitiesByYearPlotRef = useRef()
-  const countryMortalitiesByYearPlotRef = useRef()
-  const causeOfDeathMortalitiesByYearPlotRef = useRef()
-  const countryCODPlotRef = useRef()
-  const calvingTotalsPlotRef = useRef()
-  const injuryTotalsPlotRef = useRef()
-  const entanglementSeverityStackedBarPlotRef = useRef()
+  const viewofYearSliderRef = useRef<HTMLDivElement>(null)
+  const mortalitiesByYearPlotRef = useRef<HTMLDivElement>(null)
+  const countryMortalitiesByYearPlotRef = useRef<HTMLDivElement>(null)
+  const causeOfDeathMortalitiesByYearPlotRef = useRef<HTMLDivElement>(null)
+  const countryCODPlotRef = useRef<HTMLDivElement>(null)
+  const calvingTotalsPlotRef = useRef<HTMLDivElement>(null)
+  const injuryTotalsPlotRef = useRef<HTMLDivElement>(null)
+  const entanglementSeverityStackedBarPlotRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const runtime = new Runtime()
-    runtime.module(notebook, (name) => {
+    runtime.module(notebook, (name: string) => {
       if (name === 'viewof yearSlider')
         return new Inspector(viewofYearSliderRef.current)
       if (name === 'mortalitiesByYearPlot')
