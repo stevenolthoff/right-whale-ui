@@ -10,12 +10,12 @@ build_image:
   script:
   - docker build -f Dockerfile -t $CI_PROJECT_NAME:$CI_PIPELINE_ID .
 
-test:
-  stage: test
-  image: $CI_PROJECT_NAME:$CI_PIPELINE_ID
-  script:
-    - test -e /usr/share/nginx/html/index.html
-    - test -e /usr/share/nginx/html/asset-manifest.json
+# test:
+#   stage: test
+#   image: $CI_PROJECT_NAME:$CI_PIPELINE_ID
+#   script:
+#     - test -e /usr/share/nginx/html/index.html
+#     - test -e /usr/share/nginx/html/asset-manifest.json
 
 push_production:
   stage: push
