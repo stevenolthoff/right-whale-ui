@@ -1,0 +1,64 @@
+stages:
+  - build
+  - test
+  - push
+  - clean
+  - deploy
+
+build_image:
+  stage: build
+  script:
+  - docker build -f Dockerfile -t $CI_PROJECT_NAME:$CI_PIPELINE_ID .
+
+test:
+  stage: test
+  image: $CI_PROJECT_NAME:$CI_PIPELINE_ID
+  script:
+    - test -e /usr/share/nginx/html/index.html
+    - test -e /usr/share/nginx/html/asset-manifest.json
+
+push_production:
+  stage: push
+  only:
+    - main
+  script:
+    - docker tag $CI_PROJECT_NAME:$CI_PIPELINE_ID registry.axiom/$CI_PROJECT_NAME:production
+    - docker push registry.axiom/$CI_PROJECT_NAME:production
+
+push_staging:
+  stage: push
+  only:
+    - development
+  script:
+    - docker tag $CI_PROJECT_NAME:$CI_PIPELINE_ID registry.axiom/$CI_PROJECT_NAME:staging
+    - docker push registry.axiom/$CI_PROJECT_NAME:staging
+
+clean_production:
+  stage: clean
+  only:
+    - main
+  script:
+    - docker rmi --no-prune $CI_PROJECT_NAME:$CI_PIPELINE_ID
+    - docker rmi --no-prune registry.axiom/$CI_PROJECT_NAME:production
+
+clean_staging:
+  stage: clean
+  only:
+    - development
+  script:
+    - docker rmi --no-prune $CI_PROJECT_NAME:$CI_PIPELINE_ID
+    - docker rmi --no-prune registry.axiom/$CI_PROJECT_NAME:staging
+
+deploy_production:
+  stage: deploy
+  only:
+    - main
+  script:
+    - aps apps-prod right-whale-ui
+
+deploy_staging:
+  stage: deploy
+  only:
+    - development
+  script:
+    - aps apps-stage right-whale-ui
