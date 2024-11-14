@@ -4,7 +4,6 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 # TODO: Maybe revisit this, as we probably shouldn't be relying on
 # legacy-peer-deps
-COPY .npmrc ./
 RUN npm ci
 
 # Rebuild the source code only when needed
