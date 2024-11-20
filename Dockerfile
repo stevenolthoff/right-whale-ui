@@ -11,6 +11,7 @@ FROM node:18-alpine AS builder
 RUN ls -als
 # RUN apk --no-cache add curl
 WORKDIR /app
+COPY package.json package-lock.json ./
 COPY public  public
 COPY src  src
 COPY .eslintrc.json tailwind.config.ts next.config.ts postcss.config.mjs tsconfig.json ./
