@@ -11,7 +11,6 @@ FROM node:18-alpine AS builder
 RUN ls -als
 # RUN apk --no-cache add curl
 WORKDIR /app
-COPY package.json package-lock.json ./
 COPY public  public
 COPY src  src
 COPY .eslintrc.json tailwind.config.ts next.config.ts postcss.config.mjs tsconfig.json ./
@@ -46,7 +45,7 @@ WORKDIR /app
 
 ENV NODE_ENV production
 
-COPY --from=builder /app/.next/ /usr/share/nginx/html
+COPY --from=builder /app/out/ /usr/share/nginx/html
 
 COPY ./docker/nginx/conf.d/* /etc/nginx/conf.d/
 
