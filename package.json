@@ -10,11 +10,13 @@
   },
   "dependencies": {
     "@observablehq/runtime": "^5.9.9",
+    "c545da94fc314b5e": "https://api.observablehq.com/d/c545da94fc314b5e.tgz?v=3",
     "f38218f71bb1a1f8": "https://api.observablehq.com/d/f38218f71bb1a1f8@510.tgz?v=3",
     "next": "15.0.2",
     "react": "19.0.0-rc-02c0e824-20241028",
     "react-dom": "19.0.0-rc-02c0e824-20241028",
-    "react-scroll-into-view": "^2.1.3"
+    "react-scroll-into-view": "^2.1.3",
+    "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
     "@types/node": "^20",
