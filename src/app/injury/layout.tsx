@@ -2,15 +2,23 @@
 
 import React, { useState } from 'react'
 import { twMerge } from 'tailwind-merge'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
-type ChartOption = 'injury' | 'entanglement' | 'gear' | 'vessel' | 'custom'
+type ChartOption =
+  | 'injury-type-by-year'
+  | 'entanglement-type-by-year'
+  | 'gear-vs-no-gear'
+  | 'vessel-strike-by-year'
+  | 'custom'
 
 export default function InjuryLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const [selected, setSelected] = useState<ChartOption>('injury')
+  const endOfPath = usePathname().split('/').pop()
+  const [selected, setSelected] = useState<ChartOption>(endOfPath)
   const listItemClassName =
     'text-xl hover:cursor-pointer hover:text-blue-500 active:text-blue-800'
   return (
@@ -19,38 +27,48 @@ export default function InjuryLayout({
         <div
           className={twMerge(
             listItemClassName,
-            selected === 'injury' ? 'text-blue-500' : 'text-slate-800'
+            selected === 'injury-type-by-year'
+              ? 'text-blue-500'
+              : 'text-slate-800'
           )}
-          onClick={() => setSelected('injury')}
+          onClick={() => setSelected('injury-type-by-year')}
         >
-          Injury Type by Year
+          <Link href='/injury/injury-type-by-year'>Injury Type by Year</Link>
         </div>
         <div
           className={twMerge(
             listItemClassName,
-            selected === 'entanglement' ? 'text-blue-500' : 'text-slate-800'
+            selected === 'entanglement-type-by-year'
+              ? 'text-blue-500'
+              : 'text-slate-800'
           )}
-          onClick={() => setSelected('entanglement')}
+          onClick={() => setSelected('entanglement-type-by-year')}
         >
-          Entanglement by Year
+          <Link href='/injury/entanglement-type-by-year'>
+            Entanglement by Year
+          </Link>
         </div>
         <div
           className={twMerge(
             listItemClassName,
-            selected === 'gear' ? 'text-blue-500' : 'text-slate-800'
+            selected === 'gear-vs-no-gear' ? 'text-blue-500' : 'text-slate-800'
           )}
-          onClick={() => setSelected('gear')}
+          onClick={() => setSelected('gear-vs-no-gear')}
         >
-          Gear VS No Gear
+          <Link href='/injury/gear-vs-no-gear'>Gear VS No Gear</Link>
         </div>
         <div
           className={twMerge(
             listItemClassName,
-            selected === 'vessel' ? 'text-blue-500' : 'text-slate-800'
+            selected === 'vessel-strike-by-year'
+              ? 'text-blue-500'
+              : 'text-slate-800'
           )}
-          onClick={() => setSelected('vessel')}
+          onClick={() => setSelected('vessel-strike-by-year')}
         >
-          Vessel Strike by Year
+          <Link href='/injury/vessel-strike-by-year'>
+            Vessel Strike by Year
+          </Link>
         </div>
         <div
           className={twMerge(

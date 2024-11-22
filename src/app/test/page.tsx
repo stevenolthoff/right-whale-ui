@@ -17,9 +17,7 @@ export default function InjuryTypeByYear() {
   useEffect(() => {
     const runtime = new Runtime()
     runtime.module(notebook, (name) => {
-      if (name === 'viewof injuryType') {
-        console.log('here')
-      }
+      // if (name === 'viewof injuryType')
       // return new Inspector(viewofInjuryTypeRef.current)
       //       if (name === 'injuryTypeStackedBar')
       //         return new Inspector(injuryTypeStackedBarRef.current)
