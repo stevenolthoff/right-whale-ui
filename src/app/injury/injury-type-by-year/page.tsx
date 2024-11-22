@@ -1,5 +1,5 @@
-'use client' // This is a client component 👈🏽
-import { useEffect, useRef } from 'react'
+'use client'
+import React, { useEffect, useRef } from 'react'
 import notebook from 'c545da94fc314b5e'
 import { Runtime, Inspector } from '@observablehq/runtime'
 
