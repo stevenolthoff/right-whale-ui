@@ -13,13 +13,9 @@ export default function InjuryTypeByYear() {
         return new Inspector(viewofInjuryTypeRef.current)
       if (name === 'injuryTypeStackedBar')
         return new Inspector(injuryTypeStackedBarRef.current)
-      //       if (name === 'viewof vesselStrikeSlider')
-      //         return new Inspector(viewofVesselStrikeSliderRef.current)
-      //       if (name === 'strikeTypeStackedBar')
-      //         return new Inspector(strikeTypeStackedBarRef.current)
-      //       return ['filteredData', 'vesselStrikeFilteredData'].includes(name)
+      return ['filteredData'].includes(name)
     })
-    //     return () => runtime.dispose()
+    return () => runtime.dispose()
   }, [])
   return (
     <div>
