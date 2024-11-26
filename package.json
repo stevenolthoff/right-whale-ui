@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@observablehq/runtime": "^5.9.9",
-    "c545da94fc314b5e": "https://api.observablehq.com/d/c545da94fc314b5e@359.tgz?v=3",
+    "c545da94fc314b5e": "https://api.observablehq.com/d/c545da94fc314b5e@390.tgz?v=3",
     "f38218f71bb1a1f8": "https://api.observablehq.com/d/f38218f71bb1a1f8@510.tgz?v=3",
     "next": "15.0.2",
     "react": "19.0.0-rc-02c0e824-20241028",

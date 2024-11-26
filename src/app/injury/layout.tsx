@@ -8,7 +8,6 @@ import { usePathname } from 'next/navigation'
 type ChartOption =
   | 'injury-type-by-year'
   | 'entanglement'
-  | 'gear-vs-no-gear'
   | 'vessel-strike-by-year'
   | 'custom'
 
@@ -43,15 +42,6 @@ export default function InjuryLayout({
           onClick={() => setSelected('entanglement')}
         >
           <Link href='/injury/entanglement'>Entanglement</Link>
-        </div>
-        <div
-          className={twMerge(
-            listItemClassName,
-            selected === 'gear-vs-no-gear' ? 'text-blue-500' : 'text-slate-800'
-          )}
-          onClick={() => setSelected('gear-vs-no-gear')}
-        >
-          <Link href='/injury/gear-vs-no-gear'>Gear VS No Gear</Link>
         </div>
         <div
           className={twMerge(
