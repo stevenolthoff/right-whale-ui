@@ -63,7 +63,7 @@ export default function InjuryLayout({
           )}
           onClick={() => setSelected('custom')}
         >
-          Build Your Own
+          <Link href='/injury/custom'>Build Your Own</Link>
         </div>
       </div>
       <div></div>
