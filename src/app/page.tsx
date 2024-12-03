@@ -8,7 +8,6 @@ export default function Home() {
       <main>
         <Hero></Hero>
         <HomeInfo></HomeInfo>
-        {/* <Mortality></Mortality> */}
       </main>
     </>
   )

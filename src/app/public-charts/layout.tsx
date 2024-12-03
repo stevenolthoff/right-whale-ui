@@ -39,7 +39,9 @@ export default function PublicChartsLayout({
         <div
           className={twMerge(
             listItemClassName,
-            selected === 'entanglement' ? 'text-blue-500' : 'text-slate-800'
+            selected === 'mortality-by-country'
+              ? 'text-blue-500'
+              : 'text-slate-800'
           )}
           onClick={() => setSelected('mortality-by-country')}
         >
@@ -48,7 +50,7 @@ export default function PublicChartsLayout({
         <div
           className={twMerge(
             listItemClassName,
-            selected === 'mortaility-by-cause-of-death'
+            selected === 'mortality-by-cause-of-death'
               ? 'text-blue-500'
               : 'text-slate-800'
           )}
@@ -75,9 +77,7 @@ export default function PublicChartsLayout({
         <div
           className={twMerge(
             listItemClassName,
-            selected === 'mortality-by-cause-of-death-and-country'
-              ? 'text-blue-500'
-              : 'text-slate-800'
+            selected === 'calving' ? 'text-blue-500' : 'text-slate-800'
           )}
           onClick={() => setSelected('calving')}
         >

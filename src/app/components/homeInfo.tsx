@@ -1,13 +1,13 @@
 export default function HomeInfo() {
   return (
-    <div className='font-sans bg-gray-100 px-4 py-12'>
+    <div className='font-sans bg-white px-4 py-12'>
       <div className='grid lg:grid-cols-2 gap-12 lg:max-w-6xl max-w-2xl mx-auto'>
         <div className='text-left'>
-          <h2 className='text-gray-800 text-3xl font-bold mb-6'>
+          <h2 className='text-slate-800 text-3xl font-bold mb-6'>
             Welcome to the North Atlantic Right Whale Anthropogenic Events
             Visualization Site
           </h2>
-          <p className='text-sm text-gray-500'>
+          <p className='text-sm text-slate-500'>
             The North Atlantic Right Whale Anthropogenic Events Visualization
             Site was developed to provide improved access to, and visualization
             of, data associated with anthropogenic injuries to right whales.

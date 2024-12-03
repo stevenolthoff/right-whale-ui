@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 export default function Hero() {
   return (
     <div className='relative bg-gradient-to-b from-blue-900 to-blue-800 py-16 font-[sans-serif]'>
@@ -16,12 +18,14 @@ export default function Hero() {
         <p className='text-lg md:text-xl mb-12 [text-shadow:_3px_6px_7px_rgb(0_0_0_/_80%)]'>
           Empowering Awareness and Action Through Up-to-Date Data and Insights
         </p>
-        {/* <button
-          type='button'
-          className='bg-blue-600 hover:bg-blue-700 text-white text-base tracking-wide px-6 py-3 rounded-full transition duration-300 ease-in-out shadow-lg hover:shadow-xl'
-        >
-          Explore the Data
-        </button> */}
+        <Link href='/public-charts/mortality-total'>
+          <button
+            type='button'
+            className='bg-blue-600 hover:bg-blue-700 text-white text-base tracking-wide px-6 py-3 rounded-full transition duration-300 ease-in-out shadow-lg hover:shadow-xl'
+          >
+            Explore the Data
+          </button>
+        </Link>
       </div>
     </div>
   )
