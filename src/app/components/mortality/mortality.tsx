@@ -54,58 +54,23 @@ export default function Mortality() {
     <div className='flex h-full'>
       <div className='sticky top-0 pt-8 pl-8 h-full w-1/4 flex flex-col gap-2'>
         <p className='uppercase font-semibold text-slate-500'>Mortality</p>
-        <ScrollIntoView
-          selector='#mortalitiesByYearPlot'
-          scrollOptions={{ block: 'center' }}
-        >
-          <p className={listItemClassName}>Total</p>
-        </ScrollIntoView>
-        <ScrollIntoView
-          selector='#countryMortalitiesByYearPlot'
-          scrollOptions={{ block: 'center' }}
-        >
-          <p className={listItemClassName}>By Country</p>
-        </ScrollIntoView>
-        <ScrollIntoView
-          selector='#causeOfDeathMortalitiesByYearPlot'
-          scrollOptions={{ block: 'center' }}
-        >
-          <p className={listItemClassName}>By Cause of Death</p>
-        </ScrollIntoView>
-        <ScrollIntoView
-          selector='#countryCODPlot'
-          scrollOptions={{ block: 'center' }}
-        >
-          <p className={listItemClassName}>By Cause of Death and Country</p>
-        </ScrollIntoView>
-        <ScrollIntoView
-          selector='#calvingTotalsPlot'
-          scrollOptions={{ block: 'center' }}
-        >
-          <p className='uppercase font-semibold text-slate-500 hover:cursor-pointer hover:text-blue-500 active:text-blue-800'>
-            Calving
-          </p>
-        </ScrollIntoView>
+        <p className={listItemClassName}>Total</p>
+        <p className={listItemClassName}>By Country</p>
+        <p className={listItemClassName}>By Cause of Death</p>
+        <p className={listItemClassName}>By Cause of Death and Country</p>
+        <p className='uppercase font-semibold text-slate-500 hover:cursor-pointer hover:text-blue-500 active:text-blue-800'>
+          Calving
+        </p>
         <p className='uppercase font-semibold text-slate-500'>Injury</p>
-        <ScrollIntoView
-          selector='#injuryTotalsPlot'
-          scrollOptions={{ block: 'center' }}
-        >
-          <p className={listItemClassName}>Total</p>
-        </ScrollIntoView>
-        <ScrollIntoView
-          selector='#entanglementSeverityStackedBarPlot'
-          scrollOptions={{ block: 'center' }}
-        >
-          <p className={listItemClassName}>Entanglement: Gear VS No Gear</p>
-        </ScrollIntoView>
+        <p className={listItemClassName}>Total</p>
+        <p className={listItemClassName}>Entanglement: Gear VS No Gear</p>
       </div>
       <div className='flex flex-col gap-4 items-center'>
         <div
           ref={viewofYearSliderRef}
           className='sticky top-8 mt-8 bg-slate-100 outline outline-slate-200 rounded-md px-8 py-4 shadow-md'
         />
-        <div id='mortalitiesByYearPlot' ref={mortalitiesByYearPlotRef} />
+        {/* <div id='mortalitiesByYearPlot' ref={mortalitiesByYearPlotRef} />
         <div
           id='countryMortalitiesByYearPlot'
           ref={countryMortalitiesByYearPlotRef}
@@ -120,7 +85,7 @@ export default function Mortality() {
         <div
           id='entanglementSeverityStackedBarPlot'
           ref={entanglementSeverityStackedBarPlotRef}
-        />
+        /> */}
       </div>
     </div>
   )

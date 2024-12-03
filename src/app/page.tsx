@@ -1,6 +1,5 @@
 import React from 'react'
 import Hero from '@/components/hero.tsx'
-import Mortality from '@/components/mortality/mortality.tsx'
 import HomeInfo from '@/components/homeInfo.tsx'
 
 export default function Home() {
@@ -9,7 +8,7 @@ export default function Home() {
       <main>
         <Hero></Hero>
         <HomeInfo></HomeInfo>
-        <Mortality></Mortality>
+        {/* <Mortality></Mortality> */}
       </main>
     </>
   )
