@@ -2,6 +2,7 @@
 import { useLocalStorage } from '@uidotdev/usehooks'
 import { useEffect } from 'react'
 import { redirect } from 'next/navigation'
+import React from 'react'
 export default function Token() {
   const [token, setToken] = useLocalStorage('token', '')
   useEffect(() => {
