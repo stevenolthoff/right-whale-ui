@@ -1,9 +1,10 @@
 'use client' // This is a client component 👈🏽
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { twMerge } from 'tailwind-merge'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, redirect } from 'next/navigation'
+import useIsLoggedIn from '../hooks/useIsLoggedIn.tsx'
 
 type ChartOption =
   | 'injury-type-by-year'
@@ -18,6 +19,14 @@ export default function InjuryLayout({
 }) {
   const endOfPath = usePathname().split('/').pop()
   const [selected, setSelected] = useState<ChartOption>(endOfPath)
+  const isLoggedIn = useIsLoggedIn()
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      redirect('/')
+    }
+  }, [isLoggedIn])
+
   const listItemClassName =
     'text-xl hover:cursor-pointer hover:text-blue-500 active:text-blue-800'
   return (

@@ -1,6 +1,19 @@
+'use client'
 import Link from 'next/link'
+import { useLocalStorage } from '@uidotdev/usehooks'
+import { useState, useEffect } from 'react'
+import { redirect } from 'next/navigation'
 
 export default function Header() {
+  const [token, setToken] = useLocalStorage('token', '')
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  useEffect(() => {
+    if (token) {
+      setIsLoggedIn(true)
+    } else {
+      setIsLoggedIn(false)
+    }
+  }, [token])
   return (
     <header className='flex shadow-md py-4 px-4 sm:px-10 bg-white font-[sans-serif] min-h-[70px] tracking-wide relative z-50'>
       <div className='flex flex-wrap items-center justify-between gap-5 w-full'>
@@ -51,22 +64,26 @@ export default function Header() {
                 <Link href='/public-charts/mortality-total'>Explore</Link>
               </a>
             </li>
-            <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-[#007bff] text-gray-500 block font-semibold text-[15px]'
-              >
-                <Link href='/monitoring'>Monitoring</Link>
-              </a>
-            </li>
-            <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-[#007bff] text-gray-500 block font-semibold text-[15px]'
-              >
-                <Link href='/injury/injury-type-by-year'>Injury</Link>
-              </a>
-            </li>
+            {isLoggedIn && (
+              <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
+                <a
+                  href='javascript:void(0)'
+                  className='hover:text-[#007bff] text-gray-500 block font-semibold text-[15px]'
+                >
+                  <Link href='/monitoring'>Monitoring</Link>
+                </a>
+              </li>
+            )}
+            {isLoggedIn && (
+              <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
+                <a
+                  href='javascript:void(0)'
+                  className='hover:text-[#007bff] text-gray-500 block font-semibold text-[15px]'
+                >
+                  <Link href='/injury/injury-type-by-year'>Injury</Link>
+                </a>
+              </li>
+            )}
             <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
               <a
                 href='javascript:void(0)'
@@ -103,12 +120,28 @@ export default function Header() {
         </div>
 
         <div className='flex max-lg:ml-auto space-x-3'>
-          <button className='px-4 py-2 text-sm rounded-full font-bold text-white border-2 border-[#007bff] bg-[#007bff] transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]'>
-            Login
+          <button
+            onClick={() => {
+              if (isLoggedIn) {
+                setToken('')
+              } else {
+                const host = globalThis.location.hostname
+                let redirectUrl = ''
+                if (host === 'localhost') {
+                  redirectUrl = 'http://localhost:44208/u/accounts/amazon-cognito/login/?process='
+                } else {
+                  redirectUrl = 'https://stage-rwanthro-backend.srv.axds.co/u/accounts/amazon-cognito/login/?process='
+                }
+                redirect(redirectUrl)
+              }
+            }}
+            className='px-4 py-2 text-sm rounded-full font-bold text-white border-2 border-[#007bff] bg-[#007bff] transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]'
+          >
+            {isLoggedIn ? 'Sign Out' : 'Login'}
           </button>
-          <button className='px-4 py-2 text-sm rounded-full font-bold text-white border-2 border-[#007bff] bg-[#007bff] transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]'>
+          {/* <button className='px-4 py-2 text-sm rounded-full font-bold text-white border-2 border-[#007bff] bg-[#007bff] transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]'>
             Sign up
-          </button>
+          </button> */}
 
           <button id='toggleOpen' className='lg:hidden'>
             <svg
