@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from 'react'
 import notebook from 'c545da94fc314b5e'
 import { Runtime, Inspector } from '@observablehq/runtime'
+import ChartLayout from '../../components/chartLayout.tsx'
 
 export default function Entanglement() {
   const viewofVesselStrikeSliderRef = useRef<HTMLDivElement>(null)
@@ -23,10 +24,17 @@ export default function Entanglement() {
     return () => runtime.dispose()
   }, [])
   return (
-    <div>
-      <div ref={viewofVesselStrikeSliderRef} />
-      <div>Total Vessel Strikes by Year</div>
-      <div ref={vesselStrikeTotalsPlotRef} />
-    </div>
+    <ChartLayout
+      title='Vessel Strike'
+      description='Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+    >
+      <div className='flex flex-col gap-4 py-8'>
+        <div ref={vesselStrikeTotalsPlotRef} />
+        <div
+          ref={viewofVesselStrikeSliderRef}
+          className='outline outline-slate-200 rounded-md px-8 py-4 w-fit mx-auto'
+        />
+      </div>
+    </ChartLayout>
   )
 }

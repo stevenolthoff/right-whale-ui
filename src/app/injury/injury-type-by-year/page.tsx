@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from 'react'
 import notebook from 'c545da94fc314b5e'
 import { Runtime, Inspector } from '@observablehq/runtime'
+import ChartLayout from '../../components/chartLayout.tsx'
 
 export default function InjuryTypeByYear() {
   const viewofInjuryTypeRef = useRef<HTMLDivElement>(null)
@@ -18,9 +19,17 @@ export default function InjuryTypeByYear() {
     return () => runtime.dispose()
   }, [])
   return (
-    <div>
-      <div ref={viewofInjuryTypeRef} />
-      <div ref={injuryTypeStackedBarRef} />
-    </div>
+    <ChartLayout
+      title='Injury Type by Year'
+      description='Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+    >
+      <div className='flex flex-col gap-4 py-8'>
+        <div ref={injuryTypeStackedBarRef} />
+        <div
+          ref={viewofInjuryTypeRef}
+          className='outline outline-slate-200 rounded-md px-8 py-4 w-fit mx-auto'
+        />
+      </div>
+    </ChartLayout>
   )
 }

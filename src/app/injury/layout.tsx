@@ -23,6 +23,7 @@ export default function InjuryLayout({
   return (
     <div className='flex p-8 gap-8'>
       <div className='flex flex-col'>
+        <p className='uppercase font-semibold text-slate-500'>Injury</p>
         <div
           className={twMerge(
             listItemClassName,

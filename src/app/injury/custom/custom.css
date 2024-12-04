@@ -1,0 +1,11 @@
+select {
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.custom-chart label {
+  align-self: center !important;
+}
