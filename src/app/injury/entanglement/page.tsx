@@ -34,12 +34,18 @@ export default function Entanglement() {
       <div className='flex flex-col gap-4 py-8'>
         <div
           ref={viewofEntanglementSliderRef}
-          className='outline outline-slate-200 rounded-md px-8 py-4 w-fit mx-auto sticky top-4 bg-white'
+          className='outline outline-slate-200 rounded-md px-8 py-4 w-fit mx-auto sticky top-4 bg-white min-w-[408px] min-h-[58px] animate-fade-in'
         />
         <div className='text-2xl'>Gear VS No Gear</div>
-        <div ref={gearStackedBarPlotRef} />
+        <div
+          ref={gearStackedBarPlotRef}
+          className='min-w-[950px] min-h-[500px] animate-fade-in'
+        />
         <div className='text-2xl'>Entanglement Total</div>
-        <div ref={entanglementTotalBarPlotRef} />
+        <div
+          ref={entanglementTotalBarPlotRef}
+          className='min-w-[950px] min-h-[500px] animate-fade-in'
+        />
       </div>
     </ChartLayout>
   )

@@ -33,16 +33,19 @@ export default function Entanglement() {
       <div className='flex flex-col gap-4 py-8'>
         <div
           ref={viewofColumnDropdownRef}
-          className='custom-chart outline outline-slate-200 rounded-md px-8 py-4 w-fit mx-auto'
+          className='custom-chart outline outline-slate-200 rounded-md px-8 py-4 w-fit mx-auto min-w-[430px] min-h-[100px] animate-fade-in'
         />
         <div
           ref={viewofColumnValueInputRef}
-          className='custom-chart outline outline-slate-200 rounded-md px-8 py-4 w-fit mx-auto'
+          className='custom-chart outline outline-slate-200 rounded-md px-8 py-4 w-fit mx-auto min-w-[430px] min-h-[100px] animate-fade-in'
         />
-        <div ref={customBarPlotRef} />
+        <div
+          ref={customBarPlotRef}
+          className='min-w-[950px] min-h-[500px] animate-fade-in'
+        />
         <div
           ref={viewofCustomPlotSliderRef}
-          className='outline outline-slate-200 rounded-md px-8 py-4 w-fit mx-auto'
+          className='outline outline-slate-200 rounded-md px-8 py-4 w-fit mx-auto min-w-[408px] min-h-[58px] animate-fade-in'
         />
       </div>
     </ChartLayout>
