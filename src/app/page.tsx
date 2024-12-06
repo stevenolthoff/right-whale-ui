@@ -1,6 +1,6 @@
 'use client'
 import NoSsr from './components/NoSsr.tsx'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import Hero from '@/components/hero.tsx'
 import HomeInfo from '@/components/homeInfo.tsx'
 import { twMerge } from 'tailwind-merge'

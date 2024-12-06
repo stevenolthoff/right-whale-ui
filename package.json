@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@observablehq/runtime": "^5.9.9",
-    "@uidotdev/usehooks": "^2.4.1-experimental.1",
+    "@uidotdev/usehooks": "^2.4.1",
     "c545da94fc314b5e": "https://api.observablehq.com/d/c545da94fc314b5e@502.tgz?v=3",
     "f38218f71bb1a1f8": "https://api.observablehq.com/d/f38218f71bb1a1f8@510.tgz?v=3",
     "next": "15.0.2",
