@@ -11,8 +11,8 @@ export default function ChartLayout({
 }: IChartLayoutProps) {
   return (
     <div className=''>
-      <div className='text-3xl'>{title}</div>
-      <div className='max-w-[800px]'>{description}</div>
+      <div className='text-3xl font-bold'>{title}</div>
+      <div className='max-w-[800px] mt-4'>{description}</div>
       {children}
     </div>
   )

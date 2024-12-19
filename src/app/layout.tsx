@@ -1,20 +1,10 @@
 'use client'
-import type { Metadata } from 'next'
-import localFont from 'next/font/local'
+// import type { Metadata } from 'next'
 import './globals.css'
 import Header from './components/header.tsx'
 import Footer from './components/footer.tsx'
 import NoSsr from './components/NoSsr.tsx'
-const geistSans = localFont({
-  src: './fonts/GeistVF.woff',
-  variable: '--font-geist-sans',
-  weight: '100 900',
-})
-const geistMono = localFont({
-  src: './fonts/GeistMonoVF.woff',
-  variable: '--font-geist-mono',
-  weight: '100 900',
-})
+import React from "react";
 
 // export const metadata: Metadata = {
 //   title: 'NARW Anthropogenic Injuries',
@@ -28,9 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen flex flex-col`}
-      >
+      <body className={`font-lora antialiased h-screen flex flex-col`}>
         <NoSsr>
           <Header />
           <div className='flex-grow'>{children}</div>

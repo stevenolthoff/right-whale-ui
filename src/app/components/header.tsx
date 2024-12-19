@@ -15,11 +15,11 @@ export default function Header() {
     }
   }, [token])
   return (
-    <header className='flex shadow-md py-4 px-4 sm:px-10 bg-white font-[sans-serif] min-h-[70px] tracking-wide relative z-50'>
+    <header className='flex border border-slate-300 py-4 px-4 sm:px-10 bg-white  min-h-[70px] tracking-wide relative z-50'>
       <div className='flex flex-wrap items-center justify-between gap-5 w-full'>
         <Link href='/'>
-          <div className='font-bold'>
-            NARW Anthropogenic Injury Event Visualization Site
+          <div className='font-bold text-black'>
+            NARW Anthropogenic Injury Event Tracker
           </div>
         </Link>
         <div
@@ -28,7 +28,7 @@ export default function Header() {
         >
           <button
             id='toggleClose'
-            className='lg:hidden fixed top-2 right-4 z-[100] rounded-full bg-white p-3'
+            className='lg:hidden fixed top-2 right-4 z-[100] rounded-sm bg-white p-3'
           >
             <svg
               xmlns='http://www.w3.org/2000/svg'
@@ -59,7 +59,7 @@ export default function Header() {
             <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
               <a
                 href='javascript:void(0)'
-                className='hover:text-[#007bff] text-gray-500 block font-semibold text-[15px]'
+                className='hover:text-orange-500 text-black block font-bold text-[15px]'
               >
                 <Link href='/public-charts/mortality-total'>Explore</Link>
               </a>
@@ -68,7 +68,7 @@ export default function Header() {
               <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
                 <a
                   href='javascript:void(0)'
-                  className='hover:text-[#007bff] text-gray-500 block font-semibold text-[15px]'
+                  className='hover:text-orange-500 text-black block font-bold text-[15px]'
                 >
                   <Link href='/monitoring'>Monitoring</Link>
                 </a>
@@ -78,7 +78,7 @@ export default function Header() {
               <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
                 <a
                   href='javascript:void(0)'
-                  className='hover:text-[#007bff] text-gray-500 block font-semibold text-[15px]'
+                  className='hover:text-orange-500 text-black block font-bold text-[15px]'
                 >
                   <Link href='/injury/injury-type-by-year'>Injury</Link>
                 </a>
@@ -87,7 +87,7 @@ export default function Header() {
             {/* <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
               <a
                 href='javascript:void(0)'
-                className='hover:text-[#007bff] text-gray-500 block font-semibold text-[15px]'
+                className='hover:text-orange-500 text-black block font-bold text-[15px]'
               >
                 Whale Pages
               </a>
@@ -95,7 +95,7 @@ export default function Header() {
             <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
               <a
                 href='javascript:void(0)'
-                className='hover:text-[#007bff] text-gray-500 block font-semibold text-[15px]'
+                className='hover:text-orange-500 text-black block font-bold text-[15px]'
               >
                 <Link href='/resources'>Resources</Link>
               </a>
@@ -103,7 +103,7 @@ export default function Header() {
             {/* <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
               <a
                 href='javascript:void(0)'
-                className='hover:text-[#007bff] text-gray-500 block font-semibold text-[15px]'
+                className='hover:text-orange-500 text-black block font-bold text-[15px]'
               >
                 About
               </a>
@@ -111,7 +111,7 @@ export default function Header() {
             <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
               <a
                 href='javascript:void(0)'
-                className='hover:text-[#007bff] text-gray-500 block font-semibold text-[15px]'
+                className='hover:text-orange-500 text-black block font-bold text-[15px]'
               >
                 Contact
               </a>
@@ -137,11 +137,11 @@ export default function Header() {
                 redirect(redirectUrl)
               }
             }}
-            className='px-4 py-2 text-sm rounded-full font-bold text-white border-2 border-[#007bff] bg-[#007bff] transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]'
+            className='px-4 py-2 text-sm rounded-sm font-bold text-white bg-blue-800 transition-all ease-in-out duration-300 hover:bg-blue-600 '
           >
             {isLoggedIn ? 'Sign Out' : 'Login'}
           </button>
-          {/* <button className='px-4 py-2 text-sm rounded-full font-bold text-white border-2 border-[#007bff] bg-[#007bff] transition-all ease-in-out duration-300 hover:bg-transparent hover:text-[#007bff]'>
+          {/* <button className='px-4 py-2 text-sm rounded-sm font-bold text-white border-2 border-[#007bff] bg-[#007bff] transition-all ease-in-out duration-300 hover:bg-transparent hover:text-orange-500'>
             Sign up
           </button> */}
 
