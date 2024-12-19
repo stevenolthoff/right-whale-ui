@@ -97,7 +97,7 @@ export default function Header() {
                 href='javascript:void(0)'
                 className='hover:text-[#007bff] text-gray-500 block font-semibold text-[15px]'
               >
-                Resources
+                <Link href='/resources'>Resources</Link>
               </a>
             </li>
             {/* <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
@@ -128,9 +128,11 @@ export default function Header() {
                 const host = globalThis.location.hostname
                 let redirectUrl = ''
                 if (host === 'localhost') {
-                  redirectUrl = 'http://localhost:44208/u/accounts/amazon-cognito/login/?process='
+                  redirectUrl =
+                    'http://localhost:44208/u/accounts/amazon-cognito/login/?process='
                 } else {
-                  redirectUrl = 'https://stage-rwanthro-backend.srv.axds.co/u/accounts/amazon-cognito/login/?process='
+                  redirectUrl =
+                    'https://stage-rwanthro-backend.srv.axds.co/u/accounts/amazon-cognito/login/?process='
                 }
                 redirect(redirectUrl)
               }

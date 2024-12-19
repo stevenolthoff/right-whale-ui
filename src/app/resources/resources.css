@@ -1,0 +1,28 @@
+th {
+	color: #1e40af;
+	text-transform: uppercase;
+	font-size: .8rem;
+}
+
+thead {
+	border-bottom: none !important;
+}
+
+td a {
+	color: #1e40af;
+	font-weight: 500;
+}
+
+td a:hover {
+	cursor: pointer;
+	font-style: underline;
+	color: #3b82f6;
+}
+
+.wp-block-table.is-style-stripes tbody tr:nth-child(odd) {
+    background-color: white;
+}
+
+header h2 {
+	color: #082f49
+}
