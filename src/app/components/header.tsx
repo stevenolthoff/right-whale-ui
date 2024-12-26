@@ -70,7 +70,7 @@ export default function Header() {
                   href='javascript:void(0)'
                   className='hover:text-orange-500 text-black block font-bold text-[15px]'
                 >
-                  <Link href='/monitoring'>Monitoring</Link>
+                  <Link href='/monitoring/active'>Monitoring</Link>
                 </a>
               </li>
             )}
