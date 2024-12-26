@@ -10,13 +10,17 @@
   },
   "dependencies": {
     "@observablehq/runtime": "^5.9.9",
+    "@tanstack/react-table": "^8.20.6",
     "@uidotdev/usehooks": "^2.4.1",
+    "axios": "^1.7.9",
     "c545da94fc314b5e": "https://api.observablehq.com/d/c545da94fc314b5e@502.tgz?v=3",
     "f38218f71bb1a1f8": "https://api.observablehq.com/d/f38218f71bb1a1f8@510.tgz?v=3",
+    "lucide-react": "^0.469.0",
     "next": "15.0.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-scroll-into-view": "^2.1.3",
+    "recharts": "^2.15.0",
     "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
