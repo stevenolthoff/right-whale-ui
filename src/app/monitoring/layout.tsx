@@ -10,13 +10,13 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       title: 'Active Cases',
       description: 'This page shows the number of active cases by year.',
     },
-    '/monitoring/recovered': {
-      title: 'Recovered Cases',
-      description: 'This page shows the number of recovered cases by year.',
+    '/monitoring/unusual': {
+      title: 'Unusual Cases',
+      description: 'This page shows the number of unusual cases by year.',
     },
-    '/monitoring/deaths': {
-      title: 'Deaths',
-      description: 'This page shows the number of deaths by year.',
+    '/monitoring/custom': {
+      title: 'Build Your Own',
+      description: 'This page allows you to build your own monitoring page.',
     },
   }
   return (
