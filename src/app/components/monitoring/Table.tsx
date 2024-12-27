@@ -116,7 +116,7 @@ const MonitoringTable = () => {
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className='sticky top-0 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer whitespace-nowrap'
+                      className='sticky top-0 px-6 py-3 text-left text-xs font-medium text-gray-500 hover:text-blue-500 uppercase tracking-wider cursor-pointer whitespace-nowrap'
                       onClick={header.column.getToggleSortingHandler()}
                     >
                       {flexRender(
