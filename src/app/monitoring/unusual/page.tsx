@@ -7,7 +7,10 @@ import { useYearRange } from '../../hooks/useYearRange.ts'
 
 const Unusual = () => {
   const { results, loading, error } = useMonitoringData()
-  const { yearRange, setYearRange, minYear, maxYear } = useYearRange(results)
+  const { yearRange, setYearRange, minYear, maxYear } = useYearRange(
+    results,
+    (item) => item.IsUnusualMortalityEvent === true
+  )
 
   if (loading) return <div>Loading...</div>
   if (error) return <div>Error: {error}</div>
@@ -28,7 +31,7 @@ const Unusual = () => {
     }, {} as Record<number, number>)
 
   const formattedData = Object.entries(chartData)
-    .map(([year, count]) => ({ year: parseInt(year), count: count as number }))
+    .map(([year, count]) => ({ year: parseInt(year), count }))
     .sort((a, b) => a.year - b.year)
 
   return (

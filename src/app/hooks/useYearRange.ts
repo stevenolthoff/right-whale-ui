@@ -1,27 +1,49 @@
-import { useState, useEffect } from 'react'
-
+import { useState, useEffect, useCallback } from 'react'
 interface DataItem {
   DetectionDate: string
+  [key: string]: string | number | boolean | null
 }
 
-export const useYearRange = (data: DataItem[]) => {
-  const [yearRange, setYearRange] = useState<[number, number]>([0, 0])
-  const [minYear, setMinYear] = useState(0)
-  const [maxYear, setMaxYear] = useState(0)
+export const useYearRange = (
+  data: DataItem[],
+  filterCondition: (item: DataItem) => boolean
+) => {
+  const [years, setYears] = useState<{
+    min: number
+    max: number
+    range: [number, number]
+  }>({
+    min: 0,
+    max: 0,
+    range: [0, 0],
+  })
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const memoizedFilter = useCallback(filterCondition, [])
 
   useEffect(() => {
     if (data.length > 0) {
-      const years = data.map((item) =>
-        new Date(item.DetectionDate).getFullYear()
-      )
-      const min = Math.min(...years)
-      const max = Math.max(...years)
+      const filteredYears = data
+        .filter(memoizedFilter)
+        .map((item) => new Date(item.DetectionDate).getFullYear())
 
-      setMinYear(min)
-      setMaxYear(max)
-      setYearRange([min, max])
+      if (filteredYears.length > 0) {
+        const min = Math.min(...filteredYears)
+        const max = Math.max(...filteredYears)
+        setYears({
+          min,
+          max,
+          range: [min, max],
+        })
+      }
     }
-  }, [data])
+  }, [data, memoizedFilter])
 
-  return { yearRange, setYearRange, minYear, maxYear }
+  return {
+    yearRange: years.range,
+    setYearRange: (range: [number, number]) =>
+      setYears((prev) => ({ ...prev, range })),
+    minYear: years.min,
+    maxYear: years.max,
+  }
 }
