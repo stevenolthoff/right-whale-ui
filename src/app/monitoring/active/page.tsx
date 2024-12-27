@@ -27,7 +27,7 @@ const Active = () => {
     }, {} as Record<number, number>)
 
   const formattedData = Object.entries(chartData)
-    .map(([year, count]) => ({ year: parseInt(year), count }))
+    .map(([year, count]) => ({ year: parseInt(year), count: count as number }))
     .sort((a, b) => a.year - b.year)
 
   return (
