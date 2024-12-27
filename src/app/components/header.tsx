@@ -2,9 +2,11 @@
 import Link from 'next/link'
 import { useLocalStorage } from '@uidotdev/usehooks'
 import { useState, useEffect } from 'react'
-import { redirect } from 'next/navigation'
+import { redirect, usePathname } from 'next/navigation'
 
 export default function Header() {
+  const pathname = usePathname()
+  const topPath = pathname.split('/')[1]
   const [token, setToken] = useLocalStorage('token', '')
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   useEffect(() => {
@@ -59,7 +61,9 @@ export default function Header() {
             <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
               <a
                 href='javascript:void(0)'
-                className='hover:text-orange-500 text-black block font-bold text-[15px]'
+                className={`${
+                  topPath === 'public-charts' ? 'text-blue-500' : 'text-black'
+                } hover:text-blue-500 block font-bold text-[15px]`}
               >
                 <Link href='/public-charts/mortality-total'>Explore</Link>
               </a>
@@ -68,7 +72,9 @@ export default function Header() {
               <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
                 <a
                   href='javascript:void(0)'
-                  className='hover:text-orange-500 text-black block font-bold text-[15px]'
+                  className={`${
+                    topPath === 'monitoring' ? 'text-blue-500' : 'text-black'
+                  } hover:text-blue-500 block font-bold text-[15px]`}
                 >
                   <Link href='/monitoring/active'>Monitoring</Link>
                 </a>
@@ -78,7 +84,9 @@ export default function Header() {
               <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
                 <a
                   href='javascript:void(0)'
-                  className='hover:text-orange-500 text-black block font-bold text-[15px]'
+                  className={`${
+                    topPath === 'injury' ? 'text-blue-500' : 'text-black'
+                  } hover:text-blue-500 block font-bold text-[15px]`}
                 >
                   <Link href='/injury/injury-type-by-year'>Injury</Link>
                 </a>
@@ -87,7 +95,7 @@ export default function Header() {
             {/* <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
               <a
                 href='javascript:void(0)'
-                className='hover:text-orange-500 text-black block font-bold text-[15px]'
+                className='hover:text-blue-500 text-black block font-bold text-[15px]'
               >
                 Whale Pages
               </a>
@@ -95,7 +103,9 @@ export default function Header() {
             <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
               <a
                 href='javascript:void(0)'
-                className='hover:text-orange-500 text-black block font-bold text-[15px]'
+                className={`${
+                  topPath === 'resources' ? 'text-blue-500' : 'text-black'
+                } hover:text-blue-500 block font-bold text-[15px]`}
               >
                 <Link href='/resources'>Resources</Link>
               </a>
@@ -103,7 +113,7 @@ export default function Header() {
             {/* <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
               <a
                 href='javascript:void(0)'
-                className='hover:text-orange-500 text-black block font-bold text-[15px]'
+                className='hover:text-blue-500 text-black block font-bold text-[15px]'
               >
                 About
               </a>
@@ -111,7 +121,7 @@ export default function Header() {
             <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
               <a
                 href='javascript:void(0)'
-                className='hover:text-orange-500 text-black block font-bold text-[15px]'
+                className='hover:text-blue-500 text-black block font-bold text-[15px]'
               >
                 Contact
               </a>
@@ -141,7 +151,7 @@ export default function Header() {
           >
             {isLoggedIn ? 'Sign Out' : 'Login'}
           </button>
-          {/* <button className='px-4 py-2 text-sm rounded-sm font-bold text-white border-2 border-[#007bff] bg-[#007bff] transition-all ease-in-out duration-300 hover:bg-transparent hover:text-orange-500'>
+          {/* <button className='px-4 py-2 text-sm rounded-sm font-bold text-white border-2 border-[#007bff] bg-[#007bff] transition-all ease-in-out duration-300 hover:bg-transparent hover:text-blue-500'>
             Sign up
           </button> */}
 
