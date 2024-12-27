@@ -2,9 +2,10 @@
 // hooks/useMonitoringData.ts
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import { InjuryCase } from '../types/monitoring.ts'
 
 export const useMonitoringData = () => {
-  const [results, setResults] = useState<any[]>([])
+  const [results, setResults] = useState<InjuryCase[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
