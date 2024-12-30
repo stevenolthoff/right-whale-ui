@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   BarChart,
   Bar,
@@ -40,6 +40,11 @@ export const DataChart = ({ data, stacked = false }: DataChartProps) => {
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
   const [showResetButton, setShowResetButton] = useState(false)
 
+  // Add useEffect to automatically hide reset button
+  useEffect(() => {
+    setShowResetButton(hiddenSeries.size > 0)
+  }, [hiddenSeries])
+
   // Add formatter function for years
   const formatYear = (year: number): string => {
     return window.innerWidth < 768 ? `'${year.toString().slice(-2)}` : year.toString()
@@ -54,41 +59,34 @@ export const DataChart = ({ data, stacked = false }: DataChartProps) => {
     )
 
     const handleLegendClick = (entry: { value: string }) => {
-      setShowResetButton(true)
-      setHiddenSeries(prev => {
-        const newHidden = new Set(prev)
-        if (newHidden.has(entry.value)) {
-          newHidden.delete(entry.value)
-        } else {
-          // Hide all except the clicked one
-          keys.forEach(name => newHidden.add(name))
-          newHidden.delete(entry.value)
-        }
-        return newHidden
-      })
+      const newHidden = new Set(hiddenSeries)
+      if (newHidden.has(entry.value)) {
+        newHidden.delete(entry.value)
+      } else {
+        // Hide all except the clicked one
+        keys.forEach(name => newHidden.add(name))
+        newHidden.delete(entry.value)
+      }
+      setHiddenSeries(newHidden)
     }
 
     const handleBarClick = (data: any, index: number) => {
       const seriesName = keys[index]
       if (seriesName) {
-        setShowResetButton(true)
-        setHiddenSeries(prev => {
-          const newHidden = new Set(prev)
-          if (newHidden.has(seriesName)) {
-            newHidden.delete(seriesName)
-          } else {
-            // Hide all except the clicked one
-            keys.forEach(name => newHidden.add(name))
-            newHidden.delete(seriesName)
-          }
-          return newHidden
-        })
+        const newHidden = new Set(hiddenSeries)
+        if (newHidden.has(seriesName)) {
+          newHidden.delete(seriesName)
+        } else {
+          // Hide all except the clicked one
+          keys.forEach(name => newHidden.add(name))
+          newHidden.delete(seriesName)
+        }
+        setHiddenSeries(newHidden)
       }
     }
 
     const resetVisibility = () => {
       setHiddenSeries(new Set())
-      setShowResetButton(false)
     }
     
     return (
