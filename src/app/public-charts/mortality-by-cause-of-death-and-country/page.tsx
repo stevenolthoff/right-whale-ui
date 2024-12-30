@@ -170,7 +170,11 @@ export default function MortalityByCauseAndCountry() {
                 labelFormatter={(label: number) => `Year: ${label}`}
               />
               <Legend 
-                onClick={handleLegendClick}
+                onClick={(data) => {
+                  if (data.dataKey) {
+                    handleLegendClick({ dataKey: data.dataKey.toString() })
+                  }
+                }}
                 wrapperStyle={{ cursor: 'pointer' }}
                 formatter={(value: string) => {
                   const [cause, country] = value.split('_')

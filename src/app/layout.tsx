@@ -1,9 +1,9 @@
 'use client'
 // import type { Metadata } from 'next'
 import './globals.css'
-import Header from './components/header.tsx'
-import Footer from './components/footer.tsx'
-import NoSsr from './components/NoSsr.tsx'
+import Header from './components/header'
+import Footer from './components/footer'
+import NoSsr from './components/NoSsr'
 import React from "react";
 
 // export const metadata: Metadata = {

@@ -36,3 +36,8 @@ interface InjuryCase {
 }
 
 export type { InjuryCase }
+
+export interface ParsedInjuryCase {
+  year: number
+  [key: string]: any  // Allow any additional fields
+}

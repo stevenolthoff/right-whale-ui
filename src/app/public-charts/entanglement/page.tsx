@@ -1,13 +1,13 @@
 'use client'
 import React from 'react'
 import { useInjuryData } from '@/app/hooks/useInjuryData'
-import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
-import { useMortalityYearRange } from '@/app/hooks/useMortalityYearRange'
-import { DataChart } from '@/app/components/monitoring/DataChart'
+import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
+import { useInjuryYearRange } from '../../hooks/useInjuryYearRange'
+import { DataChart } from '../../components/monitoring/DataChart'
 
 export default function Entanglement() {
   const { data, loading, error } = useInjuryData()
-  const { yearRange, setYearRange, minYear, maxYear } = useMortalityYearRange(data)
+  const { yearRange, setYearRange, minYear, maxYear } = useInjuryYearRange(data)
 
   if (loading) return <div>Loading...</div>
   if (error) return <div>Error: {error}</div>
