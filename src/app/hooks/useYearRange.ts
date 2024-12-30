@@ -1,12 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
-interface DataItem {
-  DetectionDate: string
-  [key: string]: string | number | boolean | null
-}
+import { InjuryCase } from '../types/monitoring'
 
 export const useYearRange = (
-  data: DataItem[],
-  filterCondition: (item: DataItem) => boolean
+  data: InjuryCase[],
+  filterCondition: (item: InjuryCase) => boolean
 ) => {
   const [years, setYears] = useState<{
     min: number

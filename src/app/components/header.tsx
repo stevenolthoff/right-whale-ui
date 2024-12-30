@@ -88,7 +88,7 @@ export default function Header() {
                     topPath === 'injury' ? 'text-blue-500' : 'text-black'
                   } hover:text-blue-500 block font-bold text-[15px]`}
                 >
-                  <Link href='/injury/injury-type-by-year'>Injury</Link>
+                  <Link href='/injury2/injury-type'>Injury</Link>
                 </a>
               </li>
             )}
