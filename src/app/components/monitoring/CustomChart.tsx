@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import Select from 'react-select'
-import { useMonitoringData } from '../../hooks/useMonitoringData.ts'
+import { useMonitoringData } from '../../hooks/useMonitoringData'
 
 const MonitoringChart = () => {
   const plottableFields = useMemo(
@@ -36,32 +36,53 @@ const MonitoringChart = () => {
   const processedData = useMemo(() => {
     if (!results) return []
 
-    return Object.entries(
-      results.reduce((acc, item) => {
-        const year = new Date(item.DetectionDate).getFullYear()
-        if (!acc[year]) {
-          acc[year] = {
-            year,
-            ...plottableFields.reduce(
-              (fields, field) => ({
-                ...fields,
-                [field.value]: 0,
-              }),
-              {}
-            ),
-          }
+    // First reduce the data by year
+    const chartData = results.reduce((acc, item) => {
+      const year = new Date(item.DetectionDate).getFullYear()
+      if (!acc[year]) {
+        acc[year] = {
+          year,
+          ...plottableFields.reduce(
+            (fields, field) => ({
+              ...fields,
+              [field.value]: 0,
+            }),
+            {}
+          ),
         }
+      }
 
-        plottableFields.forEach((field) => {
-          acc[year][field.value] +=
-            item[field.value] === true ? 1 : Number(item[field.value]) || 0
-        })
+      plottableFields.forEach((field) => {
+        acc[year][field.value] +=
+          (item as Record<string, any>)[field.value] === true ? 1 : Number((item as Record<string, any>)[field.value]) || 0
+      })
 
-        return acc
-      }, {} as Record<string, any>)
-    )
-      .map(([, data]) => data)
-      .sort((a, b) => a.year - b.year)
+      return acc
+    }, {} as Record<string, any>)
+
+    // Get min and max years from the data
+    const years = Object.keys(chartData).map(Number)
+    const minDataYear = Math.min(...years)
+    const maxDataYear = Math.max(...years)
+    
+    // Create array with all consecutive years
+    const allData = []
+    for (let year = minDataYear; year <= maxDataYear; year++) {
+      allData.push(
+        chartData[year] || {
+          year,
+          ...plottableFields.reduce(
+            (fields, field) => ({
+              ...fields,
+              [field.value]: 0,
+            }),
+            {}
+          ),
+        }
+      )
+    }
+    
+    return allData.sort((a, b) => a.year - b.year)
   }, [plottableFields, results])
 
   if (loading) return <div className='p-4'>Loading...</div>
@@ -85,7 +106,10 @@ const MonitoringChart = () => {
 
       <div className='h-96'>
         <ResponsiveContainer width='100%' height='100%'>
-          <LineChart data={processedData}>
+          <LineChart 
+            data={processedData}
+            margin={{ top: 5, right: 45, left: 45, bottom: 5 }}
+          >
             <CartesianGrid strokeDasharray='3 3' />
             <XAxis dataKey='year' />
             {selectedFields.map((field, index) => (

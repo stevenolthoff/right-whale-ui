@@ -59,73 +59,49 @@ export default function Header() {
               </a>
             </li>
             <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
-              <a
-                href='javascript:void(0)'
+              <Link 
+                href='/public-charts/mortality-total'
                 className={`${
                   topPath === 'public-charts' ? 'text-blue-500' : 'text-black'
                 } hover:text-blue-500 block font-bold text-[15px]`}
               >
-                <Link href='/public-charts/mortality-total'>Explore</Link>
-              </a>
+                Explore
+              </Link>
             </li>
             {isLoggedIn && (
               <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
-                <a
-                  href='javascript:void(0)'
+                <Link 
+                  href='/monitoring/active'
                   className={`${
                     topPath === 'monitoring' ? 'text-blue-500' : 'text-black'
                   } hover:text-blue-500 block font-bold text-[15px]`}
                 >
-                  <Link href='/monitoring/active'>Monitoring</Link>
-                </a>
+                  Monitoring
+                </Link>
               </li>
             )}
             {isLoggedIn && (
               <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
-                <a
-                  href='javascript:void(0)'
+                <Link 
+                  href='/injury2/injury-type'
                   className={`${
                     topPath === 'injury' ? 'text-blue-500' : 'text-black'
                   } hover:text-blue-500 block font-bold text-[15px]`}
                 >
-                  <Link href='/injury2/injury-type'>Injury</Link>
-                </a>
+                  Injury
+                </Link>
               </li>
             )}
-            {/* <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-blue-500 text-black block font-bold text-[15px]'
-              >
-                Whale Pages
-              </a>
-            </li> */}
             <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
-              <a
-                href='javascript:void(0)'
+              <Link 
+                href='/resources'
                 className={`${
                   topPath === 'resources' ? 'text-blue-500' : 'text-black'
                 } hover:text-blue-500 block font-bold text-[15px]`}
               >
-                <Link href='/resources'>Resources</Link>
-              </a>
+                Resources
+              </Link>
             </li>
-            {/* <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-blue-500 text-black block font-bold text-[15px]'
-              >
-                About
-              </a>
-            </li>
-            <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
-              <a
-                href='javascript:void(0)'
-                className='hover:text-blue-500 text-black block font-bold text-[15px]'
-              >
-                Contact
-              </a>
-            </li> */}
           </ul>
         </div>
 

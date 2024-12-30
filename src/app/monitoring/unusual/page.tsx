@@ -30,9 +30,22 @@ const Unusual = () => {
       return acc
     }, {} as Record<number, number>)
 
-  const formattedData = Object.entries(chartData)
-    .map(([year, count]) => ({ year: parseInt(year), count: count as number }))
-    .sort((a, b) => a.year - b.year)
+  const formattedData = (() => {
+    // Get min and max years from the data
+    const years = Object.keys(chartData).map(Number)
+    const minDataYear = Math.min(...years)
+    const maxDataYear = Math.max(...years)
+    
+    // Create array with all consecutive years
+    const allData = []
+    for (let year = minDataYear; year <= maxDataYear; year++) {
+      allData.push({
+        year,
+        count: chartData[year] || 0
+      })
+    }
+    return allData.sort((a, b) => a.year - b.year)
+  })()
 
   return (
     <div className='flex flex-col space-y-4 bg-white p-4'>

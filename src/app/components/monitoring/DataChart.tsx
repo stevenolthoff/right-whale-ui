@@ -47,10 +47,12 @@ export const DataChart = ({ data, stacked = false }: DataChartProps) => {
             <XAxis 
               dataKey='year' 
               tickFormatter={formatYear}
-              interval={window.innerWidth < 768 ? 1 : 0}  // Show every other tick on mobile
-              angle={-45}  // Rotate labels
-              textAnchor="end"  // Align rotated text
-              height={60}  // Increase height for rotated labels
+              interval={window.innerWidth < 1200 ? 2 : 1}  // Show every third tick on smaller screens
+              angle={-45}  // Steeper angle
+              textAnchor="end"
+              height={80}  // More height for labels
+              fontSize={12}  // Smaller font
+              minTickGap={10}  // Minimum pixels between ticks
             />
             <YAxis />
             <Tooltip />
