@@ -21,7 +21,7 @@ export default function Hero() {
         <Link href='/public-charts/mortality-total'>
           <button
             type='button'
-            className='bg-white hover:bg-orange-100 hover:text-black text-black font-bold text-base tracking-wide px-6 py-3 rounded-md transition duration-300 ease-in-out shadow-lg hover:shadow-xl'
+            className='bg-white hover:bg-blue-500 hover:text-white text-black font-bold text-base tracking-wide px-6 py-3 rounded-md transition duration-300 ease-in-out shadow-lg hover:shadow-xl'
           >
             Explore the Data
           </button>

@@ -1,8 +1,8 @@
 'use client'
-import NoSsr from './components/NoSsr.tsx'
+import NoSsr from './components/NoSsr'
 import React, { useState } from 'react'
-import Hero from '@/components/hero.tsx'
-import HomeInfo from '@/components/homeInfo.tsx'
+import Hero from '@/components/hero'
+import HomeInfo from '@/components/homeInfo'
 import { twMerge } from 'tailwind-merge'
 import { useLocalStorage } from '@uidotdev/usehooks'
 
