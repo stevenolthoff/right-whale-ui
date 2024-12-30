@@ -58,7 +58,7 @@ export default function PublicChartsLayout({
         },
         {
           href: '/public-charts/mortality-by-cause-of-death-and-country',
-          label: 'By Cause of Death and Country'
+          label: 'By Cause of Death & Country'
         }
       ]
     },
