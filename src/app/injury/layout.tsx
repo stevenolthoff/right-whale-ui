@@ -1,83 +1,50 @@
-'use client' // This is a client component 👈🏽
+'use client'
+import React from 'react'
+import Sidebar from '../components/monitoring/Sidebar'
+import { usePathname } from 'next/navigation'
 
-import React, { useState, useEffect } from 'react'
-import { twMerge } from 'tailwind-merge'
-import Link from 'next/link'
-import { usePathname, redirect } from 'next/navigation'
-import useIsLoggedIn from '../hooks/useIsLoggedIn.tsx'
+export default function Layout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
+  const text: Record<string, { title: string; description: string }> = {
+    '/injury/injury-type': {
+      title: 'Injury Type by Year',
+      description: 'View injury types categorized by year.',
+    },
+    '/injury/entanglement': {
+      title: 'Entanglement',
+      description: 'View entanglement-related injuries.',
+    },
+    '/injury/vessel-strike': {
+      title: 'Vessel Strike by Year',
+      description: 'View vessel strike incidents by year.',
+    },
+  }
 
-type ChartOption =
-  | 'injury-type-by-year'
-  | 'entanglement'
-  | 'vessel-strike-by-year'
-  | 'custom'
+  const links = [
+    {
+      href: '/injury/injury-type',
+      label: 'Injury Type by Year'
+    },
+    {
+      href: '/injury/entanglement',
+      label: 'Entanglement'
+    },
+    {
+      href: '/injury/vessel-strike',
+      label: 'Vessel Strike by Year'
+    },
+  ]
 
-export default function InjuryLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const endOfPath = usePathname().split('/').pop()
-  const [selected, setSelected] = useState<ChartOption>(endOfPath)
-  const isLoggedIn = useIsLoggedIn()
-
-  useEffect(() => {
-    if (!isLoggedIn) {
-      redirect('/')
-    }
-  }, [isLoggedIn])
-
-  const listItemClassName =
-    'text-xl hover:cursor-pointer hover:text-blue-500 active:text-blue-800'
   return (
-    <div className='flex p-8 gap-8'>
-      <div className='flex flex-col'>
-        <p className='uppercase font-semibold text-slate-500'>Injury</p>
-        <div
-          className={twMerge(
-            listItemClassName,
-            selected === 'injury-type-by-year'
-              ? 'text-blue-500'
-              : 'text-slate-800'
-          )}
-          onClick={() => setSelected('injury-type-by-year')}
-        >
-          <Link href='/injury/injury-type-by-year'>Injury Type by Year</Link>
+    <div className='flex'>
+      <Sidebar title='INJURY' links={links} />
+      <main className='flex-1 p-2 md:p-12'>
+        <div className='text-3xl font-bold'>{text[pathname].title}</div>
+        <div className='max-w-[800px] mt-4 mb-8'>
+          {text[pathname].description}
         </div>
-        <div
-          className={twMerge(
-            listItemClassName,
-            selected === 'entanglement' ? 'text-blue-500' : 'text-slate-800'
-          )}
-          onClick={() => setSelected('entanglement')}
-        >
-          <Link href='/injury/entanglement'>Entanglement</Link>
-        </div>
-        <div
-          className={twMerge(
-            listItemClassName,
-            selected === 'vessel-strike-by-year'
-              ? 'text-blue-500'
-              : 'text-slate-800'
-          )}
-          onClick={() => setSelected('vessel-strike-by-year')}
-        >
-          <Link href='/injury/vessel-strike-by-year'>
-            Vessel Strike by Year
-          </Link>
-        </div>
-        <div
-          className={twMerge(
-            listItemClassName,
-            selected === 'custom' ? 'text-blue-500' : 'text-slate-800'
-          )}
-          onClick={() => setSelected('custom')}
-        >
-          <Link href='/injury/custom'>Build Your Own</Link>
-        </div>
-      </div>
-      <div></div>
-      <div>{children}</div>
+        {children}
+      </main>
     </div>
   )
 }

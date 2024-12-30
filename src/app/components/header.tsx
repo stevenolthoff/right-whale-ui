@@ -87,7 +87,7 @@ export default function Header() {
             {isLoggedIn && (
               <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
                 <Link 
-                  href='/injury2/injury-type'
+                  href='/injury/injury-type'
                   className={`${
                     topPath === 'injury' ? 'text-blue-500' : 'text-black'
                   } hover:text-blue-500 block font-bold text-[15px]`}

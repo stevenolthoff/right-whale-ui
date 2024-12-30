@@ -1,52 +1,72 @@
 'use client'
-import React, { useEffect, useRef } from 'react'
-import notebook from 'c545da94fc314b5e'
-import { Runtime, Inspector } from '@observablehq/runtime'
-import ChartLayout from '../../components/chartLayout.tsx'
+import React from 'react'
+import { useMonitoringData } from '../../hooks/useMonitoringData'
+import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
+import { DataChart } from '../../components/monitoring/DataChart'
+import { useYearRange } from '../../hooks/useYearRange'
 
-export default function Entanglement() {
-  const viewofEntanglementSliderRef = useRef<HTMLDivElement>(null)
-  const gearStackedBarPlotRef = useRef<HTMLDivElement>(null)
-  const entanglementTotalBarPlotRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const runtime = new Runtime()
-    runtime.module(notebook, (name) => {
-      if (name === 'viewof entanglementSlider')
-        return new Inspector(viewofEntanglementSliderRef.current)
-      if (name === 'gearStackedBarPlot')
-        return new Inspector(gearStackedBarPlotRef.current)
-      if (name === 'entanglementTotalBarPlot')
-        return new Inspector(entanglementTotalBarPlotRef.current)
-      return [
-        'entanglementFilteredData',
-        'gearStackedProcessedData',
-        'entanglementTotalFormattedData',
-        'gearStackedFormattedData',
-      ].includes(name)
+const Entanglement = () => {
+  const { results, loading, error } = useMonitoringData()
+  const { yearRange, setYearRange, minYear, maxYear } = useYearRange(
+    results,
+    (item) => item.InjuryTypeDescription === 'Entanglement'
+  )
+
+  if (loading) return <div>Loading...</div>
+  if (error) return <div>Error: {error}</div>
+
+  const chartData = results
+    .filter((item) => {
+      const year = new Date(item.DetectionDate).getFullYear()
+      return (
+        item.InjuryTypeDescription === 'Entanglement' &&
+        year >= yearRange[0] && 
+        year <= yearRange[1]
+      )
     })
-    return () => runtime.dispose()
-  }, [])
+    .reduce((acc, item) => {
+      const year = new Date(item.DetectionDate).getFullYear()
+      const gearType = item.InjuryAccountDescription
+      
+      if (!acc[year]) {
+        acc[year] = {
+          'Gear': 0,
+          'No Gear': 0
+        }
+      }
+      acc[year][gearType] = (acc[year][gearType] || 0) + 1
+      return acc
+    }, {} as Record<number, Record<string, number>>)
+
+  const formattedData = (() => {
+    // Get min and max years from the data
+    const years = Object.keys(chartData).map(Number)
+    const minDataYear = Math.min(...years)
+    const maxDataYear = Math.max(...years)
+    
+    // Create array with all consecutive years
+    const allData = []
+    for (let year = minDataYear; year <= maxDataYear; year++) {
+      allData.push({
+        year,
+        'Gear': chartData[year]?.['Gear'] || 0,
+        'No Gear': chartData[year]?.['No Gear'] || 0
+      })
+    }
+    return allData.sort((a, b) => a.year - b.year)
+  })()
+
   return (
-    <ChartLayout
-      title='Entanglement Type'
-      description='Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    >
-      <div className='flex flex-col gap-4 py-8'>
-        <div
-          ref={viewofEntanglementSliderRef}
-          className='outline outline-slate-200 rounded-md px-8 py-4 w-fit mx-auto sticky top-4 bg-white min-w-[408px] min-h-[58px] animate-fade-in'
-        />
-        <div className='text-2xl'>Gear VS No Gear</div>
-        <div
-          ref={gearStackedBarPlotRef}
-          className='min-w-[950px] min-h-[500px] animate-fade-in'
-        />
-        <div className='text-2xl'>Entanglement Total</div>
-        <div
-          ref={entanglementTotalBarPlotRef}
-          className='min-w-[950px] min-h-[500px] animate-fade-in'
-        />
-      </div>
-    </ChartLayout>
+    <div className='flex flex-col space-y-4 bg-white p-4'>
+      <YearRangeSlider
+        yearRange={yearRange}
+        minYear={minYear}
+        maxYear={maxYear}
+        onChange={setYearRange}
+      />
+      <DataChart data={formattedData} stacked={true} />
+    </div>
   )
 }
+
+export default Entanglement
