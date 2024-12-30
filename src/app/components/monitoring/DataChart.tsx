@@ -15,9 +15,9 @@ interface SimpleChartData {
   count: number
 }
 
-interface StackedChartData {
+export interface StackedChartData {
   year: number
-  [key: string]: number | string  // Allow for dynamic injury type keys
+  [key: string]: number  // Allow any string key with number value
 }
 
 interface DataChartProps {
