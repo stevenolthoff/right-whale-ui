@@ -2,7 +2,7 @@
 import React from 'react'
 import { useMonitoringData } from '../../hooks/useMonitoringData'
 import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
-import { DataChart } from '../../components/monitoring/DataChart'
+import { DataChart, StackedChartData } from '../../components/monitoring/DataChart'
 import { useYearRange } from '../../hooks/useYearRange'
 import { Loader } from '@/app/components/ui/Loader'
 
@@ -61,7 +61,7 @@ const InjuryType = () => {
         maxYear={maxYear}
         onChange={setYearRange}
       />
-      <DataChart data={formattedData} stacked={true} />
+      <DataChart data={formattedData as StackedChartData[]} stacked={true} />
     </div>
   )
 }
