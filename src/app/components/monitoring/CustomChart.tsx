@@ -13,8 +13,24 @@ import {
 } from 'recharts'
 import Select from 'react-select'
 import { useMonitoringData } from '../../hooks/useMonitoringData'
+import Slider from 'rc-slider'
+import 'rc-slider/assets/index.css'
 
 const MonitoringChart = () => {
+  const { results, loading, error } = useMonitoringData()
+  
+  // Get min and max years from the data
+  const { minYear, maxYear } = useMemo(() => {
+    if (!results?.length) return { minYear: 2000, maxYear: 2024 }
+    const years = results.map(item => new Date(item.DetectionDate).getFullYear())
+    return {
+      minYear: Math.min(...years),
+      maxYear: Math.max(...years)
+    }
+  }, [results])
+
+  const [yearRange, setYearRange] = useState<[number, number]>([minYear, maxYear])
+
   const plottableFields = useMemo(
     () => [
       { value: 'FirstYearSighted', label: 'First Year Sighted' },
@@ -26,7 +42,7 @@ const MonitoringChart = () => {
     ],
     []
   )
-  const { results, loading, error } = useMonitoringData()
+
   const [selectedFields, setSelectedFields] = useState<
     { value: string; label: string }[]
   >([plottableFields[0]])
@@ -39,6 +55,10 @@ const MonitoringChart = () => {
     // First reduce the data by year
     const chartData = results.reduce((acc, item) => {
       const year = new Date(item.DetectionDate).getFullYear()
+      
+      // Skip if year is outside the selected range
+      if (year < yearRange[0] || year > yearRange[1]) return acc
+      
       if (!acc[year]) {
         acc[year] = {
           year,
@@ -60,14 +80,9 @@ const MonitoringChart = () => {
       return acc
     }, {} as Record<string, any>)
 
-    // Get min and max years from the data
-    const years = Object.keys(chartData).map(Number)
-    const minDataYear = Math.min(...years)
-    const maxDataYear = Math.max(...years)
-    
-    // Create array with all consecutive years
+    // Create array with all consecutive years within the selected range
     const allData = []
-    for (let year = minDataYear; year <= maxDataYear; year++) {
+    for (let year = yearRange[0]; year <= yearRange[1]; year++) {
       allData.push(
         chartData[year] || {
           year,
@@ -83,14 +98,14 @@ const MonitoringChart = () => {
     }
     
     return allData.sort((a, b) => a.year - b.year)
-  }, [plottableFields, results])
+  }, [plottableFields, results, yearRange])
 
   if (loading) return <div className='p-4'>Loading...</div>
   if (error) return <div className='p-4 text-red-500'>Error loading data</div>
 
   return (
-    <div className='w-full p-4'>
-      <div className='mb-4'>
+    <div className='w-full'>
+      <div className='mb-8 px-4 relative z-10'>
         <Select
           isMulti
           options={plottableFields}
@@ -104,11 +119,25 @@ const MonitoringChart = () => {
         />
       </div>
 
-      <div className='h-96'>
+      <div className='mb-8 px-4 relative z-0'>
+        <Slider
+          range
+          min={minYear}
+          max={maxYear}
+          value={yearRange}
+          onChange={(value) => setYearRange(value as [number, number])}
+          marks={{
+            [minYear]: minYear.toString(),
+            [maxYear]: maxYear.toString(),
+          }}
+        />
+      </div>
+
+      <div className='h-96 px-2'>
         <ResponsiveContainer width='100%' height='100%'>
           <LineChart 
             data={processedData}
-            margin={{ top: 5, right: 45, left: 45, bottom: 5 }}
+            margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
           >
             <CartesianGrid strokeDasharray='3 3' />
             <XAxis dataKey='year' />
@@ -120,11 +149,6 @@ const MonitoringChart = () => {
                 stroke={colors[index]}
                 tick={{ fill: colors[index] }}
                 axisLine={{ stroke: colors[index] }}
-                label={{
-                  angle: -90,
-                  position: 'insideLeft',
-                  style: { fill: colors[index] },
-                }}
               />
             ))}
             {selectedFields.map((field, index) => (
