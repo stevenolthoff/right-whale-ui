@@ -17,10 +17,10 @@ import { Loader } from '@/app/components/ui/Loader'
 
 // Define colors for each cause-country combination
 const BAR_COLORS: Record<string, string> = {
-  'Entanglement_CA': '#dc2626', // red-600
-  'Entanglement_US': '#2563eb', // blue-600
-  'Vessel Strike_CA': '#9333ea', // purple-600
-  'Vessel Strike_US': '#10b981', // green
+  'Entanglement_CA': '#b33dc6',
+  'Entanglement_US': '#27aeef', 
+  'Vessel Strike_CA': '#edbf33',
+  'Vessel Strike_US': '#bdcf32',
 }
 
 // We'll focus on just Entanglement and Vessel Strike
@@ -189,7 +189,7 @@ export default function MortalityByCauseAndCountry() {
                     dataKey={`${cause}_${country}`}
                     name={`${cause}_${country}`}
                     stackId={cause}
-                    fill={BAR_COLORS[`${cause}_${country}`] || '#f59e0b'}
+                    fill={BAR_COLORS[`${cause}_${country}`] || '#ea5545'}
                     hide={hiddenSeries.has(`${cause}_${country}`)}
                     onClick={(data) => handleBarClick(data, allSeries.indexOf(`${cause}_${country}`))}
                     style={{ cursor: 'pointer' }}

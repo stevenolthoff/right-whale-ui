@@ -81,7 +81,7 @@ export default function InjuryTotal() {
             />
             <Bar
               dataKey="count"
-              fill="#dc2626" // red-600
+              fill="#3b82f6"
               radius={[0, 0, 0, 0]}
             />
           </BarChart>

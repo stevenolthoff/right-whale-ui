@@ -27,13 +27,15 @@ interface DataChartProps {
 }
 
 const COLORS = [
-  '#2563eb', // blue-600
-  '#dc2626', // red-600
-  '#16a34a', // green-600
-  '#9333ea', // purple-600
-  '#ea580c', // orange-600
-  '#0891b2', // cyan-600
-  '#4f46e5', // indigo-600
+  '#b33dc6', // Shuffled array of provided colors
+  '#27aeef',
+  '#edbf33',
+  '#bdcf32',
+  '#ea5545',
+  '#ef9b20',
+  '#87bc45',
+  '#f46a9b',
+  '#ede15b',
 ]
 
 export const DataChart = ({ data, stacked = false }: DataChartProps) => {

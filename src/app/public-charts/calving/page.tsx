@@ -84,7 +84,7 @@ export default function Calving() {
             />
             <Bar
               dataKey="count"
-              fill="#84cc16" // green-500
+              fill="#3b82f6"
               radius={[0, 0, 0, 0]}
             />
           </BarChart>
