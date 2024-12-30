@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { 
   BarChart, 
   Bar, 
@@ -28,6 +28,12 @@ const FOCUSED_CAUSES = ['Entanglement', 'Vessel Strike']
 export default function MortalityByCauseAndCountry() {
   const { data, loading, error } = useMortalityData()
   const { yearRange, setYearRange, minYear, maxYear } = useMortalityYearRange(data)
+  const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
+  const [showResetButton, setShowResetButton] = useState(false)
+
+  useEffect(() => {
+    setShowResetButton(hiddenSeries.size > 0)
+  }, [hiddenSeries])
 
   if (loading) return <div>Loading...</div>
   if (error) return <div>Error: {error}</div>
@@ -82,6 +88,49 @@ export default function MortalityByCauseAndCountry() {
   const countries = Array.from(new Set(data.map(item => item.country)))
     .sort((a, b) => a.localeCompare(b))
 
+  // Get all unique series names (cause_country combinations)
+  const allSeries = Object.keys(chartData[0] || {})
+    .filter(key => key !== 'year')
+
+  const handleLegendClick = (entry: { dataKey: string }) => {
+    const seriesName = entry.dataKey
+    
+    setShowResetButton(true)
+    setHiddenSeries(prev => {
+      const newHidden = new Set(prev)
+      if (newHidden.has(seriesName)) {
+        newHidden.delete(seriesName)
+      } else {
+        // Hide all except the clicked one
+        allSeries.forEach(name => newHidden.add(name))
+        newHidden.delete(seriesName)
+      }
+      return newHidden
+    })
+  }
+
+  const handleBarClick = (data: any, index: number) => {
+    const seriesName = allSeries[index]
+    if (seriesName) {
+      setShowResetButton(true)
+      setHiddenSeries(prev => {
+        const newHidden = new Set(prev)
+        if (newHidden.has(seriesName)) {
+          newHidden.delete(seriesName)
+        } else {
+          // Hide all except the clicked one
+          allSeries.forEach(name => newHidden.add(name))
+          newHidden.delete(seriesName)
+        }
+        return newHidden
+      })
+    }
+  }
+
+  const resetVisibility = () => {
+    setHiddenSeries(new Set())
+  }
+
   return (
     <div className='flex flex-col space-y-4 bg-white p-4'>
       <YearRangeSlider
@@ -91,59 +140,70 @@ export default function MortalityByCauseAndCountry() {
         onChange={setYearRange}
       />
       
-      <div className='h-[600px] w-full'> {/* Increased height for better readability */}
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={chartData}
-            margin={{
-              top: 20,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-            barGap={0}
-            barCategoryGap="20%"
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-              dataKey="year"
-              label={{ value: 'Year', position: 'insideBottom', offset: -5 }}
-            />
-            <YAxis
-              label={{
-                value: 'Number of Mortalities',
-                angle: -90,
-                position: 'insideLeft',
-                offset: 10,
+      <div className="relative">
+        <div className='h-[500px] w-full'>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={chartData}
+              margin={{
+                top: 20,
+                right: 30,
+                left: 20,
+                bottom: 5,
               }}
-            />
-            <Tooltip 
-              formatter={(value: number, name: string) => {
-                const [cause, country] = name.split('_')
-                return [`${value} mortalities`, `${country} (${cause})`]
-              }}
-              labelFormatter={(label: number) => `Year: ${label}`}
-            />
-            <Legend 
-              formatter={(value: string) => {
-                const [cause, country] = value.split('_')
-                return `${country} (${cause})`
-              }}
-            />
-            {FOCUSED_CAUSES.map((cause) => (
-              countries.map(country => (
-                <Bar
-                  key={`${cause}_${country}`}
-                  dataKey={`${cause}_${country}`}
-                  name={`${cause}_${country}`}
-                  stackId={cause}
-                  fill={BAR_COLORS[`${cause}_${country}`] || '#f59e0b'} // Default to amber if no color defined
-                  radius={[0, 0, 0, 0]}
-                />
-              ))
-            ))}
-          </BarChart>
-        </ResponsiveContainer>
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis 
+                dataKey="year"
+                label={{ value: 'Year', position: 'insideBottom', offset: -5 }}
+              />
+              <YAxis
+                label={{
+                  value: 'Number of Mortalities',
+                  angle: -90,
+                  position: 'insideLeft',
+                  offset: 10,
+                }}
+              />
+              <Tooltip 
+                formatter={(value: number, name: string) => [`${value} mortalities`, name]}
+                labelFormatter={(label: number) => `Year: ${label}`}
+              />
+              <Legend 
+                onClick={handleLegendClick}
+                wrapperStyle={{ cursor: 'pointer' }}
+                formatter={(value: string) => {
+                  const [cause, country] = value.split('_')
+                  return `${country} (${cause})`
+                }}
+              />
+              {FOCUSED_CAUSES.map((cause) => (
+                countries.map(country => (
+                  <Bar
+                    key={`${cause}_${country}`}
+                    dataKey={`${cause}_${country}`}
+                    name={`${cause}_${country}`}
+                    stackId={cause}
+                    fill={BAR_COLORS[`${cause}_${country}`] || '#f59e0b'}
+                    hide={hiddenSeries.has(`${cause}_${country}`)}
+                    onClick={(data) => handleBarClick(data, allSeries.indexOf(`${cause}_${country}`))}
+                    style={{ cursor: 'pointer' }}
+                  />
+                ))
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        {showResetButton && (
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={resetVisibility}
+              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Show All
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
