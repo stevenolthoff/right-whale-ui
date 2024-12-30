@@ -41,9 +41,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   ]
 
   return (
-    <div className='flex'>
+    <div className='flex min-h-screen bg-white'>
       <Sidebar categories={categories} />
-      <main className='flex-1 p-2 md:p-12 min-w-0 transition-all duration-200 peer-[.-translate-x-full]:ml-0'>
+      <main className='flex-1 p-2 md:p-12 min-w-0 transition-all duration-200 peer-[.-translate-x-full]:ml-0 bg-white'>
         <div className='text-3xl font-bold'>{text[pathname].title}</div>
         <div className='max-w-[800px] mt-4 mb-8'>
           {text[pathname].description}
