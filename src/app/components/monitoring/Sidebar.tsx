@@ -8,12 +8,16 @@ interface SidebarLink {
   label: string
 }
 
-interface SidebarProps {
+interface SidebarCategory {
   title: string
   links: SidebarLink[]
 }
 
-const Sidebar = ({ title, links }: SidebarProps) => {
+interface SidebarProps {
+  categories: SidebarCategory[]
+}
+
+const Sidebar = ({ categories }: SidebarProps) => {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(true)
 
@@ -85,51 +89,57 @@ const Sidebar = ({ title, links }: SidebarProps) => {
         aria-hidden={!isOpen}
       >
         <div className='mb-6 pt-[70px] md:pt-0'>
-          <div className='flex items-center justify-between mb-2'>
-            <h2 className='text-gray-500 font-bold whitespace-nowrap'>{title}</h2>
-            {/* Desktop close button - only shows when sidebar is open */}
-            {isOpen && (
-              <button
-                className='hidden md:block p-1 hover:bg-gray-100 rounded'
-                onClick={() => setIsOpen(false)}
-                aria-label="Close sidebar"
+          {/* Desktop close button */}
+          {isOpen && (
+            <button
+              className='hidden md:block p-1 hover:bg-gray-100 rounded absolute right-2 top-[70px] md:top-2'
+              onClick={() => setIsOpen(false)}
+              aria-label="Close sidebar"
+            >
+              <svg
+                className='w-5 h-5'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
               >
-                <svg
-                  className='w-5 h-5'
-                  fill='none'
-                  stroke='currentColor'
-                  viewBox='0 0 24 24'
-                >
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M15 19l-7-7 7-7'
-                  />
-                </svg>
-              </button>
-            )}
-          </div>
-          <div className='flex flex-col'>
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`
-                  whitespace-nowrap
-                  ${pathname === link.href
-                    ? 'block text-blue-500 mb-2 py-2'
-                    : 'block text-gray-700 mb-2 hover:text-blue-500 py-2'
-                  }
-                `}
-                onClick={() => {
-                  if (window.innerWidth < 768) {
-                    setIsOpen(false)
-                  }
-                }}
-              >
-                {link.label}
-              </Link>
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M15 19l-7-7 7-7'
+                />
+              </svg>
+            </button>
+          )}
+
+          {/* Categories and links */}
+          <div className='flex flex-col space-y-6'>
+            {categories.map((category, index) => (
+              <div key={index} className='flex flex-col'>
+                <h2 className='text-gray-500 font-bold mb-2'>{category.title}</h2>
+                <div className='flex flex-col pl-2'>
+                  {category.links.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={`
+                        whitespace-nowrap
+                        ${pathname === link.href
+                          ? 'block text-blue-500 mb-2 py-1'
+                          : 'block text-gray-700 mb-2 hover:text-blue-500 py-1'
+                        }
+                      `}
+                      onClick={() => {
+                        if (window.innerWidth < 768) {
+                          setIsOpen(false)
+                        }
+                      }}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </div>

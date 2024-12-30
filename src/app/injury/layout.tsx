@@ -20,24 +20,29 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     },
   }
 
-  const links = [
+  const categories = [
     {
-      href: '/injury/injury-type',
-      label: 'Injury Type by Year'
-    },
-    {
-      href: '/injury/entanglement',
-      label: 'Entanglement'
-    },
-    {
-      href: '/injury/vessel-strike',
-      label: 'Vessel Strike by Year'
-    },
+      title: 'INJURY',
+      links: [
+        {
+          href: '/injury/injury-type',
+          label: 'Injury Type by Year'
+        },
+        {
+          href: '/injury/entanglement',
+          label: 'Entanglement'
+        },
+        {
+          href: '/injury/vessel-strike',
+          label: 'Vessel Strike by Year'
+        }
+      ]
+    }
   ]
 
   return (
     <div className='flex'>
-      <Sidebar title='INJURY' links={links} />
+      <Sidebar categories={categories} />
       <main className='flex-1 p-2 md:p-12'>
         <div className='text-3xl font-bold'>{text[pathname].title}</div>
         <div className='max-w-[800px] mt-4 mb-8'>
