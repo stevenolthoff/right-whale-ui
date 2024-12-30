@@ -1,46 +1,28 @@
-import { useState, useEffect, useCallback } from 'react'
-import { InjuryCase } from '../types/monitoring'
+'use client'
+import { useState, useMemo } from 'react'
 
-export const useYearRange = (
-  data: InjuryCase[],
-  filterCondition: (item: InjuryCase) => boolean
-) => {
-  const [years, setYears] = useState<{
-    min: number
-    max: number
-    range: [number, number]
-  }>({
-    min: 0,
-    max: 0,
-    range: [0, 0],
-  })
+interface HasYear {
+  year?: number;
+  DetectionDate?: string;  // For InjuryCase
+}
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const memoizedFilter = useCallback(filterCondition, [])
-
-  useEffect(() => {
-    if (data.length > 0) {
-      const filteredYears = data
-        .filter(memoizedFilter)
-        .map((item) => new Date(item.DetectionDate).getFullYear())
-
-      if (filteredYears.length > 0) {
-        const min = Math.min(...filteredYears)
-        const max = Math.max(...filteredYears)
-        setYears({
-          min,
-          max,
-          range: [min, max],
-        })
-      }
+export function useYearRange<T extends HasYear>(
+  data: T[],
+  filter?: (item: T) => boolean
+) {
+  const { minYear, maxYear } = useMemo(() => {
+    if (!data?.length) return { minYear: 2000, maxYear: 2024 }
+    const filteredData = filter ? data.filter(filter) : data
+    const years = filteredData.map(item => 
+      item.year || new Date(item.DetectionDate!).getFullYear()
+    )
+    return {
+      minYear: Math.min(...years),
+      maxYear: Math.max(...years)
     }
-  }, [data, memoizedFilter])
+  }, [data, filter])
 
-  return {
-    yearRange: years.range,
-    setYearRange: (range: [number, number]) =>
-      setYears((prev) => ({ ...prev, range })),
-    minYear: years.min,
-    maxYear: years.max,
-  }
+  const [yearRange, setYearRange] = useState<[number, number]>([minYear, maxYear])
+
+  return { yearRange, setYearRange, minYear, maxYear }
 }

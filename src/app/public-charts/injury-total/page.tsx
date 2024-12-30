@@ -11,12 +11,12 @@ import {
 } from 'recharts'
 import { useInjuryData } from '@/app/hooks/useInjuryData'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
-import { useMortalityYearRange } from '@/app/hooks/useMortalityYearRange'
+import { useYearRange } from '@/app/hooks/useYearRange'
 import { Loader } from '@/app/components/ui/Loader'
 
 export default function InjuryTotal() {
   const { data, loading, error } = useInjuryData()
-  const { yearRange, setYearRange, minYear, maxYear } = useMortalityYearRange(data)
+  const { yearRange, setYearRange, minYear, maxYear } = useYearRange(data)
 
   if (loading) return <Loader />
   if (error) return <div className='p-4 text-red-500'>Error: {error}</div>

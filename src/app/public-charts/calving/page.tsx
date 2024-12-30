@@ -11,12 +11,12 @@ import {
 } from 'recharts'
 import { useCalvingData } from '@/app/hooks/useCalvingData'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
-import { useMortalityYearRange } from '@/app/hooks/useMortalityYearRange' // We can reuse this
+import { useYearRange } from '@/app/hooks/useYearRange'
 import { Loader } from '@/app/components/ui/Loader'
 
 export default function Calving() {
   const { data, loading, error } = useCalvingData()
-  const { yearRange, setYearRange, minYear, maxYear } = useMortalityYearRange(data)
+  const { yearRange, setYearRange, minYear, maxYear } = useYearRange(data)
 
   if (loading) return <Loader />
   if (error) return <div className='p-4 text-red-500'>Error: {error}</div>

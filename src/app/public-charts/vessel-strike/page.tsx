@@ -1,4 +1,5 @@
 import { Loader } from '@/app/components/ui/Loader'
+import { useInjuryData } from '@/app/hooks/useInjuryData'
 // ... other imports
 
 export default function VesselStrike() {
