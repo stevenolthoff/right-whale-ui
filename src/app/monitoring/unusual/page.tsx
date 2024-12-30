@@ -1,9 +1,9 @@
 'use client'
 import React from 'react'
-import { useMonitoringData } from '../../hooks/useMonitoringData.ts'
-import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider.tsx'
-import { DataChart } from '../../components/monitoring/DataChart.tsx'
-import { useYearRange } from '../../hooks/useYearRange.ts'
+import { useMonitoringData } from '../../hooks/useMonitoringData'
+import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
+import { DataChart } from '../../components/monitoring/DataChart'
+import { useYearRange } from '../../hooks/useYearRange'
 
 const Unusual = () => {
   const { results, loading, error } = useMonitoringData()

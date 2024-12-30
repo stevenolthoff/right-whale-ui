@@ -61,7 +61,7 @@ const Sidebar = ({ title, links }: SidebarProps) => {
         aria-hidden={!isOpen}
       >
         <div className='mb-6 pt-[70px] md:pt-0'>
-          <h2 className='text-gray-500 font-medium mb-2'>{title}</h2>
+          <h2 className='text-gray-500 font-bold mb-2'>{title}</h2>
           <div className='flex flex-col'>
             {links.map((link) => (
               <Link
