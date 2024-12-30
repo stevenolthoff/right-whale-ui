@@ -9,6 +9,8 @@ export default function Header() {
   const topPath = pathname.split('/')[1]
   const [token, setToken] = useLocalStorage('token', '')
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+
   useEffect(() => {
     if (token) {
       setIsLoggedIn(true)
@@ -16,6 +18,7 @@ export default function Header() {
       setIsLoggedIn(false)
     }
   }, [token])
+
   return (
     <header className='flex border-b border-slate-300 py-4 px-4 sm:px-10 bg-white  min-h-[70px] tracking-wide relative z-50'>
       <div className='flex flex-wrap items-center justify-between gap-5 w-full'>
@@ -26,11 +29,14 @@ export default function Header() {
         </Link>
         <div
           id='collapseMenu'
-          className='max-lg:hidden lg:!block max-lg:before:fixed max-lg:before:bg-black max-lg:before:opacity-50 max-lg:before:inset-0 max-lg:before:z-50'
+          className={`${
+            isMenuOpen ? 'block' : 'max-lg:hidden'
+          } lg:!block max-lg:before:fixed max-lg:before:bg-black max-lg:before:opacity-50 max-lg:before:inset-0 max-lg:before:z-50`}
         >
           <button
             id='toggleClose'
             className='lg:hidden fixed top-2 right-4 z-[100] rounded-sm bg-white p-3'
+            onClick={() => setIsMenuOpen(false)}
           >
             <svg
               xmlns='http://www.w3.org/2000/svg'
@@ -48,15 +54,11 @@ export default function Header() {
             </svg>
           </button>
 
-          <ul className='lg:flex gap-x-5 max-lg:space-y-3 max-lg:fixed max-lg:bg-white max-lg:w-1/2 max-lg:min-w-[300px] max-lg:top-0 max-lg:left-0 max-lg:p-6 max-lg:h-full max-lg:shadow-md max-lg:overflow-auto z-50'>
+          <ul className='lg:flex gap-x-5 max-lg:space-y-3 max-lg:fixed max-lg:bg-white max-lg:w-full max-lg:top-0 max-lg:left-0 max-lg:p-6 max-lg:h-screen max-lg:overflow-auto z-50'>
             <li className='mb-6 hidden max-lg:block'>
-              <a href='javascript:void(0)'>
-                <img
-                  src='https://readymadeui.com/readymadeui.svg'
-                  alt='logo'
-                  className='w-36'
-                />
-              </a>
+              <div className='font-bold text-black text-xl'>
+                NARW Anthropogenic Injury Event Tracker
+              </div>
             </li>
             <li className='max-lg:border-b border-gray-300 max-lg:py-3 px-3'>
               <Link 
@@ -64,6 +66,7 @@ export default function Header() {
                 className={`${
                   topPath === 'public-charts' ? 'text-blue-500' : 'text-black'
                 } hover:text-blue-500 block font-bold text-[15px]`}
+                onClick={() => setIsMenuOpen(false)}
               >
                 Explore
               </Link>
@@ -75,6 +78,7 @@ export default function Header() {
                   className={`${
                     topPath === 'monitoring' ? 'text-blue-500' : 'text-black'
                   } hover:text-blue-500 block font-bold text-[15px]`}
+                  onClick={() => setIsMenuOpen(false)}
                 >
                   Monitoring
                 </Link>
@@ -87,6 +91,7 @@ export default function Header() {
                   className={`${
                     topPath === 'injury' ? 'text-blue-500' : 'text-black'
                   } hover:text-blue-500 block font-bold text-[15px]`}
+                  onClick={() => setIsMenuOpen(false)}
                 >
                   Injury
                 </Link>
@@ -98,6 +103,7 @@ export default function Header() {
                 className={`${
                   topPath === 'resources' ? 'text-blue-500' : 'text-black'
                 } hover:text-blue-500 block font-bold text-[15px]`}
+                onClick={() => setIsMenuOpen(false)}
               >
                 Resources
               </Link>
@@ -131,7 +137,11 @@ export default function Header() {
             Sign up
           </button> */}
 
-          <button id='toggleOpen' className='lg:hidden'>
+          <button 
+            id='toggleOpen' 
+            className='lg:hidden'
+            onClick={() => setIsMenuOpen(true)}
+          >
             <svg
               className='w-7 h-7'
               fill='#000'
