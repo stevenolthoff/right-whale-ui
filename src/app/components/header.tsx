@@ -17,7 +17,7 @@ export default function Header() {
     }
   }, [token])
   return (
-    <header className='flex border border-slate-300 py-4 px-4 sm:px-10 bg-white  min-h-[70px] tracking-wide relative z-50'>
+    <header className='flex border-b border-slate-300 py-4 px-4 sm:px-10 bg-white  min-h-[70px] tracking-wide relative z-50'>
       <div className='flex flex-wrap items-center justify-between gap-5 w-full'>
         <Link href='/'>
           <div className='font-bold text-black'>
