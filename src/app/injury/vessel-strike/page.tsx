@@ -5,6 +5,7 @@ import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
 import { DataChart, StackedChartData } from '../../components/monitoring/DataChart'
 import { useYearRange } from '../../hooks/useYearRange'
 import { InjuryCase } from '@/app/types/monitoring'
+import { Loader } from '@/app/components/ui/Loader'
 
 const VesselStrike = () => {
   const { results, loading, error } = useMonitoringData()
@@ -13,8 +14,8 @@ const VesselStrike = () => {
     (item) => item.InjuryTypeDescription === 'Vessel Strike'
   )
 
-  if (loading) return <div>Loading...</div>
-  if (error) return <div>Error: {error}</div>
+  if (loading) return <Loader />
+  if (error) return <div className='p-4 text-red-500'>Error: {error}</div>
 
   const chartData = results
     .filter((item) => {

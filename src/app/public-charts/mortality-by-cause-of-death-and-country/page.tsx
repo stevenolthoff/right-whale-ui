@@ -13,6 +13,7 @@ import {
 import { useMortalityData } from '@/app/hooks/useMortalityData'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { useMortalityYearRange } from '@/app/hooks/useMortalityYearRange'
+import { Loader } from '@/app/components/ui/Loader'
 
 // Define colors for each cause-country combination
 const BAR_COLORS: Record<string, string> = {
@@ -35,8 +36,8 @@ export default function MortalityByCauseAndCountry() {
     setShowResetButton(hiddenSeries.size > 0)
   }, [hiddenSeries])
 
-  if (loading) return <div>Loading...</div>
-  if (error) return <div>Error: {error}</div>
+  if (loading) return <Loader />
+  if (error) return <div className='p-4 text-red-500'>Error: {error}</div>
 
   // Filter and format data for the chart
   const chartData = (() => {

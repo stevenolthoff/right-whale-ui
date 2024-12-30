@@ -4,13 +4,14 @@ import { useMonitoringData } from '../../hooks/useMonitoringData'
 import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
 import { DataChart } from '../../components/monitoring/DataChart'
 import { useYearRange } from '../../hooks/useYearRange'
+import { Loader } from '@/app/components/ui/Loader'
 
 const InjuryType = () => {
   const { results, loading, error } = useMonitoringData()
   const { yearRange, setYearRange, minYear, maxYear } = useYearRange(results, (item) => true)
 
-  if (loading) return <div>Loading...</div>
-  if (error) return <div>Error: {error}</div>
+  if (loading) return <Loader />
+  if (error) return <div className='p-4 text-red-500'>Error: {error}</div>
 
   const chartData = results
     .filter((item) => {

@@ -12,13 +12,14 @@ import {
 import { useInjuryData } from '@/app/hooks/useInjuryData'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { useMortalityYearRange } from '@/app/hooks/useMortalityYearRange'
+import { Loader } from '@/app/components/ui/Loader'
 
 export default function InjuryTotal() {
   const { data, loading, error } = useInjuryData()
   const { yearRange, setYearRange, minYear, maxYear } = useMortalityYearRange(data)
 
-  if (loading) return <div>Loading...</div>
-  if (error) return <div>Error: {error}</div>
+  if (loading) return <Loader />
+  if (error) return <div className='p-4 text-red-500'>Error: {error}</div>
 
   // Filter and format data for the chart
   const chartData = (() => {

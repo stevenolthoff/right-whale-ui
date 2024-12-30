@@ -12,13 +12,14 @@ import {
 import { useCalvingData } from '@/app/hooks/useCalvingData'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { useMortalityYearRange } from '@/app/hooks/useMortalityYearRange' // We can reuse this
+import { Loader } from '@/app/components/ui/Loader'
 
 export default function Calving() {
   const { data, loading, error } = useCalvingData()
   const { yearRange, setYearRange, minYear, maxYear } = useMortalityYearRange(data)
 
-  if (loading) return <div>Loading...</div>
-  if (error) return <div>Error: {error}</div>
+  if (loading) return <Loader />
+  if (error) return <div className='p-4 text-red-500'>Error: {error}</div>
 
   // Filter and format data for the chart
   const chartData = (() => {

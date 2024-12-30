@@ -15,6 +15,7 @@ import Select from 'react-select'
 import { useMonitoringData } from '../../hooks/useMonitoringData'
 import Slider from 'rc-slider'
 import 'rc-slider/assets/index.css'
+import { Loader } from '@/app/components/ui/Loader'
 
 const MonitoringChart = () => {
   const { results, loading, error } = useMonitoringData()
@@ -100,7 +101,7 @@ const MonitoringChart = () => {
     return allData.sort((a, b) => a.year - b.year)
   }, [plottableFields, results, yearRange])
 
-  if (loading) return <div className='p-4'>Loading...</div>
+  if (loading) return <Loader />
   if (error) return <div className='p-4 text-red-500'>Error loading data</div>
 
   return (
