@@ -13,6 +13,11 @@ import {
 } from '@tanstack/react-table'
 import { useMonitoringData } from '../../hooks/useMonitoringData'
 import { InjuryCase } from '../../types/monitoring'
+import {
+  ChevronUpIcon,
+  ChevronDownIcon,
+  ChevronUpDownIcon,
+} from '@heroicons/react/20/solid'
 
 const MonitoringTable = () => {
   const { results, loading, error } = useMonitoringData()
@@ -20,36 +25,16 @@ const MonitoringTable = () => {
 
   const columns = React.useMemo<ColumnDef<InjuryCase, any>[]>(
     () => [
-      columnHelper.accessor('CaseId', {
-        header: 'Case ID',
-        cell: (info) => info.getValue(),
-      }),
-      columnHelper.accessor('InjuryId', {
-        header: 'Injury ID',
-        cell: (info) => info.getValue(),
-      }),
-      columnHelper.accessor('FieldId', {
-        header: 'Field ID',
-        cell: (info) => info.getValue(),
-      }),
       columnHelper.accessor('EGNo', {
         header: 'EG No',
         cell: (info) => info.getValue(),
       }),
-      columnHelper.accessor('BirthYear', {
-        header: 'Birth Year',
-        cell: (info) => info.getValue() || 'N/A',
-      }),
-      columnHelper.accessor('GenderCode', {
-        header: 'Gender',
+      columnHelper.accessor('FieldId', {
+        header: 'Field EG No',
         cell: (info) => info.getValue(),
       }),
-      columnHelper.accessor('FirstYearSighted', {
-        header: 'First Year Sighted',
-        cell: (info) => info.getValue(),
-      }),
-      columnHelper.accessor('IsUnusualMortalityEvent', {
-        header: 'Unusual Mortality',
+      columnHelper.accessor('IsActiveCase', {
+        header: 'Active Case',
         cell: (info) => (info.getValue() ? 'Yes' : 'No'),
       }),
       columnHelper.accessor('InjuryTypeDescription', {
@@ -57,32 +42,24 @@ const MonitoringTable = () => {
         cell: (info) => info.getValue(),
       }),
       columnHelper.accessor('InjuryAccountDescription', {
-        header: 'Injury Account',
+        header: 'Injury Description',
         cell: (info) => info.getValue(),
       }),
       columnHelper.accessor('InjurySeverityDescription', {
-        header: 'Severity',
+        header: 'Injury Severity',
         cell: (info) => info.getValue(),
-      }),
-      columnHelper.accessor('PreinjuryDate', {
-        header: 'Pre-injury Date',
-        cell: (info) => new Date(info.getValue()).toLocaleDateString(),
       }),
       columnHelper.accessor('DetectionDate', {
-        header: 'Detection Date',
-        cell: (info) => new Date(info.getValue()).toLocaleDateString(),
+        header: 'Detection Year',
+        cell: (info) => new Date(info.getValue()).getFullYear(),
       }),
       columnHelper.accessor('DetectionAreaDescription', {
-        header: 'Detection Area',
+        header: 'Detection Location',
         cell: (info) => info.getValue(),
       }),
-      columnHelper.accessor('IsActiveCase', {
-        header: 'Active',
-        cell: (info) => (info.getValue() ? 'Yes' : 'No'),
-      }),
-      columnHelper.accessor('IsDead', {
-        header: 'Deceased',
-        cell: (info) => (info.getValue() ? 'Yes' : 'No'),
+      columnHelper.accessor('UnusualMortalityEventDescription', {
+        header: 'UME Status',
+        cell: (info) => info.getValue() || 'N/A',
       }),
     ],
     [columnHelper]
@@ -102,6 +79,12 @@ const MonitoringTable = () => {
     },
   })
 
+  const getSortIcon = (isSorted: false | 'asc' | 'desc') => {
+    if (!isSorted) return <ChevronUpDownIcon className="w-4 h-4 ml-1 inline" />
+    if (isSorted === 'asc') return <ChevronUpIcon className="w-4 h-4 ml-1 inline" />
+    return <ChevronDownIcon className="w-4 h-4 ml-1 inline" />
+  }
+
   if (loading) return <div className='p-4'>Loading...</div>
   if (error) return <div className='p-4 text-red-500'>Error loading data</div>
 
@@ -119,14 +102,13 @@ const MonitoringTable = () => {
                       className='sticky top-0 px-6 py-3 text-left text-xs font-medium text-gray-500 hover:text-blue-500 uppercase tracking-wider cursor-pointer whitespace-nowrap'
                       onClick={header.column.getToggleSortingHandler()}
                     >
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                      {{
-                        asc: ' ↑',
-                        desc: ' ↓',
-                      }[header.column.getIsSorted() as string] ?? null}
+                      <div className="flex items-center">
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                        {getSortIcon(header.column.getIsSorted())}
+                      </div>
                     </th>
                   ))}
                 </tr>

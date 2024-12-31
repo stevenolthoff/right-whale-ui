@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@observablehq/runtime": "^5.9.9",
     "@tanstack/react-table": "^8.20.6",
     "@types/papaparse": "^5.3.15",
