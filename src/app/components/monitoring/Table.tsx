@@ -18,6 +18,7 @@ import {
   ChevronDownIcon,
   ChevronUpDownIcon,
 } from '@heroicons/react/20/solid'
+import { TableFilters } from './TableFilters'
 
 const MonitoringTable = () => {
   const { results, loading, error } = useMonitoringData()
@@ -52,6 +53,14 @@ const MonitoringTable = () => {
       columnHelper.accessor('DetectionDate', {
         header: 'Detection Year',
         cell: (info) => new Date(info.getValue()).getFullYear(),
+        filterFn: (row, columnId, filterValue) => {
+          if (!filterValue) return true
+          const year = new Date(row.getValue(columnId)).getFullYear()
+          const [minYear, maxYear] = JSON.parse(filterValue as string)
+          if (minYear !== null && year < minYear) return false
+          if (maxYear !== null && year > maxYear) return false
+          return true
+        }
       }),
       columnHelper.accessor('DetectionAreaDescription', {
         header: 'Detection Location',
@@ -74,7 +83,7 @@ const MonitoringTable = () => {
     getPaginationRowModel: getPaginationRowModel(),
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageSize: 15,
       },
     },
   })
@@ -90,6 +99,7 @@ const MonitoringTable = () => {
 
   return (
     <div className='w-full max-w-screen-xl mx-auto'>
+      <TableFilters table={table} data={results || []} />
       <div className='relative overflow-hidden border rounded-lg shadow'>
         <div className='overflow-x-auto'>
           <table className='w-full'>
