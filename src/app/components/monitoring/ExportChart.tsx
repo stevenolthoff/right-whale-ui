@@ -5,9 +5,16 @@ import * as htmlToImage from 'html-to-image'
 interface ExportChartProps {
   chartRef: React.RefObject<HTMLDivElement>
   filename: string
+  title?: string
+  caption?: string
 }
 
-export const ExportChart: React.FC<ExportChartProps> = ({ chartRef, filename }) => {
+export const ExportChart: React.FC<ExportChartProps> = ({ 
+  chartRef, 
+  filename,
+  title,
+  caption 
+}) => {
   const handleExport = async () => {
     if (!chartRef.current) return
     

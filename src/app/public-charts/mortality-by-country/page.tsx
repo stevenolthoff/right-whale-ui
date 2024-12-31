@@ -1,12 +1,14 @@
 'use client'
-import React from 'react'
+import React, { useRef } from 'react'
 import { useMortalityData } from '@/app/hooks/useMortalityData'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { useMortalityYearRange } from '@/app/hooks/useMortalityYearRange'
 import { DataChart } from '@/app/components/monitoring/DataChart'
 import { Loader } from '@/app/components/ui/Loader'
+import { ExportChart } from '@/app/components/monitoring/ExportChart'
 
 export default function MortalityByCountry() {
+  const chartRef = useRef<HTMLDivElement>(null)
   const { data, loading, error } = useMortalityData()
   const yearRangeProps = useMortalityYearRange(
     loading ? null : data,
@@ -50,13 +52,34 @@ export default function MortalityByCountry() {
 
   return (
     <div className='flex flex-col space-y-4 bg-white p-4'>
-      <YearRangeSlider
-        yearRange={yearRangeProps.yearRange}
-        minYear={yearRangeProps.minYear}
-        maxYear={yearRangeProps.maxYear}
-        onChange={yearRangeProps.setYearRange}
-      />
-      <DataChart data={chartData} stacked={true} />
+      <div className="flex justify-between items-center">
+        <div className="flex-grow">
+          <YearRangeSlider
+            yearRange={yearRangeProps.yearRange}
+            minYear={yearRangeProps.minYear}
+            maxYear={yearRangeProps.maxYear}
+            onChange={yearRangeProps.setYearRange}
+          />
+        </div>
+        <ExportChart 
+          chartRef={chartRef}
+          filename={`mortality-by-country-${yearRangeProps.yearRange[0]}-${yearRangeProps.yearRange[1]}.png`}
+          title="Right Whale Mortalities by Country"
+          caption={`Data from ${yearRangeProps.yearRange[0]} to ${yearRangeProps.yearRange[1]}`}
+        />
+      </div>
+      
+      <div ref={chartRef} className='h-[700px] w-full'>
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-1">Right Whale Mortalities by Country</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Data from {yearRangeProps.yearRange[0]} to {yearRangeProps.yearRange[1]}
+          </p>
+        </div>
+        <div className="h-[600px]">
+          <DataChart data={chartData} stacked={true} />
+        </div>
+      </div>
     </div>
   )
 }

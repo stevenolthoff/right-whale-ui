@@ -53,48 +53,58 @@ export default function MortalityTotal() {
         <ExportChart 
           chartRef={chartRef}
           filename={`mortality-total-${yearRange[0]}-${yearRange[1]}.png`}
+          title="Total Right Whale Mortalities"
+          caption={`Data from ${yearRange[0]} to ${yearRange[1]}`}
         />
       </div>
       
-      <div ref={chartRef} className='h-[500px] w-full'>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={chartData}
-            margin={{
-              top: 20,
-              right: 30,
-              left: 40,
-              bottom: 35,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="year"
-              label={{ 
-                value: 'Year', 
-                position: 'insideBottom', 
-                offset: -15
+      <div ref={chartRef} className='h-[700px] w-full'>
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-1">Total Right Whale Mortalities</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Data from {yearRange[0]} to {yearRange[1]}
+          </p>
+        </div>
+        <div className="h-[600px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={chartData}
+              margin={{
+                top: 20,
+                right: 30,
+                left: 40,
+                bottom: 50,
               }}
-            />
-            <YAxis
-              label={{
-                value: 'Number of Mortalities',
-                angle: -90,
-                position: 'insideLeft',
-                offset: 15,
-              }}
-            />
-            <Tooltip
-              formatter={(value: number) => [`${value} mortalities`, 'Count']}
-              labelFormatter={(label: number) => `Year: ${label}`}
-            />
-            <Bar
-              dataKey="count"
-              fill="#1d4ed8"
-              name="Mortalities"
-            />
-          </BarChart>
-        </ResponsiveContainer>
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="year"
+                label={{ 
+                  value: 'Year', 
+                  position: 'insideBottom', 
+                  offset: -15
+                }}
+              />
+              <YAxis
+                label={{
+                  value: 'Number of Mortalities',
+                  angle: -90,
+                  position: 'insideLeft',
+                  offset: 15,
+                }}
+              />
+              <Tooltip
+                formatter={(value: number) => [`${value} mortalities`, 'Count']}
+                labelFormatter={(label: number) => `Year: ${label}`}
+              />
+              <Bar
+                dataKey="count"
+                fill="#1d4ed8"
+                name="Mortalities"
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   )

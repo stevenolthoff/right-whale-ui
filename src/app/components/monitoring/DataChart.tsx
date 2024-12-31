@@ -92,51 +92,74 @@ export const DataChart = ({ data, stacked = false }: DataChartProps) => {
     }
     
     return (
-      <div className="relative">
-        <div className='h-96'>
-          <ResponsiveContainer width='100%' height='100%'>
-            <BarChart data={data}>
-              <CartesianGrid strokeDasharray='3 3' />
-              <XAxis 
-                dataKey='year' 
-                tickFormatter={formatYear}
-                interval={window.innerWidth < 1200 ? 2 : 1}
-                angle={-45}
-                textAnchor="end"
-                height={80}
-                fontSize={12}
-                minTickGap={10}
-              />
-              <YAxis />
-              <Tooltip />
-              <Legend 
-                onClick={handleLegendClick}
-                wrapperStyle={{ cursor: 'pointer' }}
-              />
-              {keys.map((key, index) => (
-                <Bar 
-                  key={key} 
-                  dataKey={key} 
-                  stackId="a" 
-                  fill={COLORS[index % COLORS.length]}
-                  hide={hiddenSeries.has(key)}
-                  onClick={(data) => handleBarClick(data, index)}
-                  style={{ cursor: 'pointer' }}
-                />
-              ))}
-            </BarChart>
-          </ResponsiveContainer>
+      <div className='space-y-4'>
+        <div className='flex flex-wrap gap-2'>
+          {/* ... legend buttons ... */}
         </div>
-        {showResetButton && (
-          <div className="flex justify-center mt-4">
-            <button
-              onClick={resetVisibility}
-              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-              Show All
-            </button>
+        <div className='relative'>
+          <div className='h-[500px]'>
+            <ResponsiveContainer width='100%' height='100%'>
+              <BarChart
+                data={data}
+                margin={{
+                  top: 20,
+                  right: 30,
+                  left: 40,
+                  bottom: 50,
+                }}
+              >
+                <CartesianGrid strokeDasharray='3 3' />
+                <XAxis 
+                  dataKey='year' 
+                  tickFormatter={formatYear}
+                  interval={window.innerWidth < 1200 ? 2 : 1}
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                  fontSize={12}
+                  minTickGap={10}
+                  label={{ 
+                    value: 'Year', 
+                    position: 'insideBottom', 
+                    offset: -15
+                  }}
+                />
+                <YAxis />
+                <Tooltip />
+                <Legend 
+                  verticalAlign="bottom" 
+                  align="center"
+                  wrapperStyle={{ 
+                    paddingTop: "20px",
+                    bottom: "0px"
+                  }}
+                />
+                {keys.map((key, index) => (
+                  <Bar 
+                    key={key} 
+                    dataKey={key} 
+                    stackId={stacked ? 'stack' : undefined}
+                    fill={COLORS[index % COLORS.length]}
+                    name={key}
+                    hide={hiddenSeries.has(key)}
+                    onClick={(data) => handleBarClick(data, index)}
+                    style={{ cursor: 'pointer' }}
+                  />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-        )}
+          {showResetButton && (
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={resetVisibility}
+                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                Show All
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     )
   }
