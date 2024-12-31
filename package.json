@@ -17,6 +17,7 @@
     "axios": "^1.7.9",
     "c545da94fc314b5e": "https://api.observablehq.com/d/c545da94fc314b5e@502.tgz?v=3",
     "f38218f71bb1a1f8": "https://api.observablehq.com/d/f38218f71bb1a1f8@510.tgz?v=3",
+    "html-to-image": "^1.11.11",
     "lucide-react": "^0.469.0",
     "next": "15.0.2",
     "papaparse": "^5.4.1",
