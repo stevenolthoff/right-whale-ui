@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { 
   BarChart, 
   Bar, 
@@ -14,6 +14,7 @@ import { useMortalityData } from '@/app/hooks/useMortalityData'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { useMortalityYearRange } from '@/app/hooks/useMortalityYearRange'
 import { Loader } from '@/app/components/ui/Loader'
+import { ExportChart } from '@/app/components/monitoring/ExportChart'
 
 // Define colors for each cause-country combination
 const BAR_COLORS: Record<string, string> = {
@@ -27,6 +28,7 @@ const BAR_COLORS: Record<string, string> = {
 const FOCUSED_CAUSES = ['Entanglement', 'Vessel Strike']
 
 export default function MortalityByCauseAndCountry() {
+  const chartRef = useRef<HTMLDivElement>(null)
   const { data, loading, error } = useMortalityData()
   const yearRangeProps = useMortalityYearRange(
     loading ? null : data,
@@ -137,36 +139,52 @@ export default function MortalityByCauseAndCountry() {
 
   return (
     <div className='flex flex-col space-y-4 bg-white p-4'>
-      <YearRangeSlider
-        yearRange={yearRangeProps.yearRange}
-        minYear={yearRangeProps.minYear}
-        maxYear={yearRangeProps.maxYear}
-        onChange={yearRangeProps.setYearRange}
-      />
+      <div className="flex justify-between items-center">
+        <div className="flex-grow">
+          <YearRangeSlider
+            yearRange={yearRangeProps.yearRange}
+            minYear={yearRangeProps.minYear}
+            maxYear={yearRangeProps.maxYear}
+            onChange={yearRangeProps.setYearRange}
+          />
+        </div>
+        <ExportChart 
+          chartRef={chartRef}
+          filename={`mortality-by-cause-${yearRangeProps.yearRange[0]}-${yearRangeProps.yearRange[1]}.png`}
+          title="Right Whale Mortalities by Cause of Death and Country"
+          caption={`Data from ${yearRangeProps.yearRange[0]} to ${yearRangeProps.yearRange[1]}`}
+        />
+      </div>
       
-      <div className="relative">
-        <div className='h-[500px] w-full'>
+      <div ref={chartRef} className='h-[700px] w-full'>
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-1">Right Whale Mortalities by Cause of Death and Country</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Data from {yearRangeProps.yearRange[0]} to {yearRangeProps.yearRange[1]}
+          </p>
+        </div>
+        <div className='h-[600px]'>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={chartData}
               margin={{
                 top: 20,
                 right: 30,
-                left: 20,
-                bottom: 5,
+                left: 40,
+                bottom: 70,
               }}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
                 dataKey="year"
-                label={{ value: 'Year', position: 'insideBottom', offset: -5 }}
+                label={{ value: 'Year', position: 'insideBottom', offset: -15 }}
               />
               <YAxis
                 label={{
                   value: 'Number of Mortalities',
                   angle: -90,
                   position: 'insideLeft',
-                  offset: 10,
+                  offset: 15,
                 }}
               />
               <Tooltip 
@@ -179,7 +197,13 @@ export default function MortalityByCauseAndCountry() {
                     handleLegendClick({ dataKey: data.dataKey.toString() })
                   }
                 }}
-                wrapperStyle={{ cursor: 'pointer' }}
+                wrapperStyle={{ 
+                  cursor: 'pointer',
+                  paddingTop: '20px',
+                  bottom: '0px'
+                }}
+                verticalAlign="bottom"
+                align="center"
                 formatter={(value: string) => {
                   const [cause, country] = value.split('_')
                   return `${country} (${cause})`
@@ -202,17 +226,18 @@ export default function MortalityByCauseAndCountry() {
             </BarChart>
           </ResponsiveContainer>
         </div>
-        {showResetButton && (
-          <div className="flex justify-center mt-4">
-            <button
-              onClick={resetVisibility}
-              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-              Show All
-            </button>
-          </div>
-        )}
       </div>
+      
+      {showResetButton && (
+        <div className="flex justify-center">
+          <button
+            onClick={resetVisibility}
+            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Show All
+          </button>
+        </div>
+      )}
     </div>
   )
 }
