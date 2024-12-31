@@ -66,7 +66,7 @@ export default function InjuryTotal() {
           </p>
         </div>
         <div className='h-[600px]'>
-          <DataChart data={chartData} stacked={false} />
+          <DataChart data={chartData} stacked={false} yAxisLabel='Number of Injuries' />
         </div>
       </div>
     </div>

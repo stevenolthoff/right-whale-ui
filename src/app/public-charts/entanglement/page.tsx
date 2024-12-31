@@ -117,12 +117,12 @@ export default function Entanglement() {
         <div className='space-y-8'>
           <div className='h-[600px]'>
             <h3 className='text-lg font-semibold mb-4'>Entanglement Account Types</h3>
-            <DataChart data={chartData.byType} stacked={true} />
+            <DataChart data={chartData.byType} stacked={true} yAxisLabel='Entanglements' />
           </div>
 
           <div className='h-[600px]'>
             <h3 className='text-lg font-semibold mb-4'>Severity Levels</h3>
-            <DataChart data={chartData.bySeverity} stacked={true} />
+            <DataChart data={chartData.bySeverity} stacked={true} yAxisLabel='Entanglements' />
           </div>
         </div>
       </div>

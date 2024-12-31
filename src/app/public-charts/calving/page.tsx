@@ -66,7 +66,7 @@ export default function CalvingChart() {
           </p>
         </div>
         <div className='h-[600px]'>
-          <DataChart data={chartData} stacked={false} />
+          <DataChart data={chartData} stacked={false} yAxisLabel='Number of Calving Events'/>
         </div>
       </div>
     </div>

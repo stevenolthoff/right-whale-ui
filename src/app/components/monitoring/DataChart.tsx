@@ -14,9 +14,10 @@ import {
 interface DataChartProps {
   data: any[]
   stacked?: boolean
+  yAxisLabel?: string
 }
 
-export const DataChart: React.FC<DataChartProps> = ({ data, stacked = false }) => {
+export const DataChart: React.FC<DataChartProps> = ({ data, stacked = false, yAxisLabel = 'Number of Mortalities' }) => {
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
   const [showResetButton, setShowResetButton] = useState(false)
 
@@ -95,7 +96,7 @@ export const DataChart: React.FC<DataChartProps> = ({ data, stacked = false }) =
               />
               <YAxis
                 label={{
-                  value: 'Number of Mortalities',
+                  value: yAxisLabel,
                   angle: -90,
                   position: 'insideLeft',
                   offset: 15,
