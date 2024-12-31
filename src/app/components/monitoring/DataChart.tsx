@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import {
   BarChart,
   Bar,
@@ -8,177 +8,100 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from 'recharts'
 
-interface SimpleChartData {
-  year: number
-  count: number
-}
-
-export interface StackedChartData {
-  year: number
-  [key: string]: number  // Allow any string key with number value
-}
-
 interface DataChartProps {
-  data: SimpleChartData[] | StackedChartData[]
+  data: any[]
   stacked?: boolean
 }
 
-const COLORS = [
-  '#b33dc6', // Shuffled array of provided colors
-  '#27aeef',
-  '#edbf33',
-  '#bdcf32',
-  '#ea5545',
-  '#ef9b20',
-  '#87bc45',
-  '#f46a9b',
-  '#ede15b',
-]
-
-export const DataChart = ({ data, stacked = false }: DataChartProps) => {
+export const DataChart: React.FC<DataChartProps> = ({ data, stacked = false }) => {
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
-  const [showResetButton, setShowResetButton] = useState(false)
 
-  // Add useEffect to automatically hide reset button
-  useEffect(() => {
-    setShowResetButton(hiddenSeries.size > 0)
-  }, [hiddenSeries])
+  // Get all series names (excluding 'year')
+  const keys = Object.keys(data[0] || {}).filter((key) => key !== 'year')
 
-  // Add formatter function for years
-  const formatYear = (year: number): string => {
-    return window.innerWidth < 768 ? `'${year.toString().slice(-2)}` : year.toString()
-  }
-
-  if (stacked) {
-    // Get all unique keys from all data points
-    const keys = Array.from(new Set(
-      data.flatMap(item => Object.keys(item))
-    )).filter(key => 
-      key !== 'year' && key !== 'category'
-    )
-
-    const handleLegendClick = (entry: { value: string }) => {
-      const newHidden = new Set(hiddenSeries)
-      if (newHidden.has(entry.value)) {
-        newHidden.delete(entry.value)
+  const handleLegendClick = (entry: { dataKey: string }) => {
+    const seriesName = entry.dataKey
+    setHiddenSeries((prev) => {
+      const newHidden = new Set(prev)
+      if (newHidden.has(seriesName)) {
+        newHidden.delete(seriesName)
       } else {
-        // Hide all except the clicked one
-        keys.forEach(name => newHidden.add(name))
-        newHidden.delete(entry.value)
+        newHidden.add(seriesName)
       }
-      setHiddenSeries(newHidden)
-    }
-
-    const handleBarClick = (data: any, index: number) => {
-      const seriesName = keys[index]
-      if (seriesName) {
-        const newHidden = new Set(hiddenSeries)
-        if (newHidden.has(seriesName)) {
-          newHidden.delete(seriesName)
-        } else {
-          // Hide all except the clicked one
-          keys.forEach(name => newHidden.add(name))
-          newHidden.delete(seriesName)
-        }
-        setHiddenSeries(newHidden)
-      }
-    }
-
-    const resetVisibility = () => {
-      setHiddenSeries(new Set())
-    }
-    
-    return (
-      <div className='space-y-4'>
-        <div className='flex flex-wrap gap-2'>
-          {/* ... legend buttons ... */}
-        </div>
-        <div className='relative'>
-          <div className='h-[500px]'>
-            <ResponsiveContainer width='100%' height='100%'>
-              <BarChart
-                data={data}
-                margin={{
-                  top: 20,
-                  right: 30,
-                  left: 40,
-                  bottom: 50,
-                }}
-              >
-                <CartesianGrid strokeDasharray='3 3' />
-                <XAxis 
-                  dataKey='year' 
-                  tickFormatter={formatYear}
-                  interval={window.innerWidth < 1200 ? 2 : 1}
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                  fontSize={12}
-                  minTickGap={10}
-                  label={{ 
-                    value: 'Year', 
-                    position: 'insideBottom', 
-                    offset: -15
-                  }}
-                />
-                <YAxis />
-                <Tooltip />
-                <Legend 
-                  verticalAlign="bottom" 
-                  align="center"
-                  wrapperStyle={{ 
-                    paddingTop: "20px",
-                    bottom: "0px"
-                  }}
-                />
-                {keys.map((key, index) => (
-                  <Bar 
-                    key={key} 
-                    dataKey={key} 
-                    stackId={stacked ? 'stack' : undefined}
-                    fill={COLORS[index % COLORS.length]}
-                    name={key}
-                    hide={hiddenSeries.has(key)}
-                    onClick={(data) => handleBarClick(data, index)}
-                    style={{ cursor: 'pointer' }}
-                  />
-                ))}
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          {showResetButton && (
-            <div className="flex justify-center mt-4">
-              <button
-                onClick={resetVisibility}
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              >
-                Show All
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    )
+      return newHidden
+    })
   }
 
   return (
-    <div className='h-96'>
-      <ResponsiveContainer width='100%' height='100%'>
-        <BarChart data={data}>
-          <CartesianGrid strokeDasharray='3 3' />
-          <XAxis 
-            dataKey='year' 
-            tickFormatter={formatYear}
-            interval={0}
-          />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey='count' fill='#0088FE' />
-        </BarChart>
-      </ResponsiveContainer>
+    <div className='space-y-4'>
+      <div className='flex flex-wrap gap-2'>
+        {/* ... legend buttons ... */}
+      </div>
+      <div className='relative'>
+        <div className='h-[500px]'>
+          <ResponsiveContainer width='100%' height='100%'>
+            <BarChart
+              data={data}
+              margin={{
+                top: 20,
+                right: 30,
+                left: 40,
+                bottom: 70,  // Increased to accommodate rotated labels
+              }}
+            >
+              <CartesianGrid strokeDasharray='3 3' />
+              <XAxis 
+                dataKey="year"
+                label={{ 
+                  value: 'Year', 
+                  position: 'insideBottom', 
+                  offset: -15
+                }}
+                interval={4}  // Show every 4th tick
+                angle={-45}   // Rotate labels
+                textAnchor="end"  // Align rotated text
+                height={60}   // Increase height for rotated labels
+                tickMargin={10}  // Add margin between ticks and axis
+              />
+              <YAxis
+                label={{
+                  value: 'Number of Mortalities',
+                  angle: -90,
+                  position: 'insideLeft',
+                  offset: 15,
+                }}
+              />
+              <Tooltip />
+              {keys.map((key, index) => (
+                <Bar
+                  key={key} 
+                  dataKey={key} 
+                  stackId={stacked ? 'stack' : undefined}
+                  fill={COLORS[index % COLORS.length]}
+                  name={key}
+                  hide={hiddenSeries.has(key)}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
     </div>
   )
 }
+
+const COLORS = [
+  '#1f77b4',
+  '#ff7f0e',
+  '#2ca02c',
+  '#d62728',
+  '#9467bd',
+  '#8c564b',
+  '#e377c2',
+  '#7f7f7f',
+  '#bcbd22',
+  '#17becf',
+]

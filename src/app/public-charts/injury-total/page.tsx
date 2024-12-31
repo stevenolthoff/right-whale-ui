@@ -1,38 +1,35 @@
 'use client'
-import React from 'react'
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer 
-} from 'recharts'
+import React, { useRef } from 'react'
 import { useInjuryData } from '@/app/hooks/useInjuryData'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
-import { useYearRange } from '@/app/hooks/useYearRange'
+import { useInjuryYearRange } from '@/app/hooks/useInjuryYearRange'
+import { DataChart } from '@/app/components/monitoring/DataChart'
 import { Loader } from '@/app/components/ui/Loader'
+import { ExportChart } from '@/app/components/monitoring/ExportChart'
 
 export default function InjuryTotal() {
+  const chartRef = useRef<HTMLDivElement>(null)
   const { data, loading, error } = useInjuryData()
-  const { yearRange, setYearRange, minYear, maxYear } = useYearRange(data)
+  const yearRangeProps = useInjuryYearRange(data)
 
   if (loading) return <Loader />
   if (error) return <div className='p-4 text-red-500'>Error: {error}</div>
 
   // Filter and format data for the chart
   const chartData = (() => {
+    // Create a map of year to count
     const yearCounts = new Map<number, number>()
     
+    // Filter by year range and count occurrences
     data
-      .filter(item => item.year >= yearRange[0] && item.year <= yearRange[1])
+      .filter(item => item.year >= yearRangeProps.yearRange[0] && item.year <= yearRangeProps.yearRange[1])
       .forEach(item => {
         yearCounts.set(item.year, (yearCounts.get(item.year) || 0) + 1)
       })
 
+    // Create array with all consecutive years
     const formattedData = []
-    for (let year = yearRange[0]; year <= yearRange[1]; year++) {
+    for (let year = yearRangeProps.yearRange[0]; year <= yearRangeProps.yearRange[1]; year++) {
       formattedData.push({
         year,
         count: yearCounts.get(year) || 0
@@ -44,48 +41,33 @@ export default function InjuryTotal() {
 
   return (
     <div className='flex flex-col space-y-4 bg-white p-4'>
-      <YearRangeSlider
-        yearRange={yearRange}
-        minYear={minYear}
-        maxYear={maxYear}
-        onChange={setYearRange}
-      />
+      <div className="flex justify-between items-center">
+        <div className="flex-grow">
+          <YearRangeSlider
+            yearRange={yearRangeProps.yearRange}
+            minYear={yearRangeProps.minYear}
+            maxYear={yearRangeProps.maxYear}
+            onChange={yearRangeProps.setYearRange}
+          />
+        </div>
+        <ExportChart 
+          chartRef={chartRef}
+          filename={`injury-total-${yearRangeProps.yearRange[0]}-${yearRangeProps.yearRange[1]}.png`}
+          title="Total Right Whale Injuries"
+          caption={`Data from ${yearRangeProps.yearRange[0]} to ${yearRangeProps.yearRange[1]}`}
+        />
+      </div>
       
-      <div className='h-[500px] w-full'>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={chartData}
-            margin={{
-              top: 20,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-              dataKey="year"
-              label={{ value: 'Year', position: 'insideBottom', offset: -5 }}
-            />
-            <YAxis
-              label={{
-                value: 'Number of Injuries',
-                angle: -90,
-                position: 'insideLeft',
-                offset: 10,
-              }}
-            />
-            <Tooltip 
-              formatter={(value: number) => [`${value} injuries`, 'Count']}
-              labelFormatter={(label: number) => `Year: ${label}`}
-            />
-            <Bar
-              dataKey="count"
-              fill="#3b82f6"
-              radius={[0, 0, 0, 0]}
-            />
-          </BarChart>
-        </ResponsiveContainer>
+      <div ref={chartRef} className='h-[700px] w-full'>
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-1">Total Right Whale Injuries</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Data from {yearRangeProps.yearRange[0]} to {yearRangeProps.yearRange[1]}
+          </p>
+        </div>
+        <div className='h-[600px]'>
+          <DataChart data={chartData} stacked={false} />
+        </div>
       </div>
     </div>
   )
