@@ -1,12 +1,14 @@
 'use client'
-import React from 'react'
+import React, { useRef } from 'react'
 import { useInjuryData } from '@/app/hooks/useInjuryData'
 import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
 import { useInjuryYearRange } from '../../hooks/useInjuryYearRange'
 import { DataChart } from '../../components/monitoring/DataChart'
 import { Loader } from '@/app/components/ui/Loader'
+import { ExportChart } from '@/app/components/monitoring/ExportChart'
 
 export default function Entanglement() {
+  const chartRef = useRef<HTMLDivElement>(null)
   const { data, loading, error } = useInjuryData()
   const yearRangeProps = useInjuryYearRange(
     loading ? null : data,
@@ -86,22 +88,43 @@ export default function Entanglement() {
   }
 
   return (
-    <div className='flex flex-col space-y-8 bg-white p-4'>
-      <YearRangeSlider
-        yearRange={yearRangeProps.yearRange}
-        minYear={yearRangeProps.minYear}
-        maxYear={yearRangeProps.maxYear}
-        onChange={yearRangeProps.setYearRange}
-      />
-      
-      <div>
-        <h3 className='text-lg font-semibold mb-4'>Entanglement Account Types</h3>
-        <DataChart data={chartData.byType} stacked={true} />
+    <div className='flex flex-col space-y-4 bg-white p-4'>
+      <div className="flex justify-between items-center">
+        <div className="flex-grow">
+          <YearRangeSlider
+            yearRange={yearRangeProps.yearRange}
+            minYear={yearRangeProps.minYear}
+            maxYear={yearRangeProps.maxYear}
+            onChange={yearRangeProps.setYearRange}
+          />
+        </div>
+        <ExportChart 
+          chartRef={chartRef}
+          filename={`entanglement-analysis-${yearRangeProps.yearRange[0]}-${yearRangeProps.yearRange[1]}.png`}
+          title="Right Whale Entanglement Analysis"
+          caption={`Data from ${yearRangeProps.yearRange[0]} to ${yearRangeProps.yearRange[1]}`}
+        />
       </div>
+      
+      <div ref={chartRef} className='h-[1400px] w-full'> {/* Doubled height to fit both charts */}
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-1">Right Whale Entanglement Analysis</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Data from {yearRangeProps.yearRange[0]} to {yearRangeProps.yearRange[1]}
+          </p>
+        </div>
 
-      <div>
-        <h3 className='text-lg font-semibold mb-4'>Severity Levels</h3>
-        <DataChart data={chartData.bySeverity} stacked={true} />
+        <div className='space-y-8'>
+          <div className='h-[600px]'>
+            <h3 className='text-lg font-semibold mb-4'>Entanglement Account Types</h3>
+            <DataChart data={chartData.byType} stacked={true} />
+          </div>
+
+          <div className='h-[600px]'>
+            <h3 className='text-lg font-semibold mb-4'>Severity Levels</h3>
+            <DataChart data={chartData.bySeverity} stacked={true} />
+          </div>
+        </div>
       </div>
     </div>
   )

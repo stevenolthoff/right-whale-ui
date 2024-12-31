@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   BarChart,
   Bar,
@@ -18,28 +18,55 @@ interface DataChartProps {
 
 export const DataChart: React.FC<DataChartProps> = ({ data, stacked = false }) => {
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
+  const [showResetButton, setShowResetButton] = useState(false)
+
+  useEffect(() => {
+    setShowResetButton(hiddenSeries.size > 0)
+  }, [hiddenSeries])
 
   // Get all series names (excluding 'year')
   const keys = Object.keys(data[0] || {}).filter((key) => key !== 'year')
+  const isMultiSeries = keys.length > 1
 
-  const handleLegendClick = (entry: { dataKey: string }) => {
-    const seriesName = entry.dataKey
+  const handleLegendClick = (entry: any, index: number) => {
+    const seriesName = entry.dataKey?.toString()
+    if (!seriesName) return
+
     setHiddenSeries((prev) => {
       const newHidden = new Set(prev)
       if (newHidden.has(seriesName)) {
         newHidden.delete(seriesName)
       } else {
-        newHidden.add(seriesName)
+        keys.forEach(name => newHidden.add(name))
+        newHidden.delete(seriesName)
       }
       return newHidden
     })
   }
 
+  const handleBarClick = (data: any, index: number) => {
+    const seriesName = keys[index]
+    if (seriesName) {
+      setHiddenSeries(prev => {
+        const newHidden = new Set(prev)
+        if (newHidden.has(seriesName)) {
+          newHidden.delete(seriesName)
+        } else {
+          // Hide all except the clicked one
+          keys.forEach(name => newHidden.add(name))
+          newHidden.delete(seriesName)
+        }
+        return newHidden
+      })
+    }
+  }
+
+  const resetVisibility = () => {
+    setHiddenSeries(new Set())
+  }
+
   return (
     <div className='space-y-4'>
-      <div className='flex flex-wrap gap-2'>
-        {/* ... legend buttons ... */}
-      </div>
       <div className='relative'>
         <div className='h-[500px]'>
           <ResponsiveContainer width='100%' height='100%'>
@@ -49,7 +76,7 @@ export const DataChart: React.FC<DataChartProps> = ({ data, stacked = false }) =
                 top: 20,
                 right: 30,
                 left: 40,
-                bottom: 70,  // Increased to accommodate rotated labels
+                bottom: isMultiSeries ? 90 : 70, // Extra space for legend when needed
               }}
             >
               <CartesianGrid strokeDasharray='3 3' />
@@ -60,11 +87,11 @@ export const DataChart: React.FC<DataChartProps> = ({ data, stacked = false }) =
                   position: 'insideBottom', 
                   offset: -15
                 }}
-                interval={4}  // Show every 4th tick
-                angle={-45}   // Rotate labels
-                textAnchor="end"  // Align rotated text
-                height={60}   // Increase height for rotated labels
-                tickMargin={10}  // Add margin between ticks and axis
+                interval={4}
+                angle={-45}
+                textAnchor="end"
+                height={60}
+                tickMargin={10}
               />
               <YAxis
                 label={{
@@ -75,6 +102,17 @@ export const DataChart: React.FC<DataChartProps> = ({ data, stacked = false }) =
                 }}
               />
               <Tooltip />
+              {isMultiSeries && (
+                <Legend 
+                  onClick={handleLegendClick}
+                  wrapperStyle={{ 
+                    cursor: 'pointer',
+                    paddingTop: '20px'
+                  }}
+                  verticalAlign="bottom"
+                  align="center"
+                />
+              )}
               {keys.map((key, index) => (
                 <Bar
                   key={key} 
@@ -83,12 +121,24 @@ export const DataChart: React.FC<DataChartProps> = ({ data, stacked = false }) =
                   fill={COLORS[index % COLORS.length]}
                   name={key}
                   hide={hiddenSeries.has(key)}
+                  onClick={isMultiSeries ? (data) => handleBarClick(data, index) : undefined}
+                  style={isMultiSeries ? { cursor: 'pointer' } : undefined}
                 />
               ))}
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
+      {showResetButton && isMultiSeries && (
+        <div className="flex justify-center">
+          <button
+            onClick={resetVisibility}
+            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Show All
+          </button>
+        </div>
+      )}
     </div>
   )
 }
