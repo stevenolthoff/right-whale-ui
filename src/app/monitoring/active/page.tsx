@@ -8,13 +8,15 @@ import { Loader } from '@/app/components/ui/Loader'
 
 const Active = () => {
   const { results, loading, error } = useMonitoringData()
-  const { yearRange, setYearRange, minYear, maxYear } = useYearRange(
-    results,
+  const yearRangeProps = useYearRange(
+    loading ? null : results,
     (item) => item.IsActiveCase === true
   )
 
   if (loading) return <Loader />
   if (error) return <div className='p-4 text-red-500'>Error: {error}</div>
+
+  const { yearRange, setYearRange, minYear, maxYear } = yearRangeProps
 
   const chartData = results
     .filter((item) => {

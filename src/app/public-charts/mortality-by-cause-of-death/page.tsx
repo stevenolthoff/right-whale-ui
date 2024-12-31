@@ -8,7 +8,10 @@ import { Loader } from '@/app/components/ui/Loader'
 
 export default function MortalityByCause() {
   const { data, loading, error } = useMortalityData()
-  const { yearRange, setYearRange, minYear, maxYear } = useMortalityYearRange(data)
+  const yearRangeProps = useMortalityYearRange(
+    loading ? null : data,
+    item => item.causeOfDeath === 'Vessel Strike' || item.causeOfDeath === 'Entanglement'
+  )
 
   if (loading) return <Loader />
   if (error) return <div className='p-4 text-red-500'>Error: {error}</div>
@@ -24,7 +27,7 @@ export default function MortalityByCause() {
     
     // Filter and count occurrences
     data
-      .filter(item => item.year >= yearRange[0] && item.year <= yearRange[1])
+      .filter(item => item.year >= yearRangeProps.yearRange[0] && item.year <= yearRangeProps.yearRange[1])
       .forEach(item => {
         if (!yearData.has(item.year)) {
           yearData.set(item.year, Object.fromEntries(causes.map(c => [c, 0])))
@@ -35,7 +38,7 @@ export default function MortalityByCause() {
 
     // Convert to array format for Recharts
     const formattedData = []
-    for (let year = yearRange[0]; year <= yearRange[1]; year++) {
+    for (let year = yearRangeProps.yearRange[0]; year <= yearRangeProps.yearRange[1]; year++) {
       formattedData.push({
         year,
         ...(yearData.get(year) || Object.fromEntries(causes.map(c => [c, 0])))
@@ -48,10 +51,10 @@ export default function MortalityByCause() {
   return (
     <div className='flex flex-col space-y-4 bg-white p-4'>
       <YearRangeSlider
-        yearRange={yearRange}
-        minYear={minYear}
-        maxYear={maxYear}
-        onChange={setYearRange}
+        yearRange={yearRangeProps.yearRange}
+        minYear={yearRangeProps.minYear}
+        maxYear={yearRangeProps.maxYear}
+        onChange={yearRangeProps.setYearRange}
       />
       <DataChart data={chartData} stacked={true} />
     </div>

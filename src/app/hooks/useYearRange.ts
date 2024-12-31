@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 
 interface HasYear {
   year?: number;
@@ -7,7 +7,7 @@ interface HasYear {
 }
 
 export function useYearRange<T extends HasYear>(
-  data: T[],
+  data: T[] | null,
   filter?: (item: T) => boolean
 ) {
   const { minYear, maxYear } = useMemo(() => {
@@ -23,6 +23,11 @@ export function useYearRange<T extends HasYear>(
   }, [data, filter])
 
   const [yearRange, setYearRange] = useState<[number, number]>([minYear, maxYear])
+
+  // Update yearRange when minYear/maxYear change
+  useEffect(() => {
+    setYearRange([minYear, maxYear])
+  }, [minYear, maxYear])
 
   return { yearRange, setYearRange, minYear, maxYear }
 }

@@ -1,35 +1,27 @@
-import { useState, useEffect } from 'react'
+'use client'
+import { useState, useMemo, useEffect } from 'react'
 import { ParsedMortalityCase } from '../types/mortality'
 
-export const useMortalityYearRange = (data: ParsedMortalityCase[]) => {
-  const [years, setYears] = useState<{
-    min: number
-    max: number
-    range: [number, number]
-  }>({
-    min: 0,
-    max: 0,
-    range: [0, 0],
-  })
-
-  useEffect(() => {
-    if (data.length > 0) {
-      const years = data.map(item => item.year)
-      const min = Math.min(...years)
-      const max = Math.max(...years)
-      setYears({
-        min,
-        max,
-        range: [min, max],
-      })
+export const useMortalityYearRange = (
+  data: ParsedMortalityCase[] | null,
+  filter?: (item: ParsedMortalityCase) => boolean
+) => {
+  const { minYear, maxYear } = useMemo(() => {
+    if (!data?.length) return { minYear: 2000, maxYear: 2024 }
+    const filteredData = filter ? data.filter(filter) : data
+    const years = filteredData.map(item => item.year)
+    return {
+      minYear: Math.min(...years),
+      maxYear: Math.max(...years)
     }
-  }, [data])
+  }, [data, filter])
 
-  return {
-    yearRange: years.range,
-    setYearRange: (range: [number, number]) =>
-      setYears((prev) => ({ ...prev, range })),
-    minYear: years.min,
-    maxYear: years.max,
-  }
+  const [yearRange, setYearRange] = useState<[number, number]>([minYear, maxYear])
+
+  // Update yearRange when minYear/maxYear change
+  useEffect(() => {
+    setYearRange([minYear, maxYear])
+  }, [minYear, maxYear])
+
+  return { yearRange, setYearRange, minYear, maxYear }
 } 

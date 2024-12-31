@@ -28,7 +28,10 @@ const FOCUSED_CAUSES = ['Entanglement', 'Vessel Strike']
 
 export default function MortalityByCauseAndCountry() {
   const { data, loading, error } = useMortalityData()
-  const { yearRange, setYearRange, minYear, maxYear } = useMortalityYearRange(data)
+  const yearRangeProps = useMortalityYearRange(
+    loading ? null : data,
+    item => FOCUSED_CAUSES.includes(item.causeOfDeath)
+  )
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
   const [showResetButton, setShowResetButton] = useState(false)
 
@@ -51,8 +54,8 @@ export default function MortalityByCauseAndCountry() {
     // Filter by year range and count occurrences
     data
       .filter(item => 
-        item.year >= yearRange[0] && 
-        item.year <= yearRange[1] && 
+        item.year >= yearRangeProps.yearRange[0] && 
+        item.year <= yearRangeProps.yearRange[1] && 
         FOCUSED_CAUSES.includes(item.causeOfDeath)
       )
       .forEach(item => {
@@ -73,7 +76,7 @@ export default function MortalityByCauseAndCountry() {
 
     // Convert to array format needed by Recharts
     const formattedData = []
-    for (let year = yearRange[0]; year <= yearRange[1]; year++) {
+    for (let year = yearRangeProps.yearRange[0]; year <= yearRangeProps.yearRange[1]; year++) {
       if (yearData.has(year)) {
         formattedData.push({
           year,
@@ -135,10 +138,10 @@ export default function MortalityByCauseAndCountry() {
   return (
     <div className='flex flex-col space-y-4 bg-white p-4'>
       <YearRangeSlider
-        yearRange={yearRange}
-        minYear={minYear}
-        maxYear={maxYear}
-        onChange={setYearRange}
+        yearRange={yearRangeProps.yearRange}
+        minYear={yearRangeProps.minYear}
+        maxYear={yearRangeProps.maxYear}
+        onChange={yearRangeProps.setYearRange}
       />
       
       <div className="relative">

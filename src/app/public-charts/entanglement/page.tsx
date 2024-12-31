@@ -8,7 +8,10 @@ import { Loader } from '@/app/components/ui/Loader'
 
 export default function Entanglement() {
   const { data, loading, error } = useInjuryData()
-  const { yearRange, setYearRange, minYear, maxYear } = useInjuryYearRange(data)
+  const yearRangeProps = useInjuryYearRange(
+    loading ? null : data,
+    item => item.type.includes('Entanglement')
+  )
 
   if (loading) return <Loader />
   if (error) return <div className='p-4 text-red-500'>Error: {error}</div>
@@ -26,8 +29,8 @@ export default function Entanglement() {
       
       data
         .filter(item => 
-          item.year >= yearRange[0] && 
-          item.year <= yearRange[1] &&
+          item.year >= yearRangeProps.yearRange[0] && 
+          item.year <= yearRangeProps.yearRange[1] &&
           item.type.includes('Entanglement')
         )
         .forEach(item => {
@@ -38,7 +41,7 @@ export default function Entanglement() {
         })
 
       const formattedData = []
-      for (let year = yearRange[0]; year <= yearRange[1]; year++) {
+      for (let year = yearRangeProps.yearRange[0]; year <= yearRangeProps.yearRange[1]; year++) {
         formattedData.push({
           year,
           ...(yearData.get(year) || Object.fromEntries(types.map(t => [t, 0])))
@@ -59,8 +62,8 @@ export default function Entanglement() {
       
       data
         .filter(item => 
-          item.year >= yearRange[0] && 
-          item.year <= yearRange[1] &&
+          item.year >= yearRangeProps.yearRange[0] && 
+          item.year <= yearRangeProps.yearRange[1] &&
           item.type.includes('Entanglement')
         )
         .forEach(item => {
@@ -71,7 +74,7 @@ export default function Entanglement() {
         })
 
       const formattedData = []
-      for (let year = yearRange[0]; year <= yearRange[1]; year++) {
+      for (let year = yearRangeProps.yearRange[0]; year <= yearRangeProps.yearRange[1]; year++) {
         formattedData.push({
           year,
           ...(yearData.get(year) || Object.fromEntries(severities.map(s => [s, 0])))
@@ -85,10 +88,10 @@ export default function Entanglement() {
   return (
     <div className='flex flex-col space-y-8 bg-white p-4'>
       <YearRangeSlider
-        yearRange={yearRange}
-        minYear={minYear}
-        maxYear={maxYear}
-        onChange={setYearRange}
+        yearRange={yearRangeProps.yearRange}
+        minYear={yearRangeProps.minYear}
+        maxYear={yearRangeProps.maxYear}
+        onChange={yearRangeProps.setYearRange}
       />
       
       <div>

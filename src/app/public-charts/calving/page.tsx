@@ -16,10 +16,12 @@ import { Loader } from '@/app/components/ui/Loader'
 
 export default function Calving() {
   const { data, loading, error } = useCalvingData()
-  const { yearRange, setYearRange, minYear, maxYear } = useYearRange(data)
+  const yearRangeProps = useYearRange(loading ? null : data)
 
   if (loading) return <Loader />
   if (error) return <div className='p-4 text-red-500'>Error: {error}</div>
+
+  const { yearRange, setYearRange, minYear, maxYear } = yearRangeProps
 
   // Filter and format data for the chart
   const chartData = (() => {
