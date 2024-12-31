@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
@@ -19,9 +19,11 @@ import {
   ChevronUpDownIcon,
 } from '@heroicons/react/20/solid'
 import { TableFilters } from './TableFilters'
+import { useFilteredData } from '@/app/hooks/useFilteredData'
 
 const MonitoringTable = () => {
   const { results, loading, error } = useMonitoringData()
+  const setFilteredData = useFilteredData((state) => state.setFilteredData)
   const columnHelper = createColumnHelper<InjuryCase>()
 
   const columns = React.useMemo<ColumnDef<InjuryCase, any>[]>(
@@ -37,6 +39,11 @@ const MonitoringTable = () => {
       columnHelper.accessor('IsActiveCase', {
         header: 'Active Case',
         cell: (info) => (info.getValue() ? 'Yes' : 'No'),
+        filterFn: (row, columnId, filterValue) => {
+          if (!filterValue) return true
+          const value = row.getValue(columnId)
+          return filterValue === 'Yes' ? value === true : value === false
+        }
       }),
       columnHelper.accessor('InjuryTypeDescription', {
         header: 'Injury Type',
@@ -90,7 +97,14 @@ const MonitoringTable = () => {
         pageSize: 15,
       },
     },
+    onRowSelectionChange: () => {
+      setFilteredData(table.getFilteredRowModel().rows.map(row => row.original))
+    },
   })
+
+  useEffect(() => {
+    setFilteredData(table.getFilteredRowModel().rows.map(row => row.original))
+  }, [table.getFilteredRowModel(), setFilteredData])
 
   const getSortIcon = (isSorted: false | 'asc' | 'desc') => {
     if (!isSorted) return <ChevronUpDownIcon className="w-4 h-4 ml-1 inline" />

@@ -3,6 +3,7 @@ import React from 'react'
 import { Table } from '@tanstack/react-table'
 import { InjuryCase } from '@/app/types/monitoring'
 import { YearRangeSlider } from '../monitoring/YearRangeSlider'
+import { useFilteredData } from '@/app/hooks/useFilteredData'
 
 interface FilterProps {
   column: string
@@ -87,6 +88,8 @@ interface TableFiltersProps {
 }
 
 export const TableFilters: React.FC<TableFiltersProps> = ({ table, data }) => {
+  const setFilteredData = useFilteredData((state) => state.setFilteredData)
+  
   // Get unique values for each column that needs a select filter
   const filterOptions = React.useMemo(() => {
     const options: Record<string, Set<string>> = {
@@ -113,6 +116,7 @@ export const TableFilters: React.FC<TableFiltersProps> = ({ table, data }) => {
 
   const resetFilters = () => {
     table.resetColumnFilters()
+    setFilteredData(data) // Reset to full dataset
   }
 
   return (
