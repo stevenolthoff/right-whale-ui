@@ -45,6 +45,10 @@ const MonitoringTable = () => {
       columnHelper.accessor('InjuryAccountDescription', {
         header: 'Injury Description',
         cell: (info) => info.getValue(),
+        filterFn: (row, columnId, filterValue) => {
+          if (!filterValue) return true
+          return row.getValue(columnId) === filterValue
+        }
       }),
       columnHelper.accessor('InjurySeverityDescription', {
         header: 'Injury Severity',
