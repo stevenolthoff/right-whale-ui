@@ -2,7 +2,7 @@
 import React, { useRef } from 'react'
 import { useMonitoringData } from '../../hooks/useMonitoringData'
 import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
-import { DataChart, StackedChartData } from '../../components/monitoring/DataChart'
+import { DataChart } from '../../components/monitoring/DataChart'
 import { useYearRange } from '../../hooks/useYearRange'
 import { Loader } from '@/app/components/ui/Loader'
 import { ExportChart } from '@/app/components/monitoring/ExportChart'
@@ -82,7 +82,7 @@ const InjuryType = () => {
           </p>
         </div>
         <div className='h-[600px]'>
-          <DataChart data={formattedData as StackedChartData[]} stacked={true} />
+          <DataChart data={formattedData} stacked={true} />
         </div>
       </div>
     </div>
