@@ -71,7 +71,7 @@ const YearFilter: React.FC<FilterProps & { data: InjuryCase[] }> = ({ value, onC
   }
 
   return (
-    <div className="px-2">
+    <div className="w-full">
       <YearRangeSlider
         yearRange={yearRange}
         minYear={minYear}
@@ -141,14 +141,12 @@ export const TableFilters: React.FC<TableFiltersProps> = ({ table, data }) => {
                 {column.columnDef.header as string}
               </label>
               {column.id === 'DetectionDate' ? (
-                <div className="lg:col-span-3">
-                  <YearFilter
-                    column={column.id}
-                    value={filterValue}
-                    onChange={(value) => column.setFilterValue(value)}
-                    data={data}
-                  />
-                </div>
+                <YearFilter
+                  column={column.id}
+                  value={filterValue}
+                  onChange={(value) => column.setFilterValue(value)}
+                  data={data}
+                />
               ) : ['EGNo', 'FieldId'].includes(column.id) ? (
                 <TextFilter
                   column={column.id}
