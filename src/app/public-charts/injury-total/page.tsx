@@ -1,33 +1,27 @@
 'use client'
 import React, { useRef } from 'react'
-import { useInjuryData } from '@/app/hooks/useInjuryData'
+import { useMortalityData } from '@/app/hooks/useMortalityData'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
-import { useInjuryYearRange } from '@/app/hooks/useInjuryYearRange'
+import { useMortalityYearRange } from '@/app/hooks/useMortalityYearRange'
 import { DataChart } from '@/app/components/monitoring/DataChart'
-import { Loader } from '@/app/components/ui/Loader'
-import { ExportChart } from '@/app/components/monitoring/ExportChart'
+import { ChartLayout } from '@/app/components/charts/ChartLayout'
 
 export default function InjuryTotal() {
   const chartRef = useRef<HTMLDivElement>(null)
-  const { data, loading, error } = useInjuryData()
-  const yearRangeProps = useInjuryYearRange(data)
+  const { data, loading, error } = useMortalityData()
+  const yearRangeProps = useMortalityYearRange(data)
 
-  if (loading) return <Loader />
-  if (error) return <div className='p-4 text-red-500'>Error: {error}</div>
-
-  // Filter and format data for the chart
   const chartData = (() => {
-    // Create a map of year to count
+    if (!data) return []
+    
     const yearCounts = new Map<number, number>()
     
-    // Filter by year range and count occurrences
     data
       .filter(item => item.year >= yearRangeProps.yearRange[0] && item.year <= yearRangeProps.yearRange[1])
       .forEach(item => {
         yearCounts.set(item.year, (yearCounts.get(item.year) || 0) + 1)
       })
 
-    // Create array with all consecutive years
     const formattedData = []
     for (let year = yearRangeProps.yearRange[0]; year <= yearRangeProps.yearRange[1]; year++) {
       formattedData.push({
@@ -39,36 +33,37 @@ export default function InjuryTotal() {
     return formattedData.sort((a, b) => a.year - b.year)
   })()
 
+  const totalInjuries = chartData.reduce((sum, item) => sum + item.count, 0)
+
   return (
-    <div className='flex flex-col space-y-4 bg-white p-4'>
-      <div className="flex justify-between items-center">
-        <div className="flex-grow">
+    <ChartLayout
+      title="Right Whale Injury Events"
+      chartRef={chartRef}
+      exportFilename={`injury-total-${yearRangeProps.yearRange[0]}-${yearRangeProps.yearRange[1]}.png`}
+      yearRange={yearRangeProps.yearRange}
+      totalCount={totalInjuries}
+      loading={loading}
+      error={error}
+      description="Data represents confirmed injury events of North Atlantic Right Whales. Click and drag on the chart to zoom into specific periods."
+      controls={
+        <>
+          <label className='block text-sm font-medium text-slate-600 mb-2'>
+            Select Year Range
+          </label>
           <YearRangeSlider
             yearRange={yearRangeProps.yearRange}
             minYear={yearRangeProps.minYear}
             maxYear={yearRangeProps.maxYear}
             onChange={yearRangeProps.setYearRange}
           />
-        </div>
-        <ExportChart 
-          chartRef={chartRef}
-          filename={`injury-total-${yearRangeProps.yearRange[0]}-${yearRangeProps.yearRange[1]}.png`}
-          title="Total Right Whale Injuries"
-          caption={`Data from ${yearRangeProps.yearRange[0]} to ${yearRangeProps.yearRange[1]}`}
-        />
-      </div>
-      
-      <div ref={chartRef} className='h-[700px] w-full'>
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-1">Total Right Whale Injuries</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Data from {yearRangeProps.yearRange[0]} to {yearRangeProps.yearRange[1]}
-          </p>
-        </div>
-        <div className='h-[600px]'>
-          <DataChart data={chartData} stacked={false} yAxisLabel='Number of Injuries' />
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    >
+      <DataChart 
+        data={chartData} 
+        stacked={false}
+        yAxisLabel="Number of Injuries"
+      />
+    </ChartLayout>
   )
 }

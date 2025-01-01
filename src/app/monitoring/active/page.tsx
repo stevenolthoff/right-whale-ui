@@ -4,8 +4,7 @@ import { useMonitoringData } from '../../hooks/useMonitoringData'
 import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
 import { DataChart } from '../../components/monitoring/DataChart'
 import { useYearRange } from '../../hooks/useYearRange'
-import { Loader } from '@/app/components/ui/Loader'
-import { ExportChart } from '@/app/components/monitoring/ExportChart'
+import { ChartLayout } from '@/app/components/charts/ChartLayout'
 
 const Active = () => {
   const chartRef = useRef<HTMLDivElement>(null)
@@ -15,70 +14,66 @@ const Active = () => {
     (item) => item.IsActiveCase === true
   )
 
-  if (loading) return <Loader />
-  if (error) return <div className='p-4 text-red-500'>Error: {error}</div>
-
   const { yearRange, setYearRange, minYear, maxYear } = yearRangeProps
 
-  const chartData = results
-    .filter((item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      return item.IsActiveCase && year >= yearRange[0] && year <= yearRange[1]
-    })
-    .reduce((acc, item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      acc[year] = (acc[year] || 0) + 1
-      return acc
-    }, {} as Record<number, number>)
+  const chartData = (() => {
+    if (!results) return []
 
-  const formattedData = (() => {
-    // Get min and max years from the data
-    const years = Object.keys(chartData).map(Number)
-    const minDataYear = Math.min(...years)
-    const maxDataYear = Math.max(...years)
-    
+    const yearCounts = results
+      .filter((item) => {
+        const year = new Date(item.DetectionDate).getFullYear()
+        return item.IsActiveCase && year >= yearRange[0] && year <= yearRange[1]
+      })
+      .reduce((acc, item) => {
+        const year = new Date(item.DetectionDate).getFullYear()
+        acc[year] = (acc[year] || 0) + 1
+        return acc
+      }, {} as Record<number, number>)
+
     // Create array with all consecutive years
-    const allData = []
-    for (let year = minDataYear; year <= maxDataYear; year++) {
-      allData.push({
+    const formattedData = []
+    for (let year = yearRange[0]; year <= yearRange[1]; year++) {
+      formattedData.push({
         year,
-        count: chartData[year] || 0
+        count: yearCounts[year] || 0
       })
     }
-    return allData.sort((a, b) => a.year - b.year)
+    
+    return formattedData.sort((a, b) => a.year - b.year)
   })()
 
+  const totalActiveCases = chartData.reduce((sum, item) => sum + item.count, 0)
+
   return (
-    <div className='flex flex-col space-y-4 bg-white p-4'>
-      <div className="flex justify-between items-center">
-        <div className="flex-grow">
+    <ChartLayout
+      title="Active Right Whale Monitoring"
+      chartRef={chartRef}
+      exportFilename={`active-monitoring-${yearRange[0]}-${yearRange[1]}.png`}
+      yearRange={yearRange}
+      totalCount={totalActiveCases}
+      loading={loading}
+      error={error || undefined}
+      description="Data represents active monitoring cases of North Atlantic Right Whales. Click and drag on the chart to zoom into specific periods."
+      controls={
+        <>
+          <label className='block text-sm font-medium text-slate-600 mb-2'>
+            Select Year Range
+          </label>
           <YearRangeSlider
             yearRange={yearRange}
             minYear={minYear}
             maxYear={maxYear}
             onChange={setYearRange}
           />
-        </div>
-        <ExportChart 
-          chartRef={chartRef}
-          filename={`active-monitoring-${yearRange[0]}-${yearRange[1]}.png`}
-          title="Active Right Whale Monitoring"
-          caption={`Data from ${yearRange[0]} to ${yearRange[1]}`}
-        />
-      </div>
-      
-      <div ref={chartRef} className='h-[700px] w-full'>
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-1">Active Right Whale Monitoring</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Data from {yearRange[0]} to {yearRange[1]}
-          </p>
-        </div>
-        <div className='h-[600px]'>
-          <DataChart data={formattedData} yAxisLabel="Number of Active Cases" />
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    >
+      <DataChart 
+        data={chartData} 
+        stacked={false}
+        yAxisLabel="Number of Active Cases"
+      />
+    </ChartLayout>
   )
 }
 

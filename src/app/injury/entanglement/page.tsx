@@ -4,8 +4,7 @@ import { useMonitoringData } from '../../hooks/useMonitoringData'
 import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
 import { DataChart } from '../../components/monitoring/DataChart'
 import { useYearRange } from '../../hooks/useYearRange'
-import { Loader } from '@/app/components/ui/Loader'
-import { ExportChart } from '@/app/components/monitoring/ExportChart'
+import { ChartLayout } from '@/app/components/charts/ChartLayout'
 
 const Entanglement = () => {
   const chartRef = useRef<HTMLDivElement>(null)
@@ -15,81 +14,80 @@ const Entanglement = () => {
     (item) => item.InjuryTypeDescription === 'Entanglement'
   )
 
-  if (loading) return <Loader />
-  if (error) return <div className='p-4 text-red-500'>Error: {error}</div>
+  const chartData = (() => {
+    if (!results) return []
 
-  const chartData = results
-    .filter((item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      return (
-        item.InjuryTypeDescription === 'Entanglement' &&
-        year >= yearRange[0] && 
-        year <= yearRange[1]
-      )
-    })
-    .reduce((acc, item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      const gearType = item.InjuryAccountDescription
-      
-      if (!acc[year]) {
-        acc[year] = {
-          'Gear': 0,
-          'No Gear': 0
-        }
-      }
-      acc[year][gearType] = (acc[year][gearType] || 0) + 1
-      return acc
-    }, {} as Record<number, Record<string, number>>)
-
-  const formattedData = (() => {
-    // Get min and max years from the data
-    const years = Object.keys(chartData).map(Number)
-    const minDataYear = Math.min(...years)
-    const maxDataYear = Math.max(...years)
+    const yearData = new Map<number, Record<string, number>>()
     
-    // Create array with all consecutive years
-    const allData = []
-    for (let year = minDataYear; year <= maxDataYear; year++) {
-      allData.push({
+    results
+      .filter((item) => {
+        const year = new Date(item.DetectionDate).getFullYear()
+        return (
+          item.InjuryTypeDescription === 'Entanglement' &&
+          year >= yearRange[0] && 
+          year <= yearRange[1]
+        )
+      })
+      .forEach(item => {
+        const year = new Date(item.DetectionDate).getFullYear()
+        const gearType = item.InjuryAccountDescription
+        
+        if (!yearData.has(year)) {
+          yearData.set(year, {
+            'Gear': 0,
+            'No Gear': 0
+          })
+        }
+        const counts = yearData.get(year)!
+        counts[gearType] = (counts[gearType] || 0) + 1
+      })
+
+    const formattedData = []
+    for (let year = yearRange[0]; year <= yearRange[1]; year++) {
+      formattedData.push({
         year,
-        'Gear': chartData[year]?.['Gear'] || 0,
-        'No Gear': chartData[year]?.['No Gear'] || 0
+        'Gear': yearData.get(year)?.['Gear'] || 0,
+        'No Gear': yearData.get(year)?.['No Gear'] || 0
       })
     }
-    return allData.sort((a, b) => a.year - b.year)
+    
+    return formattedData.sort((a, b) => a.year - b.year)
   })()
 
+  const totalEntanglements = chartData.reduce((sum, item) => 
+    sum + item['Gear'] + item['No Gear']
+  , 0)
+
   return (
-    <div className='flex flex-col space-y-4 bg-white p-4'>
-      <div className="flex justify-between items-center">
-        <div className="flex-grow">
+    <ChartLayout
+      title="Right Whale Entanglement by Gear Type"
+      chartRef={chartRef}
+      exportFilename={`entanglement-gear-${yearRange[0]}-${yearRange[1]}.png`}
+      yearRange={yearRange}
+      totalCount={totalEntanglements}
+      loading={loading}
+      error={error || undefined}
+      description="Data represents entanglement cases of North Atlantic Right Whales, categorized by presence of fishing gear. Click and drag on the chart to zoom into specific periods."
+      controls={
+        <>
+          <label className='block text-sm font-medium text-slate-600 mb-2'>
+            Select Year Range
+          </label>
           <YearRangeSlider
             yearRange={yearRange}
             minYear={minYear}
             maxYear={maxYear}
             onChange={setYearRange}
           />
-        </div>
-        <ExportChart 
-          chartRef={chartRef}
-          filename={`entanglement-gear-${yearRange[0]}-${yearRange[1]}.png`}
-          title="Right Whale Entanglement by Gear Type"
-          caption={`Data from ${yearRange[0]} to ${yearRange[1]}`}
-        />
-      </div>
-      
-      <div ref={chartRef} className='h-[700px] w-full'>
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-1">Right Whale Entanglement by Gear Type</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Data from {yearRange[0]} to {yearRange[1]}
-          </p>
-        </div>
-        <div className='h-[600px]'>
-          <DataChart data={formattedData} stacked={true} />
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    >
+      <DataChart 
+        data={chartData} 
+        stacked={true}
+        yAxisLabel="Number of Entanglements"
+      />
+    </ChartLayout>
   )
 }
 

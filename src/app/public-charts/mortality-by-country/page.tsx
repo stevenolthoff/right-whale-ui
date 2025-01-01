@@ -4,8 +4,7 @@ import { useMortalityData } from '@/app/hooks/useMortalityData'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { useMortalityYearRange } from '@/app/hooks/useMortalityYearRange'
 import { DataChart } from '@/app/components/monitoring/DataChart'
-import { Loader } from '@/app/components/ui/Loader'
-import { ExportChart } from '@/app/components/monitoring/ExportChart'
+import { ChartLayout } from '@/app/components/charts/ChartLayout'
 
 export default function MortalityByCountry() {
   const chartRef = useRef<HTMLDivElement>(null)
@@ -15,19 +14,14 @@ export default function MortalityByCountry() {
     item => item.country === 'US' || item.country === 'CA'
   )
 
-  if (loading) return <Loader />
-  if (error) return <div className='p-4 text-red-500'>Error: {error}</div>
-
-  // Filter and format data for the chart
   const chartData = (() => {
-    // Get unique countries
+    if (!data) return []
+
     const countries = Array.from(new Set(data.map(item => item.country)))
       .sort((a, b) => a.localeCompare(b))
 
-    // Create year-by-year data
     const yearData = new Map<number, Record<string, number>>()
     
-    // Filter and count occurrences
     data
       .filter(item => item.year >= yearRangeProps.yearRange[0] && item.year <= yearRangeProps.yearRange[1])
       .forEach(item => {
@@ -38,7 +32,6 @@ export default function MortalityByCountry() {
         yearCounts[item.country]++
       })
 
-    // Convert to array format
     const formattedData = []
     for (let year = yearRangeProps.yearRange[0]; year <= yearRangeProps.yearRange[1]; year++) {
       formattedData.push({
@@ -50,36 +43,39 @@ export default function MortalityByCountry() {
     return formattedData.sort((a, b) => a.year - b.year)
   })()
 
+  const totalMortalities = chartData.reduce((sum, item) => 
+    sum + Object.values(item).reduce((a, b) => typeof b === 'number' ? a + b : a, 0) - item.year
+  , 0)
+
   return (
-    <div className='flex flex-col space-y-4 bg-white p-4'>
-      <div className="flex justify-between items-center">
-        <div className="flex-grow">
+    <ChartLayout
+      title="Right Whale Mortalities by Country"
+      chartRef={chartRef}
+      exportFilename={`mortality-by-country-${yearRangeProps.yearRange[0]}-${yearRangeProps.yearRange[1]}.png`}
+      yearRange={yearRangeProps.yearRange}
+      totalCount={totalMortalities}
+      loading={loading}
+      error={error}
+      description="Data represents confirmed mortalities of North Atlantic Right Whales by country. Click and drag on the chart to zoom into specific periods."
+      controls={
+        <>
+          <label className='block text-sm font-medium text-slate-600 mb-2'>
+            Select Year Range
+          </label>
           <YearRangeSlider
             yearRange={yearRangeProps.yearRange}
             minYear={yearRangeProps.minYear}
             maxYear={yearRangeProps.maxYear}
             onChange={yearRangeProps.setYearRange}
           />
-        </div>
-        <ExportChart 
-          chartRef={chartRef}
-          filename={`mortality-by-country-${yearRangeProps.yearRange[0]}-${yearRangeProps.yearRange[1]}.png`}
-          title="Right Whale Mortalities by Country"
-          caption={`Data from ${yearRangeProps.yearRange[0]} to ${yearRangeProps.yearRange[1]}`}
-        />
-      </div>
-      
-      <div ref={chartRef} className='h-[700px] w-full'>
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-1">Right Whale Mortalities by Country</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Data from {yearRangeProps.yearRange[0]} to {yearRangeProps.yearRange[1]}
-          </p>
-        </div>
-        <div className="h-[600px]">
-          <DataChart data={chartData} stacked={true} />
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    >
+      <DataChart 
+        data={chartData} 
+        stacked={true}
+        yAxisLabel="Number of Mortalities"
+      />
+    </ChartLayout>
   )
 }

@@ -4,88 +4,91 @@ import { useMonitoringData } from '../../hooks/useMonitoringData'
 import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
 import { DataChart } from '../../components/monitoring/DataChart'
 import { useYearRange } from '../../hooks/useYearRange'
-import { Loader } from '@/app/components/ui/Loader'
-import { ExportChart } from '@/app/components/monitoring/ExportChart'
+import { ChartLayout } from '@/app/components/charts/ChartLayout'
 
 const InjuryType = () => {
   const chartRef = useRef<HTMLDivElement>(null)
   const { results, loading, error } = useMonitoringData()
   const { yearRange, setYearRange, minYear, maxYear } = useYearRange(results, (item) => true)
 
-  if (loading) return <Loader />
-  if (error) return <div className='p-4 text-red-500'>Error: {error}</div>
+  const chartData = (() => {
+    if (!results) return []
 
-  const chartData = results
-    .filter((item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      return year >= yearRange[0] && year <= yearRange[1]
-    })
-    .reduce((acc, item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      const injuryType = item.InjuryTypeDescription
-      
-      if (!acc[year]) {
-        acc[year] = {}
-      }
-      acc[year][injuryType] = (acc[year][injuryType] || 0) + 1
-      return acc
-    }, {} as Record<number, Record<string, number>>)
-
-  const formattedData = (() => {
-    // Get min and max years from the data
-    const years = Object.keys(chartData).map(Number)
-    const minDataYear = Math.min(...years)
-    const maxDataYear = Math.max(...years)
-    
-    // Get all unique injury types
+    // Get all unique injury types first
     const injuryTypes = new Set<string>()
-    Object.values(chartData).forEach(yearData => {
-      Object.keys(yearData).forEach(type => injuryTypes.add(type))
+    results.forEach(item => {
+      if (item.InjuryTypeDescription) {
+        injuryTypes.add(item.InjuryTypeDescription)
+      }
     })
+
+    // Create year-by-year data with counts for each injury type
+    const yearData = new Map<number, Record<string, number>>()
     
-    // Create array with all consecutive years
-    const allData = []
-    for (let year = minDataYear; year <= maxDataYear; year++) {
-      const yearData = { year } as Record<string, number>
-      injuryTypes.forEach(type => {
-        yearData[type] = chartData[year]?.[type] || 0
+    results
+      .filter((item) => {
+        const year = new Date(item.DetectionDate).getFullYear()
+        return year >= yearRange[0] && year <= yearRange[1]
       })
-      allData.push(yearData)
+      .forEach(item => {
+        const year = new Date(item.DetectionDate).getFullYear()
+        if (!yearData.has(year)) {
+          yearData.set(year, Object.fromEntries([...injuryTypes].map(type => [type, 0])))
+        }
+        const counts = yearData.get(year)!
+        if (item.InjuryTypeDescription) {
+          counts[item.InjuryTypeDescription]++
+        }
+      })
+
+    // Format data for chart
+    const formattedData = []
+    for (let year = yearRange[0]; year <= yearRange[1]; year++) {
+      formattedData.push({
+        year,
+        ...(yearData.get(year) || Object.fromEntries([...injuryTypes].map(type => [type, 0])))
+      })
     }
-    return allData.sort((a, b) => a.year - b.year)
+    
+    return formattedData.sort((a, b) => a.year - b.year)
   })()
 
+  const totalInjuries = chartData.reduce((sum, item) => 
+    sum + Object.entries(item)
+      .filter(([key]) => key !== 'year')
+      .reduce((acc, [, value]) => acc + value, 0)
+  , 0)
+
   return (
-    <div className='flex flex-col space-y-4 bg-white p-4'>
-      <div className="flex justify-between items-center">
-        <div className="flex-grow">
+    <ChartLayout
+      title="Right Whale Injury Types"
+      chartRef={chartRef}
+      exportFilename={`injury-types-${yearRange[0]}-${yearRange[1]}.png`}
+      yearRange={yearRange}
+      totalCount={totalInjuries}
+      loading={loading}
+      error={error || undefined}
+      description="Data represents different types of injuries sustained by North Atlantic Right Whales. Click and drag on the chart to zoom into specific periods."
+      controls={
+        <>
+          <label className='block text-sm font-medium text-slate-600 mb-2'>
+            Select Year Range
+          </label>
           <YearRangeSlider
             yearRange={yearRange}
             minYear={minYear}
             maxYear={maxYear}
             onChange={setYearRange}
           />
-        </div>
-        <ExportChart 
-          chartRef={chartRef}
-          filename={`injury-types-${yearRange[0]}-${yearRange[1]}.png`}
-          title="Right Whale Injury Types"
-          caption={`Data from ${yearRange[0]} to ${yearRange[1]}`}
-        />
-      </div>
-      
-      <div ref={chartRef} className='h-[700px] w-full'>
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-1">Right Whale Injury Types</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Data from {yearRange[0]} to {yearRange[1]}
-          </p>
-        </div>
-        <div className='h-[600px]'>
-          <DataChart data={formattedData} stacked={true} />
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    >
+      <DataChart 
+        data={chartData} 
+        stacked={true}
+        yAxisLabel="Number of Injuries"
+      />
+    </ChartLayout>
   )
 }
 

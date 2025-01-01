@@ -5,8 +5,7 @@ import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
 import { DataChart } from '../../components/monitoring/DataChart'
 import { useYearRange } from '../../hooks/useYearRange'
 import { InjuryCase } from '@/app/types/monitoring'
-import { Loader } from '@/app/components/ui/Loader'
-import { ExportChart } from '@/app/components/monitoring/ExportChart'
+import { ChartLayout } from '@/app/components/charts/ChartLayout'
 
 const VesselStrike = () => {
   const chartRef = useRef<HTMLDivElement>(null)
@@ -16,84 +15,91 @@ const VesselStrike = () => {
     (item) => item.InjuryTypeDescription === 'Vessel Strike'
   )
 
-  if (loading) return <Loader />
-  if (error) return <div className='p-4 text-red-500'>Error: {error}</div>
+  const chartData = (() => {
+    if (!results) return []
 
-  const chartData = results
-    .filter((item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      return (
-        item.InjuryTypeDescription === 'Vessel Strike' &&
-        year >= yearRange[0] && 
-        year <= yearRange[1]
-      )
-    })
-    .reduce((acc, item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      const accountType = item.InjuryAccountDescription
-      
-      if (!acc[year]) {
-        acc[year] = {}
-      }
-      acc[year][accountType] = (acc[year][accountType] || 0) + 1
-      return acc
-    }, {} as Record<number, Record<string, number>>)
-
-  const formattedData = (() => {
-    // Get min and max years from the data
-    const years = Object.keys(chartData).map(Number)
-    const minDataYear = Math.min(...years)
-    const maxDataYear = Math.max(...years)
-    
-    // Get all unique account types
+    // Get all unique account types first
     const accountTypes = new Set<string>()
-    Object.values(chartData).forEach(yearData => {
-      Object.keys(yearData).forEach(type => accountTypes.add(type))
-    })
-    
-    // Create array with all consecutive years
-    const allData = []
-    for (let year = minDataYear; year <= maxDataYear; year++) {
-      const yearData = { year } as Record<string, number>
-      accountTypes.forEach(type => {
-        yearData[type] = chartData[year]?.[type] || 0
+    results
+      .filter(item => item.InjuryTypeDescription === 'Vessel Strike')
+      .forEach(item => {
+        if (item.InjuryAccountDescription) {
+          accountTypes.add(item.InjuryAccountDescription)
+        }
       })
-      allData.push(yearData)
+
+    // Create year-by-year data with counts for each account type
+    const yearData = new Map<number, Record<string, number>>()
+    
+    results
+      .filter((item) => {
+        const year = new Date(item.DetectionDate).getFullYear()
+        return (
+          item.InjuryTypeDescription === 'Vessel Strike' &&
+          year >= yearRange[0] && 
+          year <= yearRange[1]
+        )
+      })
+      .forEach(item => {
+        const year = new Date(item.DetectionDate).getFullYear()
+        const accountType = item.InjuryAccountDescription
+        
+        if (!yearData.has(year)) {
+          yearData.set(year, Object.fromEntries([...accountTypes].map(type => [type, 0])))
+        }
+        const counts = yearData.get(year)!
+        if (accountType) {
+          counts[accountType]++
+        }
+      })
+
+    const formattedData = []
+    for (let year = yearRange[0]; year <= yearRange[1]; year++) {
+      formattedData.push({
+        year,
+        ...(yearData.get(year) || Object.fromEntries([...accountTypes].map(type => [type, 0])))
+      })
     }
-    return allData.sort((a, b) => a.year - b.year)
+    
+    return formattedData.sort((a, b) => a.year - b.year)
   })()
 
+  const totalStrikes = chartData.reduce((sum, item) => 
+    sum + Object.entries(item)
+      .filter(([key]) => key !== 'year')
+      .reduce((acc, [, value]) => acc + value, 0)
+  , 0)
+
   return (
-    <div className='flex flex-col space-y-4 bg-white p-4'>
-      <div className="flex justify-between items-center">
-        <div className="flex-grow">
+    <ChartLayout
+      title="Right Whale Vessel Strike Analysis"
+      chartRef={chartRef}
+      exportFilename={`vessel-strike-${yearRange[0]}-${yearRange[1]}.png`}
+      yearRange={yearRange}
+      totalCount={totalStrikes}
+      loading={loading}
+      error={error || undefined}
+      description="Data represents vessel strike incidents involving North Atlantic Right Whales, categorized by strike type. Click and drag on the chart to zoom into specific periods."
+      controls={
+        <>
+          <label className='block text-sm font-medium text-slate-600 mb-2'>
+            Select Year Range
+          </label>
           <YearRangeSlider
             yearRange={yearRange}
             minYear={minYear}
             maxYear={maxYear}
             onChange={setYearRange}
           />
-        </div>
-        <ExportChart 
-          chartRef={chartRef}
-          filename={`vessel-strike-${yearRange[0]}-${yearRange[1]}.png`}
-          title="Right Whale Vessel Strike Analysis"
-          caption={`Data from ${yearRange[0]} to ${yearRange[1]}`}
-        />
-      </div>
-      
-      <div ref={chartRef} className='h-[700px] w-full'>
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-1">Right Whale Vessel Strike Analysis</h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Data from {yearRange[0]} to {yearRange[1]}
-          </p>
-        </div>
-        <div className='h-[600px]'>
-          <DataChart data={formattedData} stacked={true} />
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    >
+      <DataChart 
+        data={chartData} 
+        stacked={true}
+        yAxisLabel="Number of Vessel Strikes"
+      />
+    </ChartLayout>
   )
 }
 

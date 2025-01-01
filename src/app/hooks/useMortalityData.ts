@@ -8,7 +8,7 @@ const CSV_URL = 'https://docs.google.com/spreadsheets/d/1woycECMnrGEivOZUuC_9Ab1
 export const useMortalityData = () => {
   const [data, setData] = useState<ParsedMortalityCase[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,7 +53,7 @@ export const useMortalityData = () => {
             setData(parsedData)
             setLoading(false)
           },
-          error: (error: { message: SetStateAction<string | null> }) => {
+          error: (error: { message: SetStateAction<string | undefined> }) => {
             setError(error.message)
             setLoading(false)
           }
