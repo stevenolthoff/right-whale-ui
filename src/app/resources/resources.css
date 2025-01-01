@@ -1,28 +1,100 @@
+/* Table Styles */
+table {
+    @apply w-full border-collapse !important;
+}
+
 th {
-	color: #1e40af;
-	text-transform: uppercase;
-	font-size: .8rem;
+    @apply bg-blue-50 text-blue-900 text-xs font-bold tracking-wider uppercase px-4 py-3 text-left !important;
 }
 
 thead {
-	border-bottom: none !important;
+    @apply border-none !important;
 }
 
+td {
+    @apply px-4 py-3 border-b border-slate-100 !important;
+}
+
+/* Link Styles */
 td a {
-	color: #1e40af;
-	font-weight: 500;
+    @apply text-blue-600 font-medium transition-colors duration-200 !important;
 }
 
 td a:hover {
-	cursor: pointer;
-	font-style: underline;
-	color: #3b82f6;
+    @apply text-blue-500 underline !important;
 }
 
+/* Striped Table */
 .wp-block-table.is-style-stripes tbody tr:nth-child(odd) {
-    background-color: white;
+    @apply bg-slate-50/50 !important;
 }
 
-header h2 {
-	color: #082f49
+.wp-block-table.is-style-stripes tbody tr:nth-child(even) {
+    @apply bg-white !important;
+}
+
+/* Headers */
+.prose h2 {
+    @apply text-2xl font-bold text-blue-900 mt-8 mb-4 !important;
+}
+
+.prose h3 {
+    @apply text-xl font-semibold text-blue-800 mt-6 mb-3 !important;
+}
+
+.prose p {
+    @apply text-slate-600 leading-relaxed mb-4 !important;
+}
+
+/* Lists */
+.prose ul {
+    @apply space-y-2 my-4 !important;
+}
+
+.prose li {
+    @apply text-slate-600 !important;
+}
+
+/* Links in Content */
+.prose a {
+    @apply text-blue-600 font-medium transition-colors duration-200 !important;
+}
+
+.prose a:hover {
+    @apply text-blue-500 underline !important;
+}
+
+/* Responsive Table Container */
+.wp-block-table {
+    @apply overflow-x-auto block max-w-full my-8 !important;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 640px) {
+    th, td {
+        @apply px-3 py-2 text-sm !important;
+    }
+    
+    .prose h2 {
+        @apply text-xl !important;
+    }
+    
+    .prose h3 {
+        @apply text-lg !important;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .prose {
+        @apply text-black !important;
+    }
+    
+    th {
+        @apply bg-gray-100 text-black !important;
+    }
+    
+    a {
+        @apply text-black no-underline !important;
+    }
 }
