@@ -1,12 +1,14 @@
 'use client'
-import React from 'react'
+import React, { useRef } from 'react'
 import { useMonitoringData } from '../../hooks/useMonitoringData'
 import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
 import { DataChart } from '../../components/monitoring/DataChart'
 import { useYearRange } from '../../hooks/useYearRange'
 import { Loader } from '@/app/components/ui/Loader'
+import { ExportChart } from '@/app/components/monitoring/ExportChart'
 
 const Active = () => {
+  const chartRef = useRef<HTMLDivElement>(null)
   const { results, loading, error } = useMonitoringData()
   const yearRangeProps = useYearRange(
     loading ? null : results,
@@ -48,15 +50,37 @@ const Active = () => {
 
   return (
     <div className='flex flex-col space-y-4 bg-white p-4'>
-      <YearRangeSlider
-        yearRange={yearRange}
-        minYear={minYear}
-        maxYear={maxYear}
-        onChange={setYearRange}
-      />
-      <DataChart data={formattedData} />
+      <div className="flex justify-between items-center">
+        <div className="flex-grow">
+          <YearRangeSlider
+            yearRange={yearRange}
+            minYear={minYear}
+            maxYear={maxYear}
+            onChange={setYearRange}
+          />
+        </div>
+        <ExportChart 
+          chartRef={chartRef}
+          filename={`active-monitoring-${yearRange[0]}-${yearRange[1]}.png`}
+          title="Active Right Whale Monitoring"
+          caption={`Data from ${yearRange[0]} to ${yearRange[1]}`}
+        />
+      </div>
+      
+      <div ref={chartRef} className='h-[700px] w-full'>
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-1">Active Right Whale Monitoring</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Data from {yearRange[0]} to {yearRange[1]}
+          </p>
+        </div>
+        <div className='h-[600px]'>
+          <DataChart data={formattedData} yAxisLabel="Number of Active Cases" />
+        </div>
+      </div>
     </div>
   )
 }
 
 export default Active
+

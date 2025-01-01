@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
-      <body className={`font-lora antialiased bg-white h-screen flex flex-col`}>
+      <body className={`font-lora antialiased bg-white h-screen flex flex-col text-black`}>
         <NoSsr>
           <Header />
           <div className='flex-grow'>{children}</div>
