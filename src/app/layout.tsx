@@ -1,15 +1,9 @@
 'use client'
-// import type { Metadata } from 'next'
 import './globals.css'
 import Header from './components/header'
 import Footer from './components/footer'
 import NoSsr from './components/NoSsr'
 import React from "react";
-
-// export const metadata: Metadata = {
-//   title: 'NARW Anthropogenic Injuries',
-//   description: 'Tracking Right Whale Injuries and Mortality',
-// }
 
 export default function RootLayout({
   children,
