@@ -24,6 +24,7 @@ import { useFilteredData } from '@/app/hooks/useFilteredData'
 const MonitoringTable = () => {
   const { results, loading, error } = useMonitoringData()
   const setFilteredData = useFilteredData((state) => state.setFilteredData)
+  const setColumns = useFilteredData((state) => state.setColumns)
   const columnHelper = createColumnHelper<InjuryCase>()
 
   const columns = React.useMemo<ColumnDef<InjuryCase, any>[]>(
@@ -84,6 +85,10 @@ const MonitoringTable = () => {
     ],
     [columnHelper]
   )
+
+  useEffect(() => {
+    setColumns(columns)
+  }, [columns, setColumns])
 
   const table = useReactTable({
     data: results || [],
