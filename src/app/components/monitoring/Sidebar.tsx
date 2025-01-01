@@ -94,7 +94,7 @@ const Sidebar = ({ categories }: SidebarProps) => {
           ${isOpen ? 'w-72 p-6' : 'w-0 md:w-0 overflow-hidden'}
           ${isOpen ? 'translate-x-0 shadow-2xl md:shadow-none' : '-translate-x-full md:translate-x-0'}
           mt-[70px] md:mt-0
-          h-[calc(100vh-70px)]
+          min-h-[calc(100vh-70px)] md:min-h-screen
           overflow-y-auto
           border-r border-gray-200
           scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent

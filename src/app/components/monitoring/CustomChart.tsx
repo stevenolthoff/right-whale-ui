@@ -16,6 +16,7 @@ import { useMonitoringData } from '../../hooks/useMonitoringData'
 import Slider from 'rc-slider'
 import 'rc-slider/assets/index.css'
 import { Loader } from '@/app/components/ui/Loader'
+import { ChartBarIcon } from '@heroicons/react/24/outline'
 
 const MonitoringChart = () => {
   const { results, loading, error } = useMonitoringData()
@@ -101,73 +102,154 @@ const MonitoringChart = () => {
     return allData.sort((a, b) => a.year - b.year)
   }, [plottableFields, results, yearRange])
 
-  if (loading) return <Loader />
-  if (error) return <div className='p-4 text-red-500'>Error loading data</div>
+  if (error) {
+    return (
+      <div className="rounded-lg bg-red-50 p-8 text-center">
+        <div className="text-red-500 mb-2">Failed to load chart data</div>
+        <div className="text-red-400 text-sm">{error}</div>
+      </div>
+    )
+  }
 
   return (
-    <div className='w-full'>
-      <div className='mb-8 px-4 relative z-10'>
-        <Select
-          isMulti
-          options={plottableFields}
-          value={selectedFields}
-          onChange={(selected) =>
-            setSelectedFields(selected ? selected.slice(0, 4) : [])
-          }
-          className='w-full'
-          placeholder='Select up to 4 metrics to display'
-          maxMenuHeight={200}
-        />
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="flex items-center justify-between px-4">
+        <div className="flex items-center space-x-3">
+          <ChartBarIcon className="h-6 w-6 text-blue-500" />
+          <h2 className="text-xl font-semibold text-gray-900">Custom Monitoring Chart</h2>
+        </div>
       </div>
 
-      <div className='mb-8 px-4 relative z-0'>
-        <Slider
-          range
-          min={minYear}
-          max={maxYear}
-          value={yearRange}
-          onChange={(value) => setYearRange(value as [number, number])}
-          marks={{
-            [minYear]: minYear.toString(),
-            [maxYear]: maxYear.toString(),
-          }}
-        />
-      </div>
+      {/* Main Content Card */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        {loading ? (
+          <div className="h-[600px] flex items-center justify-center">
+            <Loader />
+          </div>
+        ) : (
+          <div className="p-6 space-y-6">
+            {/* Controls Section */}
+            <div className="space-y-6">
+              <div className="space-y-2 relative z-20">
+                <label className="block text-sm font-medium text-gray-700">
+                  Select Metrics (up to 4)
+                </label>
+                <Select
+                  isMulti
+                  options={plottableFields}
+                  value={selectedFields}
+                  onChange={(selected) =>
+                    setSelectedFields(selected ? selected.slice(0, 4) : [])
+                  }
+                  className="w-full"
+                  placeholder="Select up to 4 metrics to display"
+                  maxMenuHeight={200}
+                  classNamePrefix="react-select"
+                  theme={(theme) => ({
+                    ...theme,
+                    colors: {
+                      ...theme.colors,
+                      primary: '#3b82f6',
+                      primary75: '#60a5fa',
+                      primary50: '#93c5fd',
+                      primary25: '#dbeafe',
+                    },
+                  })}
+                />
+              </div>
 
-      <div className='h-96 px-2'>
-        <ResponsiveContainer width='100%' height='100%'>
-          <LineChart 
-            data={processedData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-          >
-            <CartesianGrid strokeDasharray='3 3' />
-            <XAxis dataKey='year' />
-            {selectedFields.map((field, index) => (
-              <YAxis
-                key={field.value}
-                yAxisId={field.value}
-                orientation={index % 2 === 0 ? 'left' : 'right'}
-                stroke={colors[index]}
-                tick={{ fill: colors[index] }}
-                axisLine={{ stroke: colors[index] }}
-              />
-            ))}
-            {selectedFields.map((field, index) => (
-              <Line
-                key={field.value}
-                type='monotone'
-                dataKey={field.value}
-                name={field.label}
-                stroke={colors[index]}
-                yAxisId={field.value}
-                dot={true}
-                strokeWidth={3}
-              />
-            ))}
-            <Tooltip />
-            <Legend />
-          </LineChart>
-        </ResponsiveContainer>
+              <div className="space-y-2 relative z-10">
+                <label className="block text-sm font-medium text-gray-700">
+                  Year Range: {yearRange[0]} - {yearRange[1]}
+                </label>
+                <div className="px-2 py-4">
+                  <Slider
+                    range
+                    min={minYear}
+                    max={maxYear}
+                    value={yearRange}
+                    onChange={(value) => setYearRange(value as [number, number])}
+                    marks={{
+                      [minYear]: minYear.toString(),
+                      [maxYear]: maxYear.toString(),
+                    }}
+                    railStyle={{ backgroundColor: '#e5e7eb' }}
+                    trackStyle={[{ backgroundColor: '#3b82f6' }]}
+                    handleStyle={[
+                      { borderColor: '#3b82f6', backgroundColor: '#fff' },
+                      { borderColor: '#3b82f6', backgroundColor: '#fff' },
+                    ]}
+                    dotStyle={{ borderColor: '#3b82f6' }}
+                    activeDotStyle={{ borderColor: '#3b82f6' }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Chart Section */}
+            {selectedFields.length === 0 ? (
+              <div className="h-96 flex items-center justify-center text-gray-500 bg-gray-50 rounded-lg border-2 border-dashed">
+                <div className="text-center">
+                  <ChartBarIcon className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+                  <p>Select metrics above to visualize data</p>
+                </div>
+              </div>
+            ) : (
+              <div className="h-96 mt-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart 
+                    data={processedData}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis 
+                      dataKey="year"
+                      tick={{ fill: '#6b7280' }}
+                      tickLine={{ stroke: '#6b7280' }}
+                    />
+                    {selectedFields.map((field, index) => (
+                      <YAxis
+                        key={field.value}
+                        yAxisId={field.value}
+                        orientation={index % 2 === 0 ? 'left' : 'right'}
+                        stroke={colors[index]}
+                        tick={{ fill: colors[index] }}
+                        axisLine={{ stroke: colors[index] }}
+                      />
+                    ))}
+                    {selectedFields.map((field, index) => (
+                      <Line
+                        key={field.value}
+                        type="monotone"
+                        dataKey={field.value}
+                        name={field.label}
+                        stroke={colors[index]}
+                        yAxisId={field.value}
+                        dot={true}
+                        strokeWidth={2}
+                        activeDot={{ r: 6 }}
+                      />
+                    ))}
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'white',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '6px',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                      }}
+                    />
+                    <Legend 
+                      wrapperStyle={{
+                        paddingTop: '20px'
+                      }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

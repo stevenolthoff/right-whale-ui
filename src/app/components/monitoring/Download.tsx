@@ -40,7 +40,7 @@ const DownloadButton = () => {
       delimiter=','
       data={formattedData}
       filename='monitoring-data.csv'
-      className='ml-10 mb-8 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors'
+      className='my-8 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors'
     >
       Download Filtered Data ({filteredData.length} records)
     </CsvDownload>
