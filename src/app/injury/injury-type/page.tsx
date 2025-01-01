@@ -1,12 +1,14 @@
 'use client'
-import React from 'react'
+import React, { useRef } from 'react'
 import { useMonitoringData } from '../../hooks/useMonitoringData'
 import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
 import { DataChart, StackedChartData } from '../../components/monitoring/DataChart'
 import { useYearRange } from '../../hooks/useYearRange'
 import { Loader } from '@/app/components/ui/Loader'
+import { ExportChart } from '@/app/components/monitoring/ExportChart'
 
 const InjuryType = () => {
+  const chartRef = useRef<HTMLDivElement>(null)
   const { results, loading, error } = useMonitoringData()
   const { yearRange, setYearRange, minYear, maxYear } = useYearRange(results, (item) => true)
 
@@ -55,13 +57,34 @@ const InjuryType = () => {
 
   return (
     <div className='flex flex-col space-y-4 bg-white p-4'>
-      <YearRangeSlider
-        yearRange={yearRange}
-        minYear={minYear}
-        maxYear={maxYear}
-        onChange={setYearRange}
-      />
-      <DataChart data={formattedData as StackedChartData[]} stacked={true} />
+      <div className="flex justify-between items-center">
+        <div className="flex-grow">
+          <YearRangeSlider
+            yearRange={yearRange}
+            minYear={minYear}
+            maxYear={maxYear}
+            onChange={setYearRange}
+          />
+        </div>
+        <ExportChart 
+          chartRef={chartRef}
+          filename={`injury-types-${yearRange[0]}-${yearRange[1]}.png`}
+          title="Right Whale Injury Types"
+          caption={`Data from ${yearRange[0]} to ${yearRange[1]}`}
+        />
+      </div>
+      
+      <div ref={chartRef} className='h-[700px] w-full'>
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-1">Right Whale Injury Types</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Data from {yearRange[0]} to {yearRange[1]}
+          </p>
+        </div>
+        <div className='h-[600px]'>
+          <DataChart data={formattedData as StackedChartData[]} stacked={true} />
+        </div>
+      </div>
     </div>
   )
 }

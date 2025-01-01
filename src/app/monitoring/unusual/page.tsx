@@ -77,7 +77,7 @@ const Unusual = () => {
           </p>
         </div>
         <div className='h-[600px]'>
-          <DataChart data={formattedData} yAxisLabel="# UMEs" />
+          <DataChart data={formattedData} yAxisLabel="Number of Unusual Mortality Events" />
         </div>
       </div>
     </div>
