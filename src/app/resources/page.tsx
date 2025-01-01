@@ -7,7 +7,7 @@ export default async function Resources() {
   )
   const posts = await data.json()
   return (
-    <div className='max-w-xl mx-auto py-16'>
+    <div className='max-w-xl mx-auto pt-32 pb-16'>
       <link
         rel='stylesheet'
         type='text/css'

@@ -25,7 +25,7 @@ const Sidebar = ({ categories }: SidebarProps) => {
     <>
       {/* Mobile menu button */}
       <button
-        className='md:hidden fixed bottom-[180px] left-4 z-50 p-3 rounded-full bg-white shadow-lg'
+        className='md:hidden fixed bottom-[180px] left-4 z-[90] p-3 rounded-full bg-white shadow-lg'
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Toggle menu"
       >
@@ -53,10 +53,10 @@ const Sidebar = ({ categories }: SidebarProps) => {
         </svg>
       </button>
 
-      {/* Desktop toggle button - only shows when sidebar is closed */}
+      {/* Desktop toggle button */}
       {!isOpen && (
         <button
-          className='hidden md:block fixed top-[85px] left-4 z-40 p-1 hover:bg-gray-100 rounded transition-transform duration-200'
+          className='hidden md:block fixed top-[85px] left-4 z-[90] p-1 hover:bg-gray-100 rounded transition-transform duration-200'
           onClick={() => setIsOpen(true)}
           aria-label="Open sidebar"
         >
@@ -80,19 +80,22 @@ const Sidebar = ({ categories }: SidebarProps) => {
       <nav
         className={`
           peer
-          fixed md:static bottom-0 left-0 z-40
-          bg-white min-h-screen
+          fixed md:static inset-0 z-[90]
+          bg-white
           transform transition-all duration-200 ease-in-out
           ${isOpen ? 'w-64 p-4 border-r' : 'w-0 md:w-0 overflow-hidden'}
           ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          mt-[70px] md:mt-0
+          h-[calc(100vh-70px)]
+          overflow-y-auto
         `}
         aria-hidden={!isOpen}
       >
-        <div className='mb-6 pt-[70px] md:pt-0'>
+        <div className='mb-6'>
           {/* Desktop close button */}
           {isOpen && (
             <button
-              className='hidden md:block p-1 hover:bg-gray-100 rounded absolute right-2 top-[70px] md:top-2'
+              className='hidden md:block p-1 hover:bg-gray-100 rounded absolute right-2 top-2'
               onClick={() => setIsOpen(false)}
               aria-label="Close sidebar"
             >
@@ -148,7 +151,7 @@ const Sidebar = ({ categories }: SidebarProps) => {
       {/* Overlay */}
       {isOpen && (
         <div
-          className='fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden'
+          className='fixed inset-0 bg-black bg-opacity-50 z-[85] md:hidden mt-[70px]'
           onClick={() => setIsOpen(false)}
           aria-hidden="true"
         />
