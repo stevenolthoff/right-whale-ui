@@ -10,12 +10,7 @@ const CustomPage: React.FC = () => {
     <div>
       <CustomChart />
       <Download />
-      <Table
-      // defaultFilters={{
-      //   IsActiveCase: 'Yes',
-      //   DetectionDate: [2020, 2024],
-      // }}
-      />
+      <Table />
     </div>
   )
 }
