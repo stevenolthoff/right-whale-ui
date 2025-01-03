@@ -112,27 +112,29 @@ const MonitoringChart = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6 pt-16'>
       {/* Header Section */}
-      <div className="flex items-center justify-between px-4">
-        <div className="flex items-center space-x-3">
-          <ChartBarIcon className="h-6 w-6 text-blue-500" />
-          <h2 className="text-xl font-semibold text-gray-900">Custom Monitoring Chart</h2>
+      <div className='flex items-center justify-between px-4'>
+        <div className='flex items-center space-x-3'>
+          <ChartBarIcon className='h-6 w-6 text-blue-500' />
+          <h2 className='text-xl font-semibold text-gray-900'>
+            Custom Monitoring Chart
+          </h2>
         </div>
       </div>
 
       {/* Main Content Card */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className='bg-white rounded-lg shadow-sm border border-gray-200'>
         {loading ? (
-          <div className="h-[600px] flex items-center justify-center">
+          <div className='h-[600px] flex items-center justify-center'>
             <Loader />
           </div>
         ) : (
-          <div className="p-6 space-y-6">
+          <div className='p-6 space-y-6'>
             {/* Controls Section */}
-            <div className="space-y-6">
-              <div className="space-y-2 relative z-20">
-                <label className="block text-sm font-medium text-gray-700">
+            <div className='space-y-6'>
+              <div className='space-y-2 relative z-20'>
+                <label className='block text-sm font-medium text-gray-700'>
                   Select Metrics (up to 4)
                 </label>
                 <Select
@@ -142,10 +144,10 @@ const MonitoringChart = () => {
                   onChange={(selected) =>
                     setSelectedFields(selected ? selected.slice(0, 4) : [])
                   }
-                  className="w-full"
-                  placeholder="Select up to 4 metrics to display"
+                  className='w-full'
+                  placeholder='Select up to 4 metrics to display'
                   maxMenuHeight={200}
-                  classNamePrefix="react-select"
+                  classNamePrefix='react-select'
                   theme={(theme) => ({
                     ...theme,
                     colors: {
@@ -159,17 +161,19 @@ const MonitoringChart = () => {
                 />
               </div>
 
-              <div className="space-y-2 relative z-10">
-                <label className="block text-sm font-medium text-gray-700">
+              <div className='space-y-2 relative z-10'>
+                <label className='block text-sm font-medium text-gray-700'>
                   Year Range: {yearRange[0]} - {yearRange[1]}
                 </label>
-                <div className="px-2 py-4">
+                <div className='px-2 py-4'>
                   <Slider
                     range
                     min={minYear}
                     max={maxYear}
                     value={yearRange}
-                    onChange={(value) => setYearRange(value as [number, number])}
+                    onChange={(value) =>
+                      setYearRange(value as [number, number])
+                    }
                     marks={{
                       [minYear]: minYear.toString(),
                       [maxYear]: maxYear.toString(),
@@ -189,22 +193,22 @@ const MonitoringChart = () => {
 
             {/* Chart Section */}
             {selectedFields.length === 0 ? (
-              <div className="h-96 flex items-center justify-center text-gray-500 bg-gray-50 rounded-lg border-2 border-dashed">
-                <div className="text-center">
-                  <ChartBarIcon className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+              <div className='h-96 flex items-center justify-center text-gray-500 bg-gray-50 rounded-lg border-2 border-dashed'>
+                <div className='text-center'>
+                  <ChartBarIcon className='h-12 w-12 mx-auto text-gray-400 mb-2' />
                   <p>Select metrics above to visualize data</p>
                 </div>
               </div>
             ) : (
-              <div className="h-96 mt-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart 
+              <div className='h-96 mt-4'>
+                <ResponsiveContainer width='100%' height='100%'>
+                  <LineChart
                     data={processedData}
                     margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis 
-                      dataKey="year"
+                    <CartesianGrid strokeDasharray='3 3' stroke='#e5e7eb' />
+                    <XAxis
+                      dataKey='year'
                       tick={{ fill: '#6b7280' }}
                       tickLine={{ stroke: '#6b7280' }}
                     />
@@ -221,7 +225,7 @@ const MonitoringChart = () => {
                     {selectedFields.map((field, index) => (
                       <Line
                         key={field.value}
-                        type="monotone"
+                        type='monotone'
                         dataKey={field.value}
                         name={field.label}
                         stroke={colors[index]}
@@ -231,17 +235,17 @@ const MonitoringChart = () => {
                         activeDot={{ r: 6 }}
                       />
                     ))}
-                    <Tooltip 
-                      contentStyle={{ 
+                    <Tooltip
+                      contentStyle={{
                         backgroundColor: 'white',
                         border: '1px solid #e5e7eb',
                         borderRadius: '6px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                       }}
                     />
-                    <Legend 
+                    <Legend
                       wrapperStyle={{
-                        paddingTop: '20px'
+                        paddingTop: '20px',
                       }}
                     />
                   </LineChart>

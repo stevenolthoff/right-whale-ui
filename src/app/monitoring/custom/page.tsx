@@ -8,9 +8,9 @@ import Download from '../../components/monitoring/Download'
 const CustomPage: React.FC = () => {
   return (
     <div>
-      <CustomChart />
       <Download />
       <Table />
+      <CustomChart />
     </div>
   )
 }
