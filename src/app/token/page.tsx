@@ -10,7 +10,7 @@ export default function Token() {
     console.log('token', token)
     setToken(globalThis.location.hash.split('#')[1])
     if (token) {
-      redirect('/injury/injury-type-by-year')
+      redirect('/injury/injury-type')
     }
   }, [token, setToken])
   return <></>
