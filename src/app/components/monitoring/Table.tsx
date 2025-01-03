@@ -101,6 +101,16 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
       columnHelper.accessor('UnusualMortalityEventDescription', {
         header: 'UME Status',
         cell: (info) => info.getValue() || 'N/A',
+        filterFn: (row, columnId, filterValue) => {
+          if (
+            !filterValue ||
+            !Array.isArray(filterValue) ||
+            filterValue.length === 0
+          )
+            return true
+          const value = row.getValue(columnId) || 'N/A'
+          return filterValue.includes(value)
+        },
       }),
     ]
   }, [columnHelper])

@@ -5,6 +5,8 @@ import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
 import { DataChart } from '../../components/monitoring/DataChart'
 import { useYearRange } from '../../hooks/useYearRange'
 import { ChartLayout } from '@/app/components/charts/ChartLayout'
+import Table from '@/app/components/monitoring/Table'
+import Download from '@/app/components/monitoring/Download'
 
 const Unusual = () => {
   const chartRef = useRef<HTMLDivElement>(null)
@@ -36,45 +38,60 @@ const Unusual = () => {
     for (let year = yearRange[0]; year <= yearRange[1]; year++) {
       formattedData.push({
         year,
-        count: yearCounts[year] || 0
+        count: yearCounts[year] || 0,
       })
     }
-    
+
     return formattedData.sort((a, b) => a.year - b.year)
   })()
 
-  const totalUnusualEvents = chartData.reduce((sum, item) => sum + item.count, 0)
+  const totalUnusualEvents = chartData.reduce(
+    (sum, item) => sum + item.count,
+    0
+  )
 
   return (
-    <ChartLayout
-      title="Unusual Right Whale Mortality Events"
-      chartRef={chartRef}
-      exportFilename={`unusual-mortality-${yearRange[0]}-${yearRange[1]}.png`}
-      yearRange={yearRange}
-      totalCount={totalUnusualEvents}
-      loading={loading}
-      error={error || undefined}
-      description="Data represents unusual mortality events of North Atlantic Right Whales. Click and drag on the chart to zoom into specific periods."
-      controls={
-        <>
-          <label className='block text-sm font-medium text-slate-600 mb-2'>
-            Select Year Range
-          </label>
-          <YearRangeSlider
-            yearRange={yearRange}
-            minYear={minYear}
-            maxYear={maxYear}
-            onChange={setYearRange}
-          />
-        </>
-      }
-    >
-      <DataChart 
-        data={chartData} 
-        stacked={false}
-        yAxisLabel="Number of Unusual Mortality Events"
+    <div className='wrapper'>
+      <ChartLayout
+        title='Unusual Right Whale Mortality Events'
+        chartRef={chartRef}
+        exportFilename={`unusual-mortality-${yearRange[0]}-${yearRange[1]}.png`}
+        yearRange={yearRange}
+        totalCount={totalUnusualEvents}
+        loading={loading}
+        error={error || undefined}
+        description='Data represents unusual mortality events of North Atlantic Right Whales. Click and drag on the chart to zoom into specific periods.'
+        controls={
+          <>
+            <label className='block text-sm font-medium text-slate-600 mb-2'>
+              Select Year Range
+            </label>
+            <YearRangeSlider
+              yearRange={yearRange}
+              minYear={minYear}
+              maxYear={maxYear}
+              onChange={setYearRange}
+            />
+          </>
+        }
+      >
+        <DataChart
+          data={chartData}
+          stacked={false}
+          yAxisLabel='Number of Unusual Mortality Events'
+        />
+      </ChartLayout>
+
+      <Download />
+
+      <Table
+        visibleColumns={['EGNo', 'FieldId', 'DetectionDate']}
+        defaultFilters={{
+          DetectionDate: [yearRange[0], yearRange[1]],
+        }}
+        showFilters={true}
       />
-    </ChartLayout>
+    </div>
   )
 }
 

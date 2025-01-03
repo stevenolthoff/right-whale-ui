@@ -4,66 +4,103 @@ import { Table } from '@tanstack/react-table'
 import { InjuryCase } from '@/app/types/monitoring'
 import { YearRangeSlider } from '../monitoring/YearRangeSlider'
 import { useFilteredData } from '@/app/hooks/useFilteredData'
+import Select from 'react-select'
 
 interface FilterProps {
   column: string
-  value: string
-  onChange: (value: string) => void
+  value: string | string[]
+  onChange: (value: string | string[]) => void
   options?: string[]
+  isMulti?: boolean
 }
 
 const TextFilter: React.FC<FilterProps> = ({ value, onChange }) => (
   <input
-    type="text"
-    value={value}
+    type='text'
+    value={value as string}
     onChange={(e) => onChange(e.target.value)}
-    placeholder="Filter..."
-    className="px-3 py-1 border rounded text-sm"
+    placeholder='Filter...'
+    className='px-3 py-1 border rounded text-sm'
   />
 )
 
-const SelectFilter: React.FC<FilterProps> = ({ value, onChange, options = [] }) => (
-  <select
-    value={value}
-    onChange={(e) => onChange(e.target.value)}
-    className="px-3 py-1 border rounded text-sm"
-  >
-    <option value="">All</option>
-    {options.map((option) => (
-      <option key={option} value={option}>
-        {option}
-      </option>
-    ))}
-  </select>
-)
+const SelectFilter: React.FC<FilterProps> = ({
+  value,
+  onChange,
+  options = [],
+  isMulti = false,
+}) => {
+  const selectOptions = options.map((option) => ({
+    value: option,
+    label: option,
+  }))
+  const selectedValue = isMulti
+    ? Array.isArray(value)
+      ? value.map((v) => ({ value: v, label: v }))
+      : []
+    : value
+    ? { value: value as string, label: value as string }
+    : null
 
-const YearFilter: React.FC<FilterProps & { data: InjuryCase[] }> = ({ value, onChange, data }) => {
+  return (
+    <Select
+      isMulti={isMulti}
+      value={selectedValue}
+      onChange={(selected) => {
+        if (isMulti) {
+          const values = selected
+            ? Array.isArray(selected)
+              ? selected.map((option) => option.value)
+              : []
+            : []
+          onChange(values)
+        } else {
+          const singleValue = selected as { value: string } | null
+          onChange(singleValue?.value || '')
+        }
+      }}
+      options={selectOptions}
+      className='text-sm'
+      placeholder='Select...'
+      isClearable
+    />
+  )
+}
+
+const YearFilter: React.FC<FilterProps & { data: InjuryCase[] }> = ({
+  value,
+  onChange,
+  data,
+}) => {
   // Calculate min and max years from data
   const { minYear, maxYear } = React.useMemo(() => {
     const years = data
-      .map(item => new Date(item.DetectionDate).getFullYear())
-      .filter(year => !isNaN(year))
+      .map((item) => new Date(item.DetectionDate).getFullYear())
+      .filter((year) => !isNaN(year))
     return {
       minYear: Math.min(...years),
-      maxYear: Math.max(...years)
+      maxYear: Math.max(...years),
     }
   }, [data])
 
   // Update yearRange when value changes (including reset)
   React.useEffect(() => {
-    if (!value) {
+    if (!value || Array.isArray(value)) {
       setYearRange([minYear, maxYear])
       return
     }
     try {
-      const [min, max] = JSON.parse(value)
+      const [min, max] = JSON.parse(value as string)
       setYearRange([min ?? minYear, max ?? maxYear])
     } catch {
       setYearRange([minYear, maxYear])
     }
   }, [value, minYear, maxYear])
 
-  const [yearRange, setYearRange] = React.useState<[number, number]>([minYear, maxYear])
+  const [yearRange, setYearRange] = React.useState<[number, number]>([
+    minYear,
+    maxYear,
+  ])
 
   const handleChange = (newRange: [number, number]) => {
     setYearRange(newRange)
@@ -71,7 +108,7 @@ const YearFilter: React.FC<FilterProps & { data: InjuryCase[] }> = ({ value, onC
   }
 
   return (
-    <div className="w-full">
+    <div className='w-full'>
       <YearRangeSlider
         yearRange={yearRange}
         minYear={minYear}
@@ -178,6 +215,7 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
                   value={filterValue}
                   onChange={(value) => column.setFilterValue(value)}
                   options={filterOptions[columnId] || []}
+                  isMulti={column.id === 'UnusualMortalityEventDescription'}
                 />
               )}
             </div>
