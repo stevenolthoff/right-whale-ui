@@ -85,11 +85,18 @@ const YearFilter: React.FC<FilterProps & { data: InjuryCase[] }> = ({ value, onC
 interface TableFiltersProps {
   table: Table<InjuryCase>
   data: InjuryCase[]
+  className?: string
+  defaultFilters?: Record<string, any>
 }
 
-export const TableFilters: React.FC<TableFiltersProps> = ({ table, data }) => {
+export const TableFilters: React.FC<TableFiltersProps> = ({
+  table,
+  data,
+  className = '',
+  defaultFilters,
+}) => {
   const setFilteredData = useFilteredData((state) => state.setFilteredData)
-  
+
   // Get unique values for each column that needs a select filter
   const filterOptions = React.useMemo(() => {
     const options: Record<string, Set<string>> = {
@@ -119,25 +126,37 @@ export const TableFilters: React.FC<TableFiltersProps> = ({ table, data }) => {
     setFilteredData(data) // Reset to full dataset
   }
 
+  // Add effect to set initial filters
+  React.useEffect(() => {
+    if (defaultFilters) {
+      Object.entries(defaultFilters).forEach(([columnId, value]) => {
+        const column = table.getColumn(columnId)
+        if (column) {
+          column.setFilterValue(value)
+        }
+      })
+    }
+  }, [defaultFilters, table])
+
   return (
-    <div className="space-y-4 bg-gray-50 p-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-sm font-medium text-gray-700">Filters</h3>
+    <div className={`space-y-4 bg-gray-50 p-4 ${className}`}>
+      <div className='flex justify-between items-center'>
+        <h3 className='text-sm font-medium text-gray-700'>Filters</h3>
         <button
           onClick={resetFilters}
-          className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded shadow-sm hover:bg-gray-50"
+          className='px-3 py-1 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded shadow-sm hover:bg-gray-50'
         >
           Reset Filters
         </button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
         {table.getAllColumns().map((column) => {
           const columnId = column.id as keyof typeof filterOptions
-          const filterValue = column.getFilterValue() as string ?? ''
+          const filterValue = (column.getFilterValue() as string) ?? ''
 
           return (
-            <div key={column.id} className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-gray-500 uppercase">
+            <div key={column.id} className='flex flex-col gap-1'>
+              <label className='text-xs font-medium text-gray-500 uppercase'>
                 {column.columnDef.header as string}
               </label>
               {column.id === 'DetectionDate' ? (

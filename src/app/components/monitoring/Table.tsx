@@ -21,7 +21,19 @@ import {
 import { TableFilters } from './TableFilters'
 import { useFilteredData } from '@/app/hooks/useFilteredData'
 
-const MonitoringTable = () => {
+interface MonitoringTableProps {
+  showFilters?: boolean
+  defaultFilters?: {
+    DetectionDate?: [number, number]
+    IsActiveCase?: 'Yes' | 'No'
+    [key: string]: any
+  }
+}
+
+const MonitoringTable: React.FC<MonitoringTableProps> = ({
+  showFilters = true,
+  defaultFilters,
+}) => {
   const { results, loading, error } = useMonitoringData()
   const setFilteredData = useFilteredData((state) => state.setFilteredData)
   const setColumns = useFilteredData((state) => state.setColumns)
@@ -44,7 +56,7 @@ const MonitoringTable = () => {
           if (!filterValue) return true
           const value = row.getValue(columnId)
           return filterValue === 'Yes' ? value === true : value === false
-        }
+        },
       }),
       columnHelper.accessor('InjuryTypeDescription', {
         header: 'Injury Type',
@@ -56,24 +68,33 @@ const MonitoringTable = () => {
         filterFn: (row, columnId, filterValue) => {
           if (!filterValue) return true
           return row.getValue(columnId) === filterValue
-        }
+        },
       }),
-      columnHelper.accessor('InjurySeverityDescription', {
-        header: 'Injury Severity',
-        cell: (info) => info.getValue(),
-      }),
-      columnHelper.accessor('DetectionDate', {
-        header: 'Detection Year',
-        cell: (info) => new Date(info.getValue()).getFullYear(),
-        filterFn: (row, columnId, filterValue) => {
-          if (!filterValue) return true
-          const year = new Date(row.getValue(columnId)).getFullYear()
-          const [minYear, maxYear] = JSON.parse(filterValue as string)
-          if (minYear !== null && year < minYear) return false
-          if (maxYear !== null && year > maxYear) return false
-          return true
-        }
-      }),
+        columnHelper.accessor('InjurySeverityDescription', {
+          header: 'Injury Severity',
+          cell: (info) => info.getValue(),
+        }),
+        columnHelper.accessor('DetectionDate', {
+          header: 'Detection Year',
+          cell: (info) => new Date(info.getValue()).getFullYear(),
+          filterFn: (row, columnId, filterValue) => {
+            if (!filterValue) return true
+            const year = new Date(row.getValue(columnId)).getFullYear()
+
+            let minYear: number | null = null
+            let maxYear: number | null = null
+
+            if (typeof filterValue === 'string') {
+              ;[minYear, maxYear] = JSON.parse(filterValue)
+            } else if (Array.isArray(filterValue)) {
+              ;[minYear, maxYear] = filterValue
+            }
+
+            if (minYear !== null && year < minYear) return false
+            if (maxYear !== null && year > maxYear) return false
+            return true
+          },
+        }),
       columnHelper.accessor('DetectionAreaDescription', {
         header: 'Detection Location',
         cell: (info) => info.getValue(),
@@ -103,18 +124,36 @@ const MonitoringTable = () => {
       },
     },
     onRowSelectionChange: () => {
-      setFilteredData(table.getFilteredRowModel().rows.map(row => row.original))
+      setFilteredData(
+        table.getFilteredRowModel().rows.map((row) => row.original)
+      )
     },
   })
 
   useEffect(() => {
-    setFilteredData(table.getFilteredRowModel().rows.map(row => row.original))
+    setFilteredData(table.getFilteredRowModel().rows.map((row) => row.original))
   }, [table.getFilteredRowModel(), setFilteredData])
 
+  useEffect(() => {
+    if (defaultFilters && results?.length) {
+      Object.entries(defaultFilters).forEach(([columnId, value]) => {
+        const column = table.getColumn(columnId)
+        if (column) {
+          if (columnId === 'DetectionDate' && Array.isArray(value)) {
+            column.setFilterValue(JSON.stringify(value))
+          } else {
+            column.setFilterValue(value)
+          }
+        }
+      })
+    }
+  }, [defaultFilters, table, results])
+
   const getSortIcon = (isSorted: false | 'asc' | 'desc') => {
-    if (!isSorted) return <ChevronUpDownIcon className="w-4 h-4 ml-1 inline" />
-    if (isSorted === 'asc') return <ChevronUpIcon className="w-4 h-4 ml-1 inline" />
-    return <ChevronDownIcon className="w-4 h-4 ml-1 inline" />
+    if (!isSorted) return <ChevronUpDownIcon className='w-4 h-4 ml-1 inline' />
+    if (isSorted === 'asc')
+      return <ChevronUpIcon className='w-4 h-4 ml-1 inline' />
+    return <ChevronDownIcon className='w-4 h-4 ml-1 inline' />
   }
 
   if (loading) return <div className='p-4'>Loading...</div>
@@ -122,7 +161,13 @@ const MonitoringTable = () => {
 
   return (
     <div className='w-full max-w-screen-xl mx-auto'>
-      <TableFilters table={table} data={results || []} />
+      {showFilters && (
+        <TableFilters
+          table={table}
+          data={results || []}
+          defaultFilters={defaultFilters}
+        />
+      )}
       <div className='relative overflow-hidden border rounded-lg shadow'>
         <div className='overflow-x-auto'>
           <table className='w-full'>
@@ -135,7 +180,7 @@ const MonitoringTable = () => {
                       className='sticky top-0 px-6 py-3 text-left text-xs font-medium text-gray-500 hover:text-blue-500 uppercase tracking-wider cursor-pointer whitespace-nowrap'
                       onClick={header.column.getToggleSortingHandler()}
                     >
-                      <div className="flex items-center">
+                      <div className='flex items-center'>
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext()
