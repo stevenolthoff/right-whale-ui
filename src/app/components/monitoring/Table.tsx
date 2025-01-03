@@ -28,33 +28,13 @@ interface MonitoringTableProps {
     IsActiveCase?: 'Yes' | 'No'
     [key: string]: any
   }
-  visibleColumns?: {
-    EGNo?: boolean
-    FieldId?: boolean
-    IsActiveCase?: boolean
-    InjuryTypeDescription?: boolean
-    InjuryAccountDescription?: boolean
-    InjurySeverityDescription?: boolean
-    DetectionDate?: boolean
-    DetectionAreaDescription?: boolean
-    UnusualMortalityEventDescription?: boolean
-  }
+  visibleColumns?: string[]
 }
 
 const MonitoringTable: React.FC<MonitoringTableProps> = ({
   showFilters = true,
   defaultFilters,
-  visibleColumns = {
-    EGNo: true,
-    FieldId: true,
-    IsActiveCase: true,
-    InjuryTypeDescription: true,
-    InjuryAccountDescription: true,
-    InjurySeverityDescription: true,
-    DetectionDate: true,
-    DetectionAreaDescription: true,
-    UnusualMortalityEventDescription: true,
-  },
+  visibleColumns,
 }) => {
   const { results, loading, error } = useMonitoringData()
   const setFilteredData = useFilteredData((state) => state.setFilteredData)
@@ -62,106 +42,68 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
   const columnHelper = createColumnHelper<InjuryCase>()
 
   const columns = React.useMemo<ColumnDef<InjuryCase, any>[]>(() => {
-    const allColumns = [
-      ...(visibleColumns.EGNo
-        ? [
-            columnHelper.accessor('EGNo', {
-              header: 'EG No',
-              cell: (info) => info.getValue(),
-            }),
-          ]
-        : []),
-      ...(visibleColumns.FieldId
-        ? [
-            columnHelper.accessor('FieldId', {
-              header: 'Field EG No',
-              cell: (info) => info.getValue(),
-            }),
-          ]
-        : []),
-      ...(visibleColumns.IsActiveCase
-        ? [
-            columnHelper.accessor('IsActiveCase', {
-              header: 'Active Case',
-              cell: (info) => (info.getValue() ? 'Yes' : 'No'),
-              filterFn: (row, columnId, filterValue) => {
-                if (!filterValue) return true
-                const value = row.getValue(columnId)
-                return filterValue === 'Yes' ? value === true : value === false
-              },
-            }),
-          ]
-        : []),
-      ...(visibleColumns.InjuryTypeDescription
-        ? [
-            columnHelper.accessor('InjuryTypeDescription', {
-              header: 'Injury Type',
-              cell: (info) => info.getValue(),
-            }),
-          ]
-        : []),
-      ...(visibleColumns.InjuryAccountDescription
-        ? [
-            columnHelper.accessor('InjuryAccountDescription', {
-              header: 'Injury Description',
-              cell: (info) => info.getValue(),
-              filterFn: (row, columnId, filterValue) => {
-                if (!filterValue) return true
-                return row.getValue(columnId) === filterValue
-              },
-            }),
-          ]
-        : []),
-      ...(visibleColumns.InjurySeverityDescription
-        ? [
-            columnHelper.accessor('InjurySeverityDescription', {
-              header: 'Injury Severity',
-              cell: (info) => info.getValue(),
-            }),
-          ]
-        : []),
-      ...(visibleColumns.DetectionDate
-        ? [
-            columnHelper.accessor('DetectionDate', {
-              header: 'Detection Year',
-              cell: (info) => new Date(info.getValue()).getFullYear(),
-              filterFn: (row, columnId, filterValue) => {
-                if (!filterValue) return true
-                const year = new Date(row.getValue(columnId)).getFullYear()
-                let minYear: number | null = null
-                let maxYear: number | null = null
-                if (typeof filterValue === 'string') {
-                  ;[minYear, maxYear] = JSON.parse(filterValue)
-                } else if (Array.isArray(filterValue)) {
-                  ;[minYear, maxYear] = filterValue
-                }
-                if (minYear !== null && year < minYear) return false
-                if (maxYear !== null && year > maxYear) return false
-                return true
-              },
-            }),
-          ]
-        : []),
-      ...(visibleColumns.DetectionAreaDescription
-        ? [
-            columnHelper.accessor('DetectionAreaDescription', {
-              header: 'Detection Location',
-              cell: (info) => info.getValue(),
-            }),
-          ]
-        : []),
-      ...(visibleColumns.UnusualMortalityEventDescription
-        ? [
-            columnHelper.accessor('UnusualMortalityEventDescription', {
-              header: 'UME Status',
-              cell: (info) => info.getValue() || 'N/A',
-            }),
-          ]
-        : []),
+    return [
+      columnHelper.accessor('EGNo', {
+        header: 'EG No',
+        cell: (info) => info.getValue(),
+      }),
+      columnHelper.accessor('FieldId', {
+        header: 'Field EG No',
+        cell: (info) => info.getValue(),
+      }),
+      columnHelper.accessor('IsActiveCase', {
+        header: 'Active Case',
+        cell: (info) => (info.getValue() ? 'Yes' : 'No'),
+        filterFn: (row, columnId, filterValue) => {
+          if (!filterValue) return true
+          const value = row.getValue(columnId)
+          return filterValue === 'Yes' ? value === true : value === false
+        },
+      }),
+      columnHelper.accessor('InjuryTypeDescription', {
+        header: 'Injury Type',
+        cell: (info) => info.getValue(),
+      }),
+      columnHelper.accessor('InjuryAccountDescription', {
+        header: 'Injury Description',
+        cell: (info) => info.getValue(),
+        filterFn: (row, columnId, filterValue) => {
+          if (!filterValue) return true
+          return row.getValue(columnId) === filterValue
+        },
+      }),
+      columnHelper.accessor('InjurySeverityDescription', {
+        header: 'Injury Severity',
+        cell: (info) => info.getValue(),
+      }),
+      columnHelper.accessor('DetectionDate', {
+        header: 'Detection Year',
+        cell: (info) => new Date(info.getValue()).getFullYear(),
+        filterFn: (row, columnId, filterValue) => {
+          if (!filterValue) return true
+          const year = new Date(row.getValue(columnId)).getFullYear()
+          let minYear: number | null = null
+          let maxYear: number | null = null
+          if (typeof filterValue === 'string') {
+            ;[minYear, maxYear] = JSON.parse(filterValue)
+          } else if (Array.isArray(filterValue)) {
+            ;[minYear, maxYear] = filterValue
+          }
+          if (minYear !== null && year < minYear) return false
+          if (maxYear !== null && year > maxYear) return false
+          return true
+        },
+      }),
+      columnHelper.accessor('DetectionAreaDescription', {
+        header: 'Detection Location',
+        cell: (info) => info.getValue(),
+      }),
+      columnHelper.accessor('UnusualMortalityEventDescription', {
+        header: 'UME Status',
+        cell: (info) => info.getValue() || 'N/A',
+      }),
     ]
-
-    return allColumns
-  }, [columnHelper, visibleColumns])
+  }, [columnHelper])
 
   useEffect(() => {
     setColumns(columns)
@@ -178,6 +120,16 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
       pagination: {
         pageSize: 15,
       },
+      columnVisibility: visibleColumns?.length
+        ? Object.fromEntries(
+            columns.map((col) => [
+              col.accessorKey || col.id,
+              visibleColumns.includes(
+                (col.accessorKey as string) || (col.id as string)
+              ),
+            ])
+          )
+        : {},
     },
     onRowSelectionChange: () => {
       setFilteredData(
