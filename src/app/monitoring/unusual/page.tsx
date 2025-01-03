@@ -88,8 +88,9 @@ const Unusual = () => {
         visibleColumns={['EGNo', 'FieldId', 'DetectionDate']}
         defaultFilters={{
           DetectionDate: [yearRange[0], yearRange[1]],
+          UnusualMortalityEventDescription: 'all-yes',
         }}
-        showFilters={true}
+        showFilters={false}
       />
     </div>
   )

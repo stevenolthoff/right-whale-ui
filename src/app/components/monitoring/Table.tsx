@@ -115,9 +115,49 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
     ]
   }, [columnHelper])
 
+  // Calculate filter options
+  const filterOptions = React.useMemo(() => {
+    if (!results?.length) return {}
+
+    const options: Record<string, Set<string>> = {
+      UnusualMortalityEventDescription: new Set(),
+    }
+
+    results.forEach((item) => {
+      const value = item.UnusualMortalityEventDescription
+      if (value) options.UnusualMortalityEventDescription.add(value.toString())
+    })
+
+    return Object.fromEntries(
+      Object.entries(options).map(([key, set]) => [key, Array.from(set).sort()])
+    )
+  }, [results])
+
   useEffect(() => {
     setColumns(columns)
   }, [columns, setColumns])
+
+  const [columnFilters, setColumnFilters] = React.useState<
+    { id: string; value: any }[]
+  >([])
+
+  // Initialize filters when defaultFilters change
+  React.useEffect(() => {
+    if (defaultFilters && results?.length) {
+      const initialFilters = Object.entries(defaultFilters).map(
+        ([id, value]) => ({
+          id,
+          value:
+            id === 'UnusualMortalityEventDescription' && value === 'all-yes'
+              ? filterOptions?.[id]?.filter((opt: string) =>
+                  opt.startsWith('Yes')
+                ) || []
+              : value,
+        })
+      )
+      setColumnFilters(initialFilters)
+    }
+  }, [defaultFilters, results, filterOptions])
 
   const table = useReactTable({
     data: results || [],
@@ -126,6 +166,11 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    enableFilters: true,
+    state: {
+      columnFilters,
+    },
+    onColumnFiltersChange: setColumnFilters,
     initialState: {
       pagination: {
         pageSize: 15,
@@ -152,21 +197,6 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
   useEffect(() => {
     setFilteredData(table.getFilteredRowModel().rows.map((row) => row.original))
   }, [table.getFilteredRowModel(), setFilteredData])
-
-  useEffect(() => {
-    if (defaultFilters && results?.length) {
-      Object.entries(defaultFilters).forEach(([columnId, value]) => {
-        const column = table.getColumn(columnId)
-        if (column) {
-          if (columnId === 'DetectionDate' && Array.isArray(value)) {
-            column.setFilterValue(JSON.stringify(value))
-          } else {
-            column.setFilterValue(value)
-          }
-        }
-      })
-    }
-  }, [defaultFilters, table, results])
 
   const getSortIcon = (isSorted: false | 'asc' | 'desc') => {
     if (!isSorted) return <ChevronUpDownIcon className='w-4 h-4 ml-1 inline' />

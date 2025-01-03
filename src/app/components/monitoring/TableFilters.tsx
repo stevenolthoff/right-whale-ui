@@ -29,6 +29,7 @@ const SelectFilter: React.FC<FilterProps> = ({
   onChange,
   options = [],
   isMulti = false,
+  column,
 }) => {
   const selectOptions = options.map((option) => ({
     value: option,
@@ -42,28 +43,45 @@ const SelectFilter: React.FC<FilterProps> = ({
     ? { value: value as string, label: value as string }
     : null
 
+  const handleSelectAllYes = () => {
+    const yesOptions = options.filter((option) => option.startsWith('Yes'))
+    onChange(yesOptions)
+  }
+
   return (
-    <Select
-      isMulti={isMulti}
-      value={selectedValue}
-      onChange={(selected) => {
-        if (isMulti) {
-          const values = selected
-            ? Array.isArray(selected)
-              ? selected.map((option) => option.value)
+    <div className='space-y-2'>
+      <Select
+        isMulti={isMulti}
+        value={selectedValue}
+        onChange={(selected) => {
+          if (isMulti) {
+            const values = selected
+              ? Array.isArray(selected)
+                ? selected.map((option) => option.value)
+                : []
               : []
-            : []
-          onChange(values)
-        } else {
-          const singleValue = selected as { value: string } | null
-          onChange(singleValue?.value || '')
-        }
-      }}
-      options={selectOptions}
-      className='text-sm'
-      placeholder='Select...'
-      isClearable
-    />
+            onChange(values)
+          } else {
+            const singleValue = selected as { value: string } | null
+            onChange(singleValue?.value || '')
+          }
+        }}
+        options={selectOptions}
+        className='text-sm'
+        placeholder='Select...'
+        isClearable
+      />
+      {isMulti &&
+        column === 'UnusualMortalityEventDescription' &&
+        options.some((opt) => opt.startsWith('Yes')) && (
+          <button
+            onClick={handleSelectAllYes}
+            className='text-xs text-blue-600 hover:text-blue-800'
+          >
+            Select All Yes
+          </button>
+        )}
+    </div>
   )
 }
 
@@ -165,15 +183,40 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
 
   // Add effect to set initial filters
   React.useEffect(() => {
-    if (defaultFilters) {
-      Object.entries(defaultFilters).forEach(([columnId, value]) => {
+    if (defaultFilters && data.length > 0) {
+      // First, collect all filter values to set
+      const filtersToSet = Object.entries(defaultFilters).map(
+        ([columnId, value]) => {
+          if (
+            columnId === 'UnusualMortalityEventDescription' &&
+            value === 'all-yes'
+          ) {
+            const yesOptions =
+              filterOptions[columnId]?.filter((opt) => opt.startsWith('Yes')) ||
+              []
+            return { columnId, value: yesOptions }
+          }
+          if (columnId === 'DetectionDate' && Array.isArray(value)) {
+            return { columnId, value: JSON.stringify(value) }
+          }
+          return { columnId, value }
+        }
+      )
+
+      // Then apply all filters at once
+      filtersToSet.forEach(({ columnId, value }) => {
         const column = table.getColumn(columnId)
         if (column) {
           column.setFilterValue(value)
         }
       })
+
+      // Finally update filtered data once
+      setFilteredData(
+        table.getFilteredRowModel().rows.map((row) => row.original)
+      )
     }
-  }, [defaultFilters, table])
+  }, [data, defaultFilters, table, filterOptions, setFilteredData])
 
   return (
     <div className={`space-y-4 bg-gray-50 p-4 ${className}`}>
