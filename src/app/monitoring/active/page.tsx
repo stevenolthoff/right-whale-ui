@@ -5,6 +5,8 @@ import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
 import { DataChart } from '../../components/monitoring/DataChart'
 import { useYearRange } from '../../hooks/useYearRange'
 import { ChartLayout } from '@/app/components/charts/ChartLayout'
+import Download from '@/app/components/monitoring/Download'
+import Table from '@/app/components/monitoring/Table'
 
 const Active = () => {
   const chartRef = useRef<HTMLDivElement>(null)
@@ -35,45 +37,53 @@ const Active = () => {
     for (let year = yearRange[0]; year <= yearRange[1]; year++) {
       formattedData.push({
         year,
-        count: yearCounts[year] || 0
+        count: yearCounts[year] || 0,
       })
     }
-    
+
     return formattedData.sort((a, b) => a.year - b.year)
   })()
 
   const totalActiveCases = chartData.reduce((sum, item) => sum + item.count, 0)
 
   return (
-    <ChartLayout
-      title="Active Right Whale Monitoring"
-      chartRef={chartRef}
-      exportFilename={`active-monitoring-${yearRange[0]}-${yearRange[1]}.png`}
-      yearRange={yearRange}
-      totalCount={totalActiveCases}
-      loading={loading}
-      error={error || undefined}
-      description="Data represents active monitoring cases of North Atlantic Right Whales. Click and drag on the chart to zoom into specific periods."
-      controls={
-        <>
-          <label className='block text-sm font-medium text-slate-600 mb-2'>
-            Select Year Range
-          </label>
-          <YearRangeSlider
-            yearRange={yearRange}
-            minYear={minYear}
-            maxYear={maxYear}
-            onChange={setYearRange}
-          />
-        </>
-      }
-    >
-      <DataChart 
-        data={chartData} 
-        stacked={false}
-        yAxisLabel="Number of Active Cases"
+    <div className='wrapper'>
+      <ChartLayout
+        title='Active Right Whale Monitoring'
+        chartRef={chartRef}
+        exportFilename={`active-monitoring-${yearRange[0]}-${yearRange[1]}.png`}
+        yearRange={yearRange}
+        totalCount={totalActiveCases}
+        loading={loading}
+        error={error || undefined}
+        description='Data represents active monitoring cases of North Atlantic Right Whales. Click and drag on the chart to zoom into specific periods.'
+        controls={
+          <>
+            <label className='block text-sm font-medium text-slate-600 mb-2'>
+              Select Year Range
+            </label>
+            <YearRangeSlider
+              yearRange={yearRange}
+              minYear={minYear}
+              maxYear={maxYear}
+              onChange={setYearRange}
+            />
+          </>
+        }
+      >
+        <DataChart
+          data={chartData}
+          stacked={false}
+          yAxisLabel='Number of Active Cases'
+        />
+      </ChartLayout>
+      <Download />
+      <Table
+        visibleColumns={['EGNo', 'FieldId', 'DetectionDate']}
+        defaultFilters={{ IsActiveCase: 'Yes' }}
+        showFilters={false}
       />
-    </ChartLayout>
+    </div>
   )
 }
 
