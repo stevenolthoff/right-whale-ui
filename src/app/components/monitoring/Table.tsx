@@ -123,9 +123,10 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
       columnVisibility: visibleColumns?.length
         ? Object.fromEntries(
             columns.map((col) => [
-              col.accessorKey || col.id,
+              (col as { accessorKey: string }).accessorKey || col.id,
               visibleColumns.includes(
-                (col.accessorKey as string) || (col.id as string)
+                (col as { accessorKey: string }).accessorKey ||
+                  (col.id as string)
               ),
             ])
           )

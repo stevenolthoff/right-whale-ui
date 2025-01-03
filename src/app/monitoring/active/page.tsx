@@ -77,10 +77,15 @@ const Active = () => {
           yAxisLabel='Number of Active Cases'
         />
       </ChartLayout>
+
       <Download />
+
       <Table
         visibleColumns={['EGNo', 'FieldId', 'DetectionDate']}
-        defaultFilters={{ IsActiveCase: 'Yes' }}
+        defaultFilters={{
+          IsActiveCase: 'Yes',
+          DetectionDate: [yearRange[0], yearRange[1]],
+        }}
         showFilters={false}
       />
     </div>
