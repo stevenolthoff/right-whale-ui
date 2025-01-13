@@ -21,30 +21,51 @@ const Active = () => {
   const chartData = (() => {
     if (!results) return []
 
-    const yearCounts = results
-      .filter((item) => {
-        const year = new Date(item.DetectionDate).getFullYear()
-        return item.IsActiveCase && year >= yearRange[0] && year <= yearRange[1]
-      })
-      .reduce((acc, item) => {
-        const year = new Date(item.DetectionDate).getFullYear()
-        acc[year] = (acc[year] || 0) + 1
-        return acc
-      }, {} as Record<number, number>)
+    // First, filter the results based on year range and active cases
+    const filteredResults = results.filter((item) => {
+      const year = new Date(item.DetectionDate).getFullYear()
+      return item.IsActiveCase && year >= yearRange[0] && year <= yearRange[1]
+    })
 
-    // Create array with all consecutive years
+    // Group by year and injury type
+    const yearTypeCount = filteredResults.reduce((acc, item) => {
+      const year = new Date(item.DetectionDate).getFullYear()
+      const injuryType = item.InjuryTypeDescription || 'Unknown'
+
+      if (!acc[year]) {
+        acc[year] = {}
+      }
+      acc[year][injuryType] = (acc[year][injuryType] || 0) + 1
+      return acc
+    }, {} as Record<number, Record<string, number>>)
+
+    // Get unique injury types
+    const injuryTypes = Array.from(
+      new Set(
+        filteredResults.map((item) => item.InjuryTypeDescription || 'Unknown')
+      )
+    )
+
+    // Create array with all consecutive years and injury types
     const formattedData = []
     for (let year = yearRange[0]; year <= yearRange[1]; year++) {
-      formattedData.push({
-        year,
-        count: yearCounts[year] || 0,
+      const dataPoint: any = { year }
+      injuryTypes.forEach((injuryType) => {
+        dataPoint[injuryType] = yearTypeCount[year]?.[injuryType] || 0
       })
+      formattedData.push(dataPoint)
     }
 
     return formattedData.sort((a, b) => a.year - b.year)
   })()
 
-  const totalActiveCases = chartData.reduce((sum, item) => sum + item.count, 0)
+  const totalActiveCases =
+    results?.filter(
+      (item) =>
+        item.IsActiveCase &&
+        new Date(item.DetectionDate).getFullYear() >= yearRange[0] &&
+        new Date(item.DetectionDate).getFullYear() <= yearRange[1]
+    ).length || 0
 
   return (
     <div className='wrapper'>
@@ -73,7 +94,7 @@ const Active = () => {
       >
         <DataChart
           data={chartData}
-          stacked={false}
+          stacked={true}
           yAxisLabel='Number of Active Cases'
         />
       </ChartLayout>
