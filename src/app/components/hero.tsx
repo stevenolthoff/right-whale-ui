@@ -28,14 +28,6 @@ export default function Hero() {
               Explore the Data
             </button>
           </Link>
-          <Link href='#learn-more'>
-            <button
-              type='button'
-              className='bg-transparent border-2 border-white text-white hover:bg-white/10 font-bold text-lg tracking-wide px-8 py-4 rounded-lg transition duration-300 ease-in-out'
-            >
-              Learn More
-            </button>
-          </Link>
         </div>
       </div>
     </div>
