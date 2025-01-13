@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   const [hasVisited, setHasVisited] = useLocalStorage('hasVisitedBefore', false)
-  const [isPopupOpen, setIsPopupOpen] = useState(false)
+  const [isPopupOpen, setIsPopupOpen] = useState(true)
 
   useEffect(() => {
     if (!hasVisited) {
