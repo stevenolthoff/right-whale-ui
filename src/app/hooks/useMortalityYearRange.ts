@@ -20,7 +20,7 @@ export const useMortalityYearRange = (
 
   // Update yearRange when minYear/maxYear change
   useEffect(() => {
-    setYearRange([minYear, maxYear])
+    setYearRange([1980, maxYear])
   }, [minYear, maxYear])
 
   return { yearRange, setYearRange, minYear, maxYear }

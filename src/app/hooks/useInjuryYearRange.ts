@@ -19,7 +19,7 @@ export function useInjuryYearRange(
   const [yearRange, setYearRange] = useState<[number, number]>([minYear, maxYear])
 
   useEffect(() => {
-    setYearRange([minYear, maxYear])
+    setYearRange([1980, maxYear])
   }, [minYear, maxYear])
 
   return { yearRange, setYearRange, minYear, maxYear }
