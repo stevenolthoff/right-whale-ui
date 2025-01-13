@@ -10,6 +10,7 @@ interface DisclaimerPopupProps {
 export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
   const aboutSectionRef = useRef<HTMLHeadingElement>(null)
   const dataAccessSectionRef = useRef<HTMLHeadingElement>(null)
+
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && open) {
@@ -41,7 +42,7 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
         id='my_modal_2'
         className={twMerge('modal', open ? 'modal-open' : '')}
       >
-        <div className='modal-box max-w-4xl p-0 overflow-hidden flex flex-col h-[90vh]'>
+        <div className='modal-box max-w-none md:max-w-4xl p-0 overflow-hidden flex flex-col h-screen md:h-[90vh] w-full md:w-auto m-0 md:m-auto rounded-none md:rounded-lg'>
           {/* Header */}
           <div className='p-6 flex justify-between items-center border-b flex-shrink-0'>
             <h1 className='text-2xl font-bold'>
@@ -58,7 +59,7 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
           </div>
 
           {/* Hero Image */}
-          <div className='relative w-full h-64 flex-shrink-0'>
+          <div className='relative w-full h-48 md:h-64 flex-shrink-0'>
             <Image
               src='/whale-info.webp'
               alt='Whale Tail'
@@ -68,7 +69,7 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
           </div>
 
           {/* Scrollable Content */}
-          <div className='flex-grow overflow-y-auto p-6'>
+          <div className='flex-grow overflow-y-auto p-4 md:p-6'>
             <p className='mb-6'>
               The North Atlantic Right Whale Anthropogenic Events Visualization
               Site was developed to provide improved access to, and
@@ -99,7 +100,7 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
             </p>
 
             {/* Button Section */}
-            <div className='grid grid-cols-3 gap-4 mb-8'>
+            <div className='grid grid-cols-2 gap-4 mb-8'>
               <button
                 className='btn bg-blue-700 hover:bg-blue-800 text-white'
                 onClick={scrollToAbout}
@@ -111,9 +112,6 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
                 onClick={scrollToDataAccess}
               >
                 DATA ACCESS & USE
-              </button>
-              <button className='btn bg-blue-700 hover:bg-blue-800 text-white'>
-                USER'S GUIDE
               </button>
             </div>
 
@@ -181,7 +179,7 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
               The Right Whale Anthropogenic Event Visualization Site serves
               multiple user purposes and as such, data and visualization output
               access varies by user. Publicly available data and graphics are
-              accessible through the “Explore” tab. Near real time injury
+              accessible through the "Explore" tab. Near real time injury
               monitoring data are accessible by field teams and managers and are
               meant to facilitate efforts in support of the ongoing Unusual
               Mortality Event. Injury event data, derived from detailed annual
