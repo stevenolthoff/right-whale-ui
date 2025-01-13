@@ -1,55 +1,52 @@
 'use client'
 import React, { useRef } from 'react'
-import { useMonitoringData } from '../../hooks/useMonitoringData'
+import { useInjuryData } from '../../hooks/useInjuryData'
 import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
 import { DataChart } from '../../components/monitoring/DataChart'
-import { useYearRange } from '../../hooks/useYearRange'
-import { InjuryCase } from '@/app/types/monitoring'
+import { useInjuryYearRange } from '../../hooks/useInjuryYearRange'
 import { ChartLayout } from '@/app/components/charts/ChartLayout'
 
 const VesselStrike = () => {
   const chartRef = useRef<HTMLDivElement>(null)
-  const { results, loading, error } = useMonitoringData()
-  const { yearRange, setYearRange, minYear, maxYear } = useYearRange(
-    results as InjuryCase[],
-    (item) => item.InjuryTypeDescription === 'Vessel Strike'
+  const { data, loading, error } = useInjuryData()
+  const { yearRange, setYearRange, minYear, maxYear } = useInjuryYearRange(
+    data,
+    (item) => item.type === 'Vessel Strike'
   )
 
   const chartData = (() => {
-    if (!results) return []
+    if (!data) return []
 
-    // Get all unique account types first
-    const accountTypes = new Set<string>()
-    results
-      .filter(item => item.InjuryTypeDescription === 'Vessel Strike')
-      .forEach(item => {
-        if (item.InjuryAccountDescription) {
-          accountTypes.add(item.InjuryAccountDescription)
+    // Get all unique severity types
+    const severityTypes = new Set<string>()
+    data
+      .filter((item) => item.type === 'Vessel Strike')
+      .forEach((item) => {
+        if (item.severity) {
+          severityTypes.add(item.severity)
         }
       })
 
-    // Create year-by-year data with counts for each account type
+    // Create year-by-year data with counts for each severity type
     const yearData = new Map<number, Record<string, number>>()
-    
-    results
-      .filter((item) => {
-        const year = new Date(item.DetectionDate).getFullYear()
-        return (
-          item.InjuryTypeDescription === 'Vessel Strike' &&
-          year >= yearRange[0] && 
-          year <= yearRange[1]
-        )
-      })
-      .forEach(item => {
-        const year = new Date(item.DetectionDate).getFullYear()
-        const accountType = item.InjuryAccountDescription
-        
-        if (!yearData.has(year)) {
-          yearData.set(year, Object.fromEntries([...accountTypes].map(type => [type, 0])))
+
+    data
+      .filter(
+        (item) =>
+          item.type === 'Vessel Strike' &&
+          item.year >= yearRange[0] &&
+          item.year <= yearRange[1]
+      )
+      .forEach((item) => {
+        if (!yearData.has(item.year)) {
+          yearData.set(
+            item.year,
+            Object.fromEntries([...severityTypes].map((type) => [type, 0]))
+          )
         }
-        const counts = yearData.get(year)!
-        if (accountType) {
-          counts[accountType]++
+        const counts = yearData.get(item.year)!
+        if (item.severity) {
+          counts[item.severity]++
         }
       })
 
@@ -57,29 +54,33 @@ const VesselStrike = () => {
     for (let year = yearRange[0]; year <= yearRange[1]; year++) {
       formattedData.push({
         year,
-        ...(yearData.get(year) || Object.fromEntries([...accountTypes].map(type => [type, 0])))
+        ...(yearData.get(year) ||
+          Object.fromEntries([...severityTypes].map((type) => [type, 0]))),
       })
     }
-    
+
     return formattedData.sort((a, b) => a.year - b.year)
   })()
 
-  const totalStrikes = chartData.reduce((sum, item) => 
-    sum + Object.entries(item)
-      .filter(([key]) => key !== 'year')
-      .reduce((acc, [, value]) => acc + value, 0)
-  , 0)
+  const totalStrikes = chartData.reduce(
+    (sum, item) =>
+      sum +
+      Object.entries(item)
+        .filter(([key]) => key !== 'year')
+        .reduce((acc, [, value]) => acc + value, 0),
+    0
+  )
 
   return (
     <ChartLayout
-      title="Right Whale Vessel Strike Analysis"
+      title='Right Whale Vessel Strike Analysis'
       chartRef={chartRef}
       exportFilename={`vessel-strike-${yearRange[0]}-${yearRange[1]}.png`}
       yearRange={yearRange}
       totalCount={totalStrikes}
       loading={loading}
       error={error || undefined}
-      description="Data represents vessel strike incidents involving North Atlantic Right Whales, categorized by strike type. Click and drag on the chart to zoom into specific periods."
+      description='Data represents vessel strike incidents involving North Atlantic Right Whales, categorized by severity. Click and drag on the chart to zoom into specific periods.'
       controls={
         <>
           <label className='block text-sm font-medium text-slate-600 mb-2'>
@@ -94,10 +95,10 @@ const VesselStrike = () => {
         </>
       }
     >
-      <DataChart 
-        data={chartData} 
+      <DataChart
+        data={chartData}
         stacked={true}
-        yAxisLabel="Number of Vessel Strikes"
+        yAxisLabel='Number of Vessel Strikes'
       />
     </ChartLayout>
   )
