@@ -46,7 +46,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       ),
     },
     '/monitoring/unusual': {
-      title: 'Unusual Cases',
+      title: 'Unusual Mortality Event Cases',
       description: (
         <>
           <p className='text-lg text-gray-700 leading-relaxed mb-4'>
@@ -114,7 +114,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         },
         {
           href: '/monitoring/unusual',
-          label: 'Unusual Cases',
+          label: 'Unusual Mortality Event Cases',
         },
         {
           href: '/monitoring/custom',

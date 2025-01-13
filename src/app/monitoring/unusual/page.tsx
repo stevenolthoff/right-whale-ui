@@ -30,23 +30,40 @@ const Unusual = () => {
       })
       .reduce((acc, item) => {
         const year = new Date(item.DetectionDate).getFullYear()
-        acc[year] = (acc[year] || 0) + 1
+        const desc = item.UnusualMortalityEventDescription
+        acc[year] = acc[year] || {}
+        acc[year][desc] = (acc[year][desc] || 0) + 1
         return acc
-      }, {} as Record<number, number>)
+      }, {} as Record<number, Record<string, number>>)
+
+    const uniqueDescriptions = Array.from(
+      new Set(
+        results
+          .filter((item) => item.IsUnusualMortalityEvent)
+          .map((item) => item.UnusualMortalityEventDescription)
+      )
+    )
 
     const formattedData = []
     for (let year = yearRange[0]; year <= yearRange[1]; year++) {
-      formattedData.push({
-        year,
-        count: yearCounts[year] || 0,
+      const dataPoint: any = { year }
+      uniqueDescriptions.forEach((desc) => {
+        dataPoint[desc] = (yearCounts[year] && yearCounts[year][desc]) || 0
       })
+      formattedData.push(dataPoint)
     }
 
     return formattedData.sort((a, b) => a.year - b.year)
   })()
 
   const totalUnusualEvents = chartData.reduce(
-    (sum, item) => sum + item.count,
+    (sum, item) =>
+      sum +
+      Object.values(item).reduce(
+        (a: number, b: any) => (typeof b === 'number' ? a + b : a),
+        0
+      ) -
+      item.year,
     0
   )
 
@@ -77,7 +94,7 @@ const Unusual = () => {
       >
         <DataChart
           data={chartData}
-          stacked={false}
+          stacked={true}
           yAxisLabel='Number of Unusual Mortality Events'
         />
       </ChartLayout>
