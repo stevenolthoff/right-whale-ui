@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { twMerge } from 'tailwind-merge'
 import Image from 'next/image'
 
@@ -8,6 +8,17 @@ interface DisclaimerPopupProps {
 }
 
 export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && open) {
+        onClose()
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [open, onClose])
+
   return (
     <>
       <dialog
