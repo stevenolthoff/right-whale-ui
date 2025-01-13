@@ -6,6 +6,10 @@ import { usePathname } from 'next/navigation'
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname()
   const text: Record<string, { title: string; description: string }> = {
+    '/monitoring/overview': {
+      title: 'Introduction to the Data',
+      description: '',
+    },
     '/monitoring/active': {
       title: 'Active Cases',
       description: 'This page shows the number of active cases by year.',
@@ -22,22 +26,31 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   const categories = [
     {
+      title: 'OVERVIEW',
+      links: [
+        {
+          href: '/monitoring/overview',
+          label: 'Introduction to the Data',
+        },
+      ],
+    },
+    {
       title: 'MONITORING',
       links: [
         {
           href: '/monitoring/active',
-          label: 'Active Cases'
+          label: 'Active Cases',
         },
         {
           href: '/monitoring/unusual',
-          label: 'Unusual Cases'
+          label: 'Unusual Cases',
         },
         {
           href: '/monitoring/custom',
-          label: 'Build Your Own'
-        }
-      ]
-    }
+          label: 'Build Your Own',
+        },
+      ],
+    },
   ]
 
   return (
