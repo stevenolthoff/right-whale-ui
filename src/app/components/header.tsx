@@ -59,7 +59,7 @@ export default function Header() {
           </Link>
           {isLoggedIn && (
             <Link
-              href='/monitoring/active'
+              href='/monitoring/overview'
               className={`${
                 topPath === 'monitoring'
                   ? 'text-blue-600 after:w-full'
