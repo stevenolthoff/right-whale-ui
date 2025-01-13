@@ -10,6 +10,10 @@ export default function PublicChartsLayout({
 }) {
   const pathname = usePathname()
   const text: Record<string, { title: string; description: string }> = {
+    '/public-charts/overview': {
+      title: 'Introduction to the Data',
+      description: '',
+    },
     '/public-charts/mortality-total': {
       title: 'Mortality Total',
       description: 'View total mortality statistics.',
@@ -24,7 +28,8 @@ export default function PublicChartsLayout({
     },
     '/public-charts/mortality-by-cause-of-death-and-country': {
       title: 'Mortality by Cause and Country',
-      description: 'View mortality statistics broken down by both cause and country.',
+      description:
+        'View mortality statistics broken down by both cause and country.',
     },
     '/public-charts/calving': {
       title: 'Calving',
@@ -42,48 +47,57 @@ export default function PublicChartsLayout({
 
   const categories = [
     {
+      title: 'OVERVIEW',
+      links: [
+        {
+          href: '/public-charts/overview',
+          label: 'Introduction to the Data',
+        },
+      ],
+    },
+    {
       title: 'MORTALITY',
       links: [
         {
           href: '/public-charts/mortality-total',
-          label: 'Total'
+          label: 'Total',
         },
         {
           href: '/public-charts/mortality-by-country',
-          label: 'By Country'
+          label: 'By Country',
         },
         {
           href: '/public-charts/mortality-by-cause-of-death',
-          label: 'By Cause of Death'
+          label: 'By Cause of Death',
         },
         {
           href: '/public-charts/mortality-by-cause-of-death-and-country',
-          label: 'By Cause of Death & Country'
-        }
-      ]
+          label: 'By Cause of Death & Country',
+        },
+      ],
     },
     {
       title: 'CALVING',
       links: [
         {
           href: '/public-charts/calving',
-          label: 'Total'
-        }
-      ]
+          label: 'Total',
+        },
+      ],
     },
     {
       title: 'INJURY',
       links: [
         {
           href: '/public-charts/injury-total',
-          label: 'Total'
+          label: 'Total',
         },
         {
           href: '/public-charts/entanglement',
-          label: 'Entanglement'
-        }
-      ]
-    }
+          label: 'Entanglement',
+        },
+      ],
+    },
   ]
 
   return (

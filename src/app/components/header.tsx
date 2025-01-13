@@ -30,10 +30,10 @@ export default function Header() {
   }, [])
 
   return (
-    <header 
+    <header
       className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 border border-b border-slate-200 ${
-        isScrolled 
-          ? 'bg-white/95 backdrop-blur-sm shadow-md py-3' 
+        isScrolled
+          ? 'bg-white/95 backdrop-blur-sm shadow-md py-3'
           : 'bg-white py-4'
       }`}
     >
@@ -42,29 +42,27 @@ export default function Header() {
           <div className='hidden md:block font-bold text-black text-lg transition-colors hover:text-blue-600'>
             NARW Anthropogenic Injury Event Tracker
           </div>
-          <div className='md:hidden font-bold text-black text-lg'>
-            NARW
-          </div>
+          <div className='md:hidden font-bold text-black text-lg'>NARW</div>
         </Link>
 
         {/* Desktop Navigation */}
         <nav className='hidden lg:flex items-center space-x-8'>
-          <Link 
-            href='/public-charts/mortality-total'
+          <Link
+            href='/public-charts/overview'
             className={`${
-              topPath === 'public-charts' 
-                ? 'text-blue-600 after:w-full' 
+              topPath === 'public-charts'
+                ? 'text-blue-600 after:w-full'
                 : 'text-gray-700 after:w-0'
             } font-semibold text-[15px] hover:text-blue-600 relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:bg-blue-600 after:transition-all after:duration-300 hover:after:w-full`}
           >
             Explore
           </Link>
           {isLoggedIn && (
-            <Link 
+            <Link
               href='/monitoring/active'
               className={`${
-                topPath === 'monitoring' 
-                  ? 'text-blue-600 after:w-full' 
+                topPath === 'monitoring'
+                  ? 'text-blue-600 after:w-full'
                   : 'text-gray-700 after:w-0'
               } font-semibold text-[15px] hover:text-blue-600 relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:bg-blue-600 after:transition-all after:duration-300 hover:after:w-full`}
             >
@@ -72,22 +70,22 @@ export default function Header() {
             </Link>
           )}
           {isLoggedIn && (
-            <Link 
+            <Link
               href='/injury/injury-type'
               className={`${
-                topPath === 'injury' 
-                  ? 'text-blue-600 after:w-full' 
+                topPath === 'injury'
+                  ? 'text-blue-600 after:w-full'
                   : 'text-gray-700 after:w-0'
               } font-semibold text-[15px] hover:text-blue-600 relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:bg-blue-600 after:transition-all after:duration-300 hover:after:w-full`}
             >
               Injury
             </Link>
           )}
-          <Link 
+          <Link
             href='/resources'
             className={`${
-              topPath === 'resources' 
-                ? 'text-blue-600 after:w-full' 
+              topPath === 'resources'
+                ? 'text-blue-600 after:w-full'
                 : 'text-gray-700 after:w-0'
             } font-semibold text-[15px] hover:text-blue-600 relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:bg-blue-600 after:transition-all after:duration-300 hover:after:w-full`}
           >
@@ -102,9 +100,10 @@ export default function Header() {
                 setToken('')
               } else {
                 const host = globalThis.location.hostname
-                let redirectUrl = host === 'localhost'
-                  ? 'http://localhost:44208/u/accounts/amazon-cognito/login/?process='
-                  : 'https://stage-rwanthro-backend.srv.axds.co/u/accounts/amazon-cognito/login/?process='
+                let redirectUrl =
+                  host === 'localhost'
+                    ? 'http://localhost:44208/u/accounts/amazon-cognito/login/?process='
+                    : 'https://stage-rwanthro-backend.srv.axds.co/u/accounts/amazon-cognito/login/?process='
                 redirect(redirectUrl)
               }
             }}
@@ -114,15 +113,11 @@ export default function Header() {
           </button>
 
           {/* Mobile Menu Button */}
-          <button 
+          <button
             className='lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors'
             onClick={() => setIsMenuOpen(true)}
           >
-            <svg
-              className='w-6 h-6'
-              fill='currentColor'
-              viewBox='0 0 20 20'
-            >
+            <svg className='w-6 h-6' fill='currentColor' viewBox='0 0 20 20'>
               <path
                 fillRule='evenodd'
                 d='M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z'
@@ -133,7 +128,7 @@ export default function Header() {
         </div>
 
         {/* Mobile Menu Overlay */}
-        <div 
+        <div
           className={`fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
             isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
@@ -169,11 +164,11 @@ export default function Header() {
             </div>
 
             <nav className='space-y-4'>
-              <Link 
+              <Link
                 href='/public-charts/mortality-total'
                 className={`block px-4 py-3 rounded-lg font-semibold transition-colors ${
-                  topPath === 'public-charts' 
-                    ? 'text-blue-600 bg-blue-50' 
+                  topPath === 'public-charts'
+                    ? 'text-blue-600 bg-blue-50'
                     : 'text-gray-700 hover:bg-gray-50'
                 }`}
                 onClick={() => setIsMenuOpen(false)}
@@ -181,11 +176,11 @@ export default function Header() {
                 Explore
               </Link>
               {isLoggedIn && (
-                <Link 
+                <Link
                   href='/monitoring/active'
                   className={`block px-4 py-3 rounded-lg font-semibold transition-colors ${
-                    topPath === 'monitoring' 
-                      ? 'text-blue-600 bg-blue-50' 
+                    topPath === 'monitoring'
+                      ? 'text-blue-600 bg-blue-50'
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
                   onClick={() => setIsMenuOpen(false)}
@@ -194,11 +189,11 @@ export default function Header() {
                 </Link>
               )}
               {isLoggedIn && (
-                <Link 
+                <Link
                   href='/injury/injury-type'
                   className={`block px-4 py-3 rounded-lg font-semibold transition-colors ${
-                    topPath === 'injury' 
-                      ? 'text-blue-600 bg-blue-50' 
+                    topPath === 'injury'
+                      ? 'text-blue-600 bg-blue-50'
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
                   onClick={() => setIsMenuOpen(false)}
@@ -206,11 +201,11 @@ export default function Header() {
                   Injury
                 </Link>
               )}
-              <Link 
+              <Link
                 href='/resources'
                 className={`block px-4 py-3 rounded-lg font-semibold transition-colors ${
-                  topPath === 'resources' 
-                    ? 'text-blue-600 bg-blue-50' 
+                  topPath === 'resources'
+                    ? 'text-blue-600 bg-blue-50'
                     : 'text-gray-700 hover:bg-gray-50'
                 }`}
                 onClick={() => setIsMenuOpen(false)}
