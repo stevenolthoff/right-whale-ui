@@ -14,9 +14,9 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
         id='my_modal_2'
         className={twMerge('modal', open ? 'modal-open' : '')}
       >
-        <div className='modal-box max-w-4xl p-0 overflow-hidden'>
+        <div className='modal-box max-w-4xl p-0 overflow-hidden flex flex-col h-[90vh]'>
           {/* Header */}
-          <div className='p-6 flex justify-between items-center border-b'>
+          <div className='p-6 flex justify-between items-center border-b flex-shrink-0'>
             <h1 className='text-2xl font-bold'>
               Welcome to the North Atlantic Right Whale Anthropogenic Events
               Visualization Site
@@ -31,7 +31,7 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
           </div>
 
           {/* Hero Image */}
-          <div className='relative w-full h-64'>
+          <div className='relative w-full h-64 flex-shrink-0'>
             <Image
               src='/whale-info.webp'
               alt='Whale Tail'
@@ -40,8 +40,8 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
             />
           </div>
 
-          {/* Content */}
-          <div className='p-6 overflow-scroll'>
+          {/* Scrollable Content */}
+          <div className='flex-grow overflow-y-auto p-6'>
             <p className='mb-6'>
               The North Atlantic Right Whale Anthropogenic Events Visualization
               Site was developed to provide improved access to, and
@@ -132,17 +132,17 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
               Data visualization output products are available for regularly
               sought after data extracts.
             </p>
+          </div>
 
-            {/* Close button */}
-            <div className='flex justify-end mt-8'>
-              <button
-                type='button'
-                className='bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full transition duration-300 ease-in-out'
-                onClick={onClose}
-              >
-                CLOSE
-              </button>
-            </div>
+          {/* Fixed Footer */}
+          <div className='border-t p-4 flex justify-end flex-shrink-0 bg-white'>
+            <button
+              type='button'
+              className='bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full transition duration-300 ease-in-out'
+              onClick={onClose}
+            >
+              CLOSE
+            </button>
           </div>
 
           {/* X button */}
