@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { twMerge } from 'tailwind-merge'
 import Image from 'next/image'
 
@@ -8,6 +8,8 @@ interface DisclaimerPopupProps {
 }
 
 export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
+  const aboutSectionRef = useRef<HTMLHeadingElement>(null)
+
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && open) {
@@ -18,6 +20,13 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
     document.addEventListener('keydown', handleEscape)
     return () => document.removeEventListener('keydown', handleEscape)
   }, [open, onClose])
+
+  const scrollToAbout = () => {
+    aboutSectionRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+  }
 
   return (
     <>
@@ -84,7 +93,10 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
 
             {/* Button Section */}
             <div className='grid grid-cols-3 gap-4 mb-8'>
-              <button className='btn bg-blue-700 hover:bg-blue-800 text-white'>
+              <button
+                className='btn bg-blue-700 hover:bg-blue-800 text-white'
+                onClick={scrollToAbout}
+              >
                 ABOUT
               </button>
               <button className='btn bg-blue-700 hover:bg-blue-800 text-white'>
@@ -95,7 +107,12 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
               </button>
             </div>
 
-            <h2 className='text-xl font-bold mb-3'>About the Platform</h2>
+            <h2
+              ref={aboutSectionRef}
+              className='text-xl font-bold mb-3 scroll-mt-6'
+            >
+              About the Platform
+            </h2>
             <p className='mb-6'>
               The North Atlantic right whale remains one of the most endangered
               large whales in the world, and the population has been in decline
