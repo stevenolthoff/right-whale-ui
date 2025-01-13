@@ -66,7 +66,7 @@ export default function Header() {
                   : 'text-gray-700 after:w-0'
               } font-semibold text-[15px] hover:text-blue-600 relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:bg-blue-600 after:transition-all after:duration-300 hover:after:w-full`}
             >
-              Monitoring
+              Near Real-Time Injury Monitoring
             </Link>
           )}
           {isLoggedIn && (
