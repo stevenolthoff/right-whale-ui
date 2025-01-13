@@ -45,7 +45,16 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
     return [
       columnHelper.accessor('EGNo', {
         header: 'EG No',
-        cell: (info) => info.getValue(),
+        cell: (info) => (
+          <a
+            href={`https://rwcatalog.neaq.org/#/whales/${info.getValue()}`}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='text-blue-600 hover:text-blue-800'
+          >
+            {info.getValue()}
+          </a>
+        ),
       }),
       columnHelper.accessor('FieldId', {
         header: 'Field EG No',
