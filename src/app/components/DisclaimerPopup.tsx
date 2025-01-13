@@ -9,7 +9,7 @@ interface DisclaimerPopupProps {
 
 export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
   const aboutSectionRef = useRef<HTMLHeadingElement>(null)
-
+  const dataAccessSectionRef = useRef<HTMLHeadingElement>(null)
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && open) {
@@ -23,6 +23,13 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
 
   const scrollToAbout = () => {
     aboutSectionRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+  }
+
+  const scrollToDataAccess = () => {
+    dataAccessSectionRef.current?.scrollIntoView({
       behavior: 'smooth',
       block: 'start',
     })
@@ -99,7 +106,10 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
               >
                 ABOUT
               </button>
-              <button className='btn bg-blue-700 hover:bg-blue-800 text-white'>
+              <button
+                className='btn bg-blue-700 hover:bg-blue-800 text-white'
+                onClick={scrollToDataAccess}
+              >
                 DATA ACCESS & USE
               </button>
               <button className='btn bg-blue-700 hover:bg-blue-800 text-white'>
@@ -159,6 +169,35 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
               and view AED data through data filters and pre-packaged queries.
               Data visualization output products are available for regularly
               sought after data extracts.
+            </p>
+
+            <h2
+              ref={dataAccessSectionRef}
+              className='text-xl font-bold mb-3 scroll-mt-6'
+            >
+              Data Access & Use
+            </h2>
+            <p className='mb-6'>
+              The Right Whale Anthropogenic Event Visualization Site serves
+              multiple user purposes and as such, data and visualization output
+              access varies by user. Publicly available data and graphics are
+              accessible through the “Explore” tab. Near real time injury
+              monitoring data are accessible by field teams and managers and are
+              meant to facilitate efforts in support of the ongoing Unusual
+              Mortality Event. Injury event data, derived from detailed annual
+              assessments of scars, active entanglements, and associated data,
+              are accessible for management and related activities. Access to,
+              and use of, data on this site are under the purview of the North
+              Atlantic Right Whale Consortium Data Access Protocols. Data may
+              not be shared or used without a formal data access request
+              submission available through the{' '}
+              <a
+                href='https://www.narwc.org/accessing-narwc-data.html'
+                className='text-blue-500'
+              >
+                NARWC
+              </a>
+              .
             </p>
           </div>
 
