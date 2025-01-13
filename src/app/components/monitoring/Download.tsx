@@ -10,28 +10,14 @@ const DownloadButton = () => {
   if (!filteredData.length) return null
 
   const formattedData = filteredData.map(row => {
-    const formattedRow: Record<string, any> = {}
-    columns.forEach(column => {
-      const accessorFn = (column as any).accessorFn
-      const accessorKey = (column as any).accessorKey
+    const formattedRow: Record<string, any> = { ...row }
 
-      const key = accessorKey || column.id
-      if (!key) return
+    if (formattedRow.DetectionDate) {
+      formattedRow.DetectionYear = new Date(
+        formattedRow.DetectionDate
+      ).getFullYear()
+    }
 
-      const header = typeof column.header === 'string' 
-        ? column.header 
-        : key
-
-      const value = accessorFn ? accessorFn(row) : row[key as keyof typeof row]
-      
-      if (key === 'DetectionDate' && value) {
-        formattedRow[header] = new Date(value as string).getFullYear()
-      } else if (key === 'IsActiveCase') {
-        formattedRow[header] = value ? 'Yes' : 'No'
-      } else {
-        formattedRow[header] = value || 'N/A'
-      }
-    })
     return formattedRow
   })
 
