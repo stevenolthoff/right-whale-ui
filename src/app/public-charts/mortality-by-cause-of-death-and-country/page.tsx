@@ -156,6 +156,19 @@ export default function MortalityByCauseAndCountry() {
       loading={loading}
       error={error}
       description={`Data represents confirmed mortalities of North Atlantic Right Whales in ${country} by cause of death. Click on legend items or bars to focus on specific categories.`}
+      controls={
+        <>
+          <label className='block text-sm font-medium text-slate-600 mb-2'>
+            Select Year Range
+          </label>
+          <YearRangeSlider
+            yearRange={yearRangeProps.yearRange}
+            minYear={yearRangeProps.minYear}
+            maxYear={yearRangeProps.maxYear}
+            onChange={yearRangeProps.setYearRange}
+          />
+        </>
+      }
     >
       <div className='relative h-[600px]'>
         <ResponsiveContainer width='100%' height='90%'>
@@ -233,19 +246,7 @@ export default function MortalityByCauseAndCountry() {
 
   return (
     <div className='space-y-8'>
-      <div className='mb-6'>
-        <label className='block text-sm font-medium text-slate-600 mb-2'>
-          Select Year Range
-        </label>
-        <YearRangeSlider
-          yearRange={yearRangeProps.yearRange}
-          minYear={yearRangeProps.minYear}
-          maxYear={yearRangeProps.maxYear}
-          onChange={yearRangeProps.setYearRange}
-        />
-      </div>
-
-      <div className='flex justify-end mb-4'>
+      <div className='flex justify-center mb-4'>
         <button
           onClick={() => setIsSideBySide(!isSideBySide)}
           className='hidden lg:block px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors'
