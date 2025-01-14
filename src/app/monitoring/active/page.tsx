@@ -102,7 +102,7 @@ const Active = () => {
       <Download />
 
       <Table
-        visibleColumns={['EGNo', 'FieldId', 'DetectionDate']}
+        visibleColumns={['EGNo', 'CaseId', 'DetectionDate']}
         defaultFilters={{
           IsActiveCase: 'Yes',
           DetectionDate: [yearRange[0], yearRange[1]],
