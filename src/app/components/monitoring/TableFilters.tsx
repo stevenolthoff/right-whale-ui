@@ -246,7 +246,7 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
                   onChange={(value) => column.setFilterValue(value)}
                   data={data}
                 />
-              ) : ['EGNo', 'FieldId'].includes(column.id) ? (
+              ) : ['EGNo', 'FieldId', 'CaseId'].includes(column.id) ? (
                 <TextFilter
                   column={column.id}
                   value={filterValue}

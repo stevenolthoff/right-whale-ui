@@ -91,6 +91,18 @@ export default function Header() {
           >
             Resources
           </Link>
+          {isLoggedIn && (
+            <Link
+              href='https://stage-rwanthro-backend.srv.axds.co/admin/'
+              className={`${
+                topPath === 'admin'
+                  ? 'text-blue-600 after:w-full'
+                  : 'text-gray-700 after:w-0'
+              } font-semibold text-[15px] hover:text-blue-600 relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:bg-blue-600 after:transition-all after:duration-300 hover:after:w-full`}
+            >
+              Admin
+            </Link>
+          )}
         </nav>
 
         <div className='flex items-center gap-3 ml-auto'>

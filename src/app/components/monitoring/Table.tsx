@@ -56,6 +56,17 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
           </a>
         ),
       }),
+      columnHelper.accessor('CaseId', {
+        header: 'Case ID',
+        cell: (info) => info.getValue(),
+        filterFn: (row, columnId, filterValue) => {
+          if (!filterValue) return true
+          const value = row.getValue(columnId)
+          return value != null
+            ? value.toString() === filterValue.toString()
+            : false
+        },
+      }),
       columnHelper.accessor('FieldId', {
         header: 'Field EG No',
         cell: (info) => info.getValue(),
