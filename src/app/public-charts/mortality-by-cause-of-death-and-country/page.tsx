@@ -75,6 +75,7 @@ export default function MortalityByCauseAndCountry() {
   const yearRangeProps = useMortalityYearRange(data)
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
   const [showResetButton, setShowResetButton] = useState(false)
+  const [isSideBySide, setIsSideBySide] = useState(true)
 
   useEffect(() => {
     setShowResetButton(hiddenSeries.size > 0)
@@ -244,7 +245,22 @@ export default function MortalityByCauseAndCountry() {
         />
       </div>
 
-      <div className='grid grid-cols-1 lg:grid-cols-2'>
+      <div className='flex justify-end mb-4'>
+        <button
+          onClick={() => setIsSideBySide(!isSideBySide)}
+          className='hidden lg:block px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors'
+        >
+          {isSideBySide
+            ? 'Switch to Vertical Layout'
+            : 'Switch to Side by Side'}
+        </button>
+      </div>
+
+      <div
+        className={`grid grid-cols-1 ${
+          isSideBySide ? 'lg:grid-cols-2' : 'lg:grid-cols-1'
+        } gap-8`}
+      >
         <ChartComponent
           chartData={usChartData}
           title='US Right Whale Mortalities'
