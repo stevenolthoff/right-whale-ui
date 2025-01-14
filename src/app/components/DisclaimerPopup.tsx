@@ -40,9 +40,9 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
     <>
       <dialog
         id='my_modal_2'
-        className={twMerge('modal', open ? 'modal-open' : '')}
+        className={twMerge('modal bg-black/60', open ? 'modal-open' : '')}
       >
-        <div className='modal-box max-w-none md:max-w-4xl p-0 overflow-hidden flex flex-col h-screen md:h-[90vh] w-full md:w-auto m-0 md:m-auto rounded-none md:rounded-lg'>
+        <div className='modal-box bg-white max-w-none md:max-w-4xl p-0 overflow-hidden flex flex-col h-screen md:h-[90vh] w-full md:w-auto m-0 md:m-auto rounded-none md:rounded-lg'>
           {/* Header */}
           <div className='p-6 flex justify-between items-center border-b flex-shrink-0'>
             <h1 className='text-2xl font-bold'>
@@ -220,7 +220,11 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
             </button>
           </form>
         </div>
-        <form method='dialog' className='modal-backdrop' onClick={onClose}>
+        <form
+          method='dialog'
+          className='modal-backdrop bg-black/60'
+          onClick={onClose}
+        >
           <button>close</button>
         </form>
       </dialog>

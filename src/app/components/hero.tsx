@@ -20,7 +20,7 @@ export default function Hero() {
           Empowering Awareness and Action Through Up-to-Date Data and Insights
         </p>
         <div className='flex flex-col md:flex-row gap-4 justify-center'>
-          <Link href='/public-charts/mortality-total'>
+          <Link href='/public-charts/overview'>
             <button
               type='button'
               className='bg-white hover:bg-blue-500 hover:text-white text-blue-900 font-bold text-lg tracking-wide px-8 py-4 rounded-lg transition duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
