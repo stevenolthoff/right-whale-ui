@@ -1,8 +1,14 @@
 'use client'
-import React, { useState, useEffect, useRef } from 'react'
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, 
-  Tooltip, Legend, ResponsiveContainer 
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
 } from 'recharts'
 import { useMortalityData } from '@/app/hooks/useMortalityData'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
@@ -69,6 +75,7 @@ const formatChartDataForCountry = (
 }
 
 export default function MortalityByCauseAndCountry() {
+  console.count('MortalityByCauseAndCountry render')
   const chartRefUS = useRef<HTMLDivElement>(null)
   const chartRefCA = useRef<HTMLDivElement>(null)
   const { data, loading, error } = useMortalityData()
@@ -81,46 +88,50 @@ export default function MortalityByCauseAndCountry() {
     setShowResetButton(hiddenSeries.size > 0)
   }, [hiddenSeries])
 
-  const usChartData = formatChartDataForCountry(
-    data,
-    yearRangeProps.yearRange,
-    'US'
-  )
-  const canadaChartData = formatChartDataForCountry(
-    data,
-    yearRangeProps.yearRange,
-    'Canada'
-  )
-
-  const getTotalMortalities = (chartData: any[]) =>
-    chartData.reduce(
-      (sum, item) =>
-        sum +
-        Object.values(item).reduce(
-          (a: number, b: unknown) => (typeof b === 'number' ? a + b : a),
-          0
-        ) -
-        item.year,
-      0
+  const usChartData = useMemo(() => {
+    console.time('data-formatting-us')
+    const result = formatChartDataForCountry(
+      data,
+      yearRangeProps.yearRange,
+      'US'
     )
+    console.timeEnd('data-formatting-us')
+    return result
+  }, [data, yearRangeProps.yearRange])
 
-  const handleLegendClick = (entry: { dataKey: string }, causes: string[]) => {
-    const seriesName = entry.dataKey
-    setHiddenSeries((prev) => {
-      const newHidden = new Set(prev)
-      if (newHidden.has(seriesName)) {
-        newHidden.delete(seriesName)
-      } else {
-        causes.forEach((name) => newHidden.add(name))
-        newHidden.delete(seriesName)
-      }
-      return newHidden
-    })
-  }
+  const canadaChartData = useMemo(() => {
+    console.time('data-formatting-canada')
+    const result = formatChartDataForCountry(
+      data,
+      yearRangeProps.yearRange,
+      'Canada'
+    )
+    console.timeEnd('data-formatting-canada')
+    return result
+  }, [data, yearRangeProps.yearRange])
 
-  const handleBarClick = (data: any, index: number, causes: string[]) => {
-    const seriesName = causes[index]
-    if (seriesName) {
+  const getTotalMortalities = useMemo(
+    () => (chartData: any[]) => {
+      console.time('getTotalMortalities')
+      const result = chartData.reduce(
+        (sum, item) =>
+          sum +
+          Object.values(item).reduce(
+            (a: number, b: unknown) => (typeof b === 'number' ? a + b : a),
+            0
+          ) -
+          item.year,
+        0
+      )
+      console.timeEnd('getTotalMortalities')
+      return result
+    },
+    []
+  )
+
+  const handleLegendClick = useCallback(
+    (entry: { dataKey: string }, causes: string[]) => {
+      const seriesName = entry.dataKey
       setHiddenSeries((prev) => {
         const newHidden = new Set(prev)
         if (newHidden.has(seriesName)) {
@@ -131,117 +142,171 @@ export default function MortalityByCauseAndCountry() {
         }
         return newHidden
       })
-    }
-  }
+    },
+    []
+  )
 
-  const ChartComponent = ({
-    chartData,
-    title,
-    chartRef,
-    country,
-  }: {
-    chartData: { data: any[]; causes: string[] }
-    title: string
-    chartRef: React.RefObject<HTMLDivElement>
-    country: string
-  }) => (
-    <ChartLayout
-      title={title}
-      chartRef={chartRef}
-      exportFilename={`mortality-${country.toLowerCase()}-${
-        yearRangeProps.yearRange[0]
-      }-${yearRangeProps.yearRange[1]}.png`}
-      yearRange={yearRangeProps.yearRange}
-      totalCount={getTotalMortalities(chartData.data)}
-      loading={loading}
-      error={error}
-      description={`Data represents confirmed mortalities of North Atlantic Right Whales in ${country} by cause of death. Click on legend items or bars to focus on specific categories.`}
-      controls={
-        <>
-          <label className='block text-sm font-medium text-slate-600 mb-2'>
-            Select Year Range
-          </label>
-          <YearRangeSlider
-            yearRange={yearRangeProps.yearRange}
-            minYear={yearRangeProps.minYear}
-            maxYear={yearRangeProps.maxYear}
-            onChange={yearRangeProps.setYearRange}
-          />
-        </>
+  const handleBarClick = useCallback(
+    (data: any, index: number, causes: string[]) => {
+      const seriesName = causes[index]
+      if (seriesName) {
+        setHiddenSeries((prev) => {
+          const newHidden = new Set(prev)
+          if (newHidden.has(seriesName)) {
+            newHidden.delete(seriesName)
+          } else {
+            causes.forEach((name) => newHidden.add(name))
+            newHidden.delete(seriesName)
+          }
+          return newHidden
+        })
       }
-    >
-      <div className='relative h-[600px]'>
-        <ResponsiveContainer width='100%' height='90%'>
-          <BarChart
-            data={chartData.data}
-            margin={{ top: 20, right: 30, left: 40, bottom: 120 }}
-          >
-            <CartesianGrid strokeDasharray='3 3' />
-            <XAxis
-              dataKey='year'
-              label={{ value: 'Year', position: 'insideBottom', offset: -15 }}
-            />
-            <YAxis
-              label={{
-                value: 'Number of Mortalities',
-                angle: -90,
-                position: 'insideLeft',
-                offset: 15,
-              }}
-            />
-            <Tooltip
-              formatter={(value: number, name: string) => [
-                `${value} mortalities`,
-                name,
-              ]}
-              labelFormatter={(label: number) => `Year: ${label}`}
-            />
-            <Legend
-              onClick={(data) => {
-                if (data.dataKey) {
-                  handleLegendClick(
-                    { dataKey: data.dataKey.toString() },
-                    chartData.causes
-                  )
-                }
-              }}
-              wrapperStyle={{
-                cursor: 'pointer',
-                paddingTop: '20px',
-                bottom: '40px',
-              }}
-              verticalAlign='bottom'
-              align='center'
-            />
-            {chartData.causes.map((cause, index) => (
-              <Bar
-                key={cause}
-                dataKey={cause}
-                name={cause}
-                stackId='stack'
-                fill={COLORS[index % COLORS.length]}
-                hide={hiddenSeries.has(cause)}
-                onClick={(data) =>
-                  handleBarClick(data, index, chartData.causes)
-                }
-                style={{ cursor: 'pointer' }}
-              />
-            ))}
-          </BarChart>
-        </ResponsiveContainer>
+    },
+    []
+  )
 
-        {showResetButton && (
-          <div className='absolute -bottom-4 left-1/2 -translate-x-1/2'>
-            <button
-              onClick={() => setHiddenSeries(new Set())}
-              className='px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors'
-            >
-              Show All
-            </button>
+  const handleResetClick = useCallback(() => {
+    setHiddenSeries(new Set())
+  }, [])
+
+  const yearRangeControl = useMemo(
+    () => (
+      <>
+        <label className='block text-sm font-medium text-slate-600 mb-2'>
+          Select Year Range
+        </label>
+        <YearRangeSlider
+          yearRange={yearRangeProps.yearRange}
+          minYear={yearRangeProps.minYear}
+          maxYear={yearRangeProps.maxYear}
+          onChange={yearRangeProps.setYearRange}
+        />
+      </>
+    ),
+    [
+      yearRangeProps.yearRange,
+      yearRangeProps.minYear,
+      yearRangeProps.maxYear,
+      yearRangeProps.setYearRange,
+    ]
+  )
+
+  const ChartComponent = React.memo(
+    ({
+      chartData,
+      title,
+      chartRef,
+      country,
+      onLegendClick,
+      onBarClick,
+      onResetClick,
+      hiddenSeries,
+      showResetButton,
+      yearRange,
+    }: {
+      chartData: { data: any[]; causes: string[] }
+      title: string
+      chartRef: React.RefObject<HTMLDivElement>
+      country: string
+      onLegendClick: (entry: { dataKey: string }, causes: string[]) => void
+      onBarClick: (data: any, index: number, causes: string[]) => void
+      onResetClick: () => void
+      hiddenSeries: Set<string>
+      showResetButton: boolean
+      yearRange: [number, number]
+    }) => {
+      console.count(`${country} ChartComponent render`)
+      return (
+        <ChartLayout
+          title={title}
+          chartRef={chartRef}
+          exportFilename={`mortality-${country.toLowerCase()}-${yearRange[0]}-${
+            yearRange[1]
+          }.png`}
+          yearRange={yearRange}
+          totalCount={getTotalMortalities(chartData.data)}
+          loading={loading}
+          error={error}
+          description={`Data represents confirmed mortalities of North Atlantic Right Whales in ${country} by cause of death. Click on legend items or bars to focus on specific categories.`}
+        >
+          <div className='relative h-[600px]'>
+            <ResponsiveContainer width='100%' height='90%'>
+              <BarChart
+                data={chartData.data}
+                margin={{ top: 20, right: 30, left: 40, bottom: 120 }}
+              >
+                <CartesianGrid strokeDasharray='3 3' />
+                <XAxis
+                  dataKey='year'
+                  label={{
+                    value: 'Year',
+                    position: 'insideBottom',
+                    offset: -15,
+                  }}
+                />
+                <YAxis
+                  label={{
+                    value: 'Number of Mortalities',
+                    angle: -90,
+                    position: 'insideLeft',
+                    offset: 15,
+                  }}
+                />
+                <Tooltip
+                  formatter={(value: number, name: string) => [
+                    `${value} mortalities`,
+                    name,
+                  ]}
+                  labelFormatter={(label: number) => `Year: ${label}`}
+                />
+                <Legend
+                  onClick={(data) => {
+                    if (data.dataKey) {
+                      onLegendClick(
+                        { dataKey: data.dataKey.toString() },
+                        chartData.causes
+                      )
+                    }
+                  }}
+                  wrapperStyle={{
+                    cursor: 'pointer',
+                    paddingTop: '20px',
+                    bottom: '40px',
+                  }}
+                  verticalAlign='bottom'
+                  align='center'
+                />
+                {chartData.causes.map((cause, index) => (
+                  <Bar
+                    key={cause}
+                    dataKey={cause}
+                    name={cause}
+                    stackId='stack'
+                    fill={COLORS[index % COLORS.length]}
+                    hide={hiddenSeries.has(cause)}
+                    onClick={(data) =>
+                      onBarClick(data, index, chartData.causes)
+                    }
+                    style={{ cursor: 'pointer' }}
+                  />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+
+            {showResetButton && (
+              <div className='absolute -bottom-4 left-1/2 -translate-x-1/2'>
+                <button
+                  onClick={onResetClick}
+                  className='px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors'
+                >
+                  Show All
+                </button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-    </ChartLayout>
+        </ChartLayout>
+      )
+    }
   )
 
   return (
@@ -257,6 +322,8 @@ export default function MortalityByCauseAndCountry() {
         </button>
       </div>
 
+      {yearRangeControl}
+
       <div
         className={`grid grid-cols-1 ${
           isSideBySide ? 'lg:grid-cols-2' : 'lg:grid-cols-1'
@@ -267,12 +334,24 @@ export default function MortalityByCauseAndCountry() {
           title='US Right Whale Mortalities'
           chartRef={chartRefUS}
           country='US'
+          onLegendClick={handleLegendClick}
+          onBarClick={handleBarClick}
+          onResetClick={handleResetClick}
+          hiddenSeries={hiddenSeries}
+          showResetButton={showResetButton}
+          yearRange={yearRangeProps.yearRange}
         />
         <ChartComponent
           chartData={canadaChartData}
           title='Canadian Right Whale Mortalities'
           chartRef={chartRefCA}
           country='Canada'
+          onLegendClick={handleLegendClick}
+          onBarClick={handleBarClick}
+          onResetClick={handleResetClick}
+          hiddenSeries={hiddenSeries}
+          showResetButton={showResetButton}
+          yearRange={yearRangeProps.yearRange}
         />
       </div>
     </div>
