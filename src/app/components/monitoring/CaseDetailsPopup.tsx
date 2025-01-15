@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useCallback } from 'react'
 import { InjuryCase } from '../../types/monitoring'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 
@@ -13,16 +13,29 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
   isOpen,
   onClose,
 }) => {
+  // Handle escape key press
+  const handleEscapeKey = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose()
+      }
+    },
+    [onClose]
+  )
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
+      document.addEventListener('keydown', handleEscapeKey)
     } else {
       document.body.style.overflow = 'unset'
     }
+
     return () => {
       document.body.style.overflow = 'unset'
+      document.removeEventListener('keydown', handleEscapeKey)
     }
-  }, [isOpen])
+  }, [isOpen, handleEscapeKey])
 
   if (!isOpen || !caseData) return null
 
@@ -45,12 +58,20 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
     },
   ]
 
+  // Handle click outside
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose()
+    }
+  }
+
   return (
     <div
       className='fixed inset-0 z-[9999] overflow-y-auto bg-gray-900/25 backdrop-blur-sm'
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose()
-      }}
+      onClick={handleBackdropClick}
+      role='dialog'
+      aria-modal='true'
+      aria-labelledby='case-details-title'
     >
       <div className='flex items-center justify-center min-h-screen sm:p-4'>
         {/* Popup content */}
@@ -58,12 +79,16 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
           {/* Header Section */}
           <div className='flex flex-col space-y-1 mb-8'>
             <div className='flex justify-between items-center'>
-              <h2 className='text-2xl sm:text-3xl font-semibold text-gray-900'>
+              <h2
+                id='case-details-title'
+                className='text-2xl sm:text-3xl font-semibold text-gray-900'
+              >
                 Case {caseData.CaseId}
               </h2>
               <button
                 onClick={onClose}
                 className='text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full'
+                aria-label='Close dialog'
               >
                 <XMarkIcon className='h-6 w-6' />
               </button>
