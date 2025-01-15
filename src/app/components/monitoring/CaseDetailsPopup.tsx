@@ -1,6 +1,49 @@
 import React, { useEffect, useCallback, useState } from 'react'
 import { InjuryCase } from '../../types/monitoring'
 import { XMarkIcon } from '@heroicons/react/24/outline'
+import axios from 'axios'
+
+interface AssessmentPagination {
+  next: string | null
+  previous: string | null
+  count: number
+  page: number
+  total_pages: number
+  previous_page: number | null
+  next_page: number | null
+  start_index: number
+  end_index: number
+}
+
+interface AssessmentCase {
+  EGNo: string
+  DetectionDate: string
+}
+
+interface Assessment {
+  AssessmentId: number
+  Case_id: number
+  AssessmentTypeId: number
+  AssessmentTypeDescription: string
+  InjuryImpactId: number
+  InjuryImpactDescription: string
+  FirstSightingDate: string
+  FirstSightingAreaCode: string
+  FirstSightingAreaDescription: string
+  LastSightingDate: string
+  LastSightingAreaCode: string
+  LastSightingAreaDescription: string
+  IsMonitorRemove: boolean
+  MonitorRemoveReasonId: number | null
+  MonitorRemoveReasonDescription: string
+  InjuryImpactComments: string
+  Case: AssessmentCase
+}
+
+interface AssessmentResponse {
+  pagination: AssessmentPagination
+  results: Assessment[]
+}
 
 interface CaseDetailsContentProps {
   caseData: InjuryCase
@@ -61,6 +104,38 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
   const [activeTab, setActiveTab] = useState<'details' | 'additional'>(
     'details'
   )
+  const [assessmentData, setAssessmentData] =
+    useState<AssessmentResponse | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Fetch assessment data when popup opens
+  useEffect(() => {
+    const fetchAssessments = async () => {
+      if (isOpen && caseData) {
+        setIsLoading(true)
+        try {
+          const response = await axios.get<AssessmentResponse>(
+            `https://stage-rwanthro-backend.srv.axds.co/anthro/api/v1/monitoring_assessments/?case_id=${caseData.CaseId}&page_size=25`,
+            {
+              headers: {
+                accept: 'application/json',
+                Authorization: 'token 8186f023f5f80b21498be6162280820fd6144d75',
+                'X-CSRFToken':
+                  'TgNK6RFXdMwTkfwpKhgxJLPhIFvoZf3hHyROnPqNurZnzExIbbtH8wk55D0gCHcW',
+              },
+            }
+          )
+          setAssessmentData(response.data)
+        } catch (error) {
+          console.error('Error fetching assessments:', error)
+        } finally {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    fetchAssessments()
+  }, [isOpen, caseData])
 
   // Handle escape key press
   const handleEscapeKey = useCallback(
@@ -148,7 +223,7 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
-                Additional Info
+                Assessments
               </button>
             </nav>
           </div>
