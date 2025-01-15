@@ -208,8 +208,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
             </button>
           )}
           <div className='text-sm text-gray-400'>
-            {filteredAssessments.length} result
-            {filteredAssessments.length !== 1 ? 's' : ''}
+            Showing {filteredAssessments.length} of {assessments.length} results
           </div>
         </div>
       </div>
