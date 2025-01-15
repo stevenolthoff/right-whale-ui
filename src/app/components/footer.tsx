@@ -10,8 +10,8 @@ export default function Footer() {
           <div className='space-y-4'>
             <h3 className='text-blue-900 font-bold text-lg'>About</h3>
             <p className='text-slate-600 text-sm leading-relaxed'>
-              Dedicated to tracking and visualizing North Atlantic Right Whale injuries 
-              and mortality events to support conservation efforts.
+              Dedicated to tracking and visualizing North Atlantic Right Whale
+              injuries and mortality events to support conservation efforts.
             </p>
           </div>
 
@@ -20,15 +20,18 @@ export default function Footer() {
             <h3 className='text-blue-900 font-bold text-lg'>Quick Links</h3>
             <ul className='space-y-2'>
               {[
-                { text: 'Mortality Data', url: '/public-charts/mortality-total' },
+                {
+                  text: 'Mortality Data',
+                  url: '/public-charts/mortality-total',
+                },
                 { text: 'Calving Data', url: '/public-charts/calving' },
                 { text: 'Injury Data', url: '/public-charts/injury-total' },
                 // { text: 'Custom Analysis', url: '/monitoring/custom' },
                 // { text: 'Data Table', url: '/monitoring/table' },
               ].map((link) => (
                 <li key={link.text}>
-                  <Link 
-                    href={link.url} 
+                  <Link
+                    href={link.url}
                     className='text-slate-600 hover:text-blue-600 text-sm transition-colors duration-200'
                   >
                     {link.text}
@@ -49,10 +52,10 @@ export default function Footer() {
                 { text: 'Data Sources', url: '#' },
               ].map((link) => (
                 <li key={link.text}>
-                  <a 
+                  <a
                     href={link.url}
                     target='_blank'
-                    rel='noopener noreferrer' 
+                    rel='noopener noreferrer'
                     className='text-slate-600 hover:text-blue-600 text-sm transition-colors duration-200'
                   >
                     {link.text}
@@ -66,13 +69,25 @@ export default function Footer() {
           <div className='space-y-4'>
             <h3 className='text-blue-900 font-bold text-lg'>Contact</h3>
             <div className='space-y-2'>
-              <p className='text-slate-600 text-sm'>Have questions about our data?</p>
-              <a 
-                href='mailto:contact@example.com'
+              <p className='text-slate-600 text-sm'>
+                Have questions about our data?
+              </p>
+              <a
+                href='mailto:hpettis@neaq.org'
                 className='inline-flex items-center text-blue-600 hover:text-blue-500 text-sm font-medium'
               >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                <svg
+                  className='w-4 h-4 mr-2'
+                  fill='none'
+                  stroke='currentColor'
+                  viewBox='0 0 24 24'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'
+                  />
                 </svg>
                 Contact Us
               </a>
@@ -85,7 +100,8 @@ export default function Footer() {
           <div className='flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0'>
             {/* Copyright */}
             <p className='text-slate-500 text-sm'>
-              © {new Date().getFullYear()} NARW Anthropogenic Injury Event Tracker. All rights reserved.
+              © {new Date().getFullYear()} NARW Anthropogenic Injury Event
+              Tracker. All rights reserved.
             </p>
 
             {/* Social Links */}
