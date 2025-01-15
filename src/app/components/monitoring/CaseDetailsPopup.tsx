@@ -493,16 +493,6 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
               onLoadMore={handleLoadMore}
             />
           )}
-
-          {/* Footer - Mobile Only */}
-          <div className='sm:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100'>
-            <button
-              onClick={onClose}
-              className='w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium rounded-xl transition-colors'
-            >
-              Close
-            </button>
-          </div>
         </div>
       </div>
     </div>
