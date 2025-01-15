@@ -14,8 +14,11 @@ export default function InjuryTotal() {
   const chartData = (() => {
     if (!data) return []
 
-    const yearCounts = new Map<number, number>()
+    // Create a map to store counts by year and type
+    const yearTypeMap = new Map<string, number>()
+    const types = new Set<string>()
 
+    // Filter and count data
     data
       .filter(
         (item) =>
@@ -23,25 +26,35 @@ export default function InjuryTotal() {
           item.year <= yearRangeProps.yearRange[1]
       )
       .forEach((item) => {
-        yearCounts.set(item.year, (yearCounts.get(item.year) || 0) + 1)
+        const key = `${item.year}-${item.type}`
+        yearTypeMap.set(key, (yearTypeMap.get(key) || 0) + 1)
+        types.add(item.type)
       })
 
+    // Format data for stacked chart
     const formattedData = []
     for (
       let year = yearRangeProps.yearRange[0];
       year <= yearRangeProps.yearRange[1];
       year++
     ) {
-      formattedData.push({
-        year,
-        count: yearCounts.get(year) || 0,
+      const dataPoint: any = { year }
+      types.forEach((type) => {
+        dataPoint[type] = yearTypeMap.get(`${year}-${type}`) || 0
       })
+      formattedData.push(dataPoint)
     }
 
     return formattedData.sort((a, b) => a.year - b.year)
   })()
 
-  const totalInjuries = chartData.reduce((sum, item) => sum + item.count, 0)
+  const totalInjuries = chartData.reduce((sum, yearData) => {
+    // Sum all values except the year property
+    const yearTotal = Object.entries(yearData)
+      .filter(([key]) => key !== 'year')
+      .reduce((yearSum, [_, count]) => yearSum + (count as number), 0)
+    return sum + yearTotal
+  }, 0)
 
   return (
     <ChartLayout
@@ -51,7 +64,7 @@ export default function InjuryTotal() {
       yearRange={yearRangeProps.yearRange}
       totalCount={totalInjuries}
       loading={loading}
-      error={error}
+      error={error || undefined}
       description='Data represents confirmed injury events of North Atlantic Right Whales. Click and drag on the chart to zoom into specific periods.'
       controls={
         <>
@@ -69,7 +82,7 @@ export default function InjuryTotal() {
     >
       <DataChart
         data={chartData}
-        stacked={false}
+        stacked={true}
         yAxisLabel='Number of Injuries'
       />
     </ChartLayout>
