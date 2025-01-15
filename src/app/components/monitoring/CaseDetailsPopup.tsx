@@ -90,6 +90,115 @@ const CaseDetailsContent: React.FC<CaseDetailsContentProps> = ({
   )
 }
 
+interface AssessmentContentProps {
+  assessments: Assessment[]
+  isLoading: boolean
+}
+
+const AssessmentContent: React.FC<AssessmentContentProps> = ({
+  assessments,
+  isLoading,
+}) => {
+  if (isLoading) {
+    return (
+      <div className='h-96 flex items-center justify-center text-gray-500'>
+        Loading assessments...
+      </div>
+    )
+  }
+
+  if (!assessments?.length) {
+    return (
+      <div className='h-96 flex items-center justify-center text-gray-500'>
+        No assessments found
+      </div>
+    )
+  }
+
+  // Sort assessments by FirstSightingDate in descending order
+  const sortedAssessments = [...assessments].sort(
+    (a, b) =>
+      new Date(b.FirstSightingDate).getTime() -
+      new Date(a.FirstSightingDate).getTime()
+  )
+
+  return (
+    <div className='space-y-6 max-h-[75vh] sm:max-h-[65vh] overflow-y-auto pr-4 -mr-4 pb-16'>
+      {sortedAssessments.map((assessment) => (
+        <div
+          key={assessment.AssessmentId}
+          className='bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow'
+        >
+          <div className='flex items-center justify-between mb-3'>
+            <div className='flex items-center space-x-3'>
+              <span className='text-sm font-medium text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full'>
+                {assessment.AssessmentTypeDescription}
+              </span>
+              <span
+                className={`text-sm font-medium px-2.5 py-0.5 rounded-full ${
+                  assessment.InjuryImpactDescription === 'No Impact'
+                    ? 'bg-green-50 text-green-600'
+                    : assessment.InjuryImpactDescription === 'Minor'
+                    ? 'bg-yellow-50 text-yellow-600'
+                    : 'bg-red-50 text-red-600'
+                }`}
+              >
+                {assessment.InjuryImpactDescription}
+              </span>
+            </div>
+            <div className='text-sm text-gray-500'>
+              ID: {assessment.AssessmentId}
+            </div>
+          </div>
+
+          <div className='space-y-2'>
+            <div className='grid grid-cols-2 gap-4'>
+              <div>
+                <div className='text-sm font-medium text-gray-500'>
+                  First Sighting
+                </div>
+                <div className='text-sm'>
+                  {new Date(assessment.FirstSightingDate).toLocaleDateString()}{' '}
+                  - {assessment.FirstSightingAreaDescription}
+                </div>
+              </div>
+              <div>
+                <div className='text-sm font-medium text-gray-500'>
+                  Last Sighting
+                </div>
+                <div className='text-sm'>
+                  {new Date(assessment.LastSightingDate).toLocaleDateString()} -{' '}
+                  {assessment.LastSightingAreaDescription}
+                </div>
+              </div>
+            </div>
+
+            {assessment.InjuryImpactComments && (
+              <div className='mt-3'>
+                <div className='text-sm font-medium text-gray-500 mb-1'>
+                  Comments
+                </div>
+                <div className='text-sm text-gray-700 bg-gray-50 p-3 rounded-lg'>
+                  {assessment.InjuryImpactComments}
+                </div>
+              </div>
+            )}
+
+            <div className='mt-3 flex items-center justify-between text-sm text-gray-500'>
+              <div>
+                Monitor Remove: {assessment.IsMonitorRemove ? 'Yes' : 'No'}
+              </div>
+              {assessment.MonitorRemoveReasonDescription !== 'No' && (
+                <div>Reason: {assessment.MonitorRemoveReasonDescription}</div>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 interface CaseDetailsPopupProps {
   caseData: InjuryCase | null
   isOpen: boolean
@@ -232,9 +341,10 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
           {activeTab === 'details' ? (
             <CaseDetailsContent caseData={caseData} />
           ) : (
-            <div className='h-96 flex items-center justify-center text-gray-500'>
-              Additional information will be added here
-            </div>
+            <AssessmentContent
+              assessments={assessmentData?.results || []}
+              isLoading={isLoading}
+            />
           )}
 
           {/* Footer - Mobile Only */}
