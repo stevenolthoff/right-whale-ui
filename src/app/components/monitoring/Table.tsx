@@ -55,7 +55,7 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
             href={`https://rwcatalog.neaq.org/#/whales/${info.getValue()}`}
             target='_blank'
             rel='noopener noreferrer'
-            className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+            className={`text-blue-600 hover:text-blue-800 ${info.getValue() ? 'bg-blue-100' : ''} px-2 py-1 rounded-md`}
           >
             {info.getValue()}
           </a>

@@ -144,70 +144,84 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
   return (
     <div className='space-y-6'>
       {/* Controls */}
-      <div className='flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 pb-4 border-b border-gray-100'>
+      <div className='flex flex-col space-y-4 pb-6'>
         {/* Sort Controls */}
-        <div className='flex items-center space-x-4'>
-          <div className='text-sm text-gray-500'>Sort by:</div>
-          <button
-            onClick={() => setSortField('FirstSightingDate')}
-            className={`text-sm px-3 py-1 rounded-md ${
-              sortField === 'FirstSightingDate'
-                ? 'bg-blue-50 text-blue-600'
-                : 'text-gray-600 hover:bg-gray-50'
-            }`}
-          >
-            First Sighting
-          </button>
-          <button
-            onClick={() => setSortField('LastSightingDate')}
-            className={`text-sm px-3 py-1 rounded-md ${
-              sortField === 'LastSightingDate'
-                ? 'bg-blue-50 text-blue-600'
-                : 'text-gray-600 hover:bg-gray-50'
-            }`}
-          >
-            Last Sighting
-          </button>
-          <button
-            onClick={() =>
-              setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc')
-            }
-            className='text-sm text-gray-600 hover:text-gray-900'
-          >
-            {sortDirection === 'desc' ? '↓ Newest First' : '↑ Oldest First'}
-          </button>
+        <div className='flex flex-wrap items-center gap-3'>
+          <div className='text-sm font-medium text-gray-700'>Sort by:</div>
+          <div className='flex gap-2 flex-wrap'>
+            <button
+              onClick={() => setSortField('FirstSightingDate')}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                sortField === 'FirstSightingDate'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              First Sighting
+            </button>
+            <button
+              onClick={() => setSortField('LastSightingDate')}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                sortField === 'LastSightingDate'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              Last Sighting
+            </button>
+            <button
+              onClick={() =>
+                setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc')
+              }
+              className='inline-flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors'
+            >
+              {sortDirection === 'desc' ? (
+                <>
+                  <span>Newest First</span>
+                  <span className='text-gray-400'>↓</span>
+                </>
+              ) : (
+                <>
+                  <span>Oldest First</span>
+                  <span className='text-gray-400'>↑</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Filter Controls */}
-        <div className='flex items-center space-x-4 sm:ml-8'>
-          <div className='text-sm text-gray-500'>Impact:</div>
-          <select
-            value={impactFilter}
-            onChange={(e) => setImpactFilter(e.target.value)}
-            className='text-sm border-gray-200 rounded-md py-1 px-2 text-gray-600 hover:border-gray-300 focus:border-blue-500 focus:ring-blue-500'
-          >
-            {[
-              'All',
-              'Decline',
-              'Extended Monitor',
-              'Inconclusive',
-              'No Impact',
-            ].map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-          {impactFilter !== 'All' && (
-            <button
-              onClick={() => setImpactFilter('All')}
-              className='text-sm text-gray-400 hover:text-gray-600'
-              aria-label='Clear filter'
+        <div className='flex flex-wrap items-center gap-3'>
+          <div className='text-sm font-medium text-gray-700'>Impact:</div>
+          <div className='flex items-center gap-3 flex-wrap'>
+            <select
+              value={impactFilter}
+              onChange={(e) => setImpactFilter(e.target.value)}
+              className='px-4 py-2 text-sm font-medium bg-white border border-gray-200 rounded-lg text-gray-700 hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors'
             >
-              ✕
-            </button>
-          )}
-          <div className='text-sm text-gray-400'>
+              {[
+                'All',
+                'Decline',
+                'Extended Monitor',
+                'Inconclusive',
+                'No Impact',
+              ].map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+            {impactFilter !== 'All' && (
+              <button
+                onClick={() => setImpactFilter('All')}
+                className='p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors'
+                aria-label='Clear filter'
+              >
+                <XMarkIcon className='h-4 w-4' />
+              </button>
+            )}
+          </div>
+          <div className='ml-auto text-sm text-gray-500'>
             Showing {filteredAssessments.length} of {assessments.length} results
           </div>
         </div>
