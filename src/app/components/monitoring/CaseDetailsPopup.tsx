@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react'
+import React, { useEffect, useCallback, useState, useRef } from 'react'
 import { InjuryCase } from '../../types/monitoring'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import axios from 'axios'
@@ -93,27 +93,34 @@ const CaseDetailsContent: React.FC<CaseDetailsContentProps> = ({
 interface AssessmentContentProps {
   assessments: Assessment[]
   isLoading: boolean
+  onLoadMore?: () => void
 }
 
 const AssessmentContent: React.FC<AssessmentContentProps> = ({
   assessments,
   isLoading,
+  onLoadMore,
 }) => {
   const [sortField, setSortField] = useState<
     'FirstSightingDate' | 'LastSightingDate'
   >('FirstSightingDate')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
   const [impactFilter, setImpactFilter] = useState<string>('All')
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  if (isLoading) {
-    return (
-      <div className='h-96 flex items-center justify-center text-gray-500'>
-        Loading assessments...
-      </div>
-    )
-  }
+  // Handle scroll
+  const handleScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
+      // If we're within 100px of the bottom, trigger next page load
+      if (scrollHeight - scrollTop - clientHeight < 100) {
+        onLoadMore?.()
+      }
+    },
+    [onLoadMore]
+  )
 
-  if (!assessments?.length) {
+  if (!assessments?.length && !isLoading) {
     return (
       <div className='h-96 flex items-center justify-center text-gray-500'>
         No assessments found
@@ -208,7 +215,11 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
       </div>
 
       {/* Assessment List */}
-      <div className='max-h-[65vh] overflow-y-auto pr-4 -mr-4 pb-16 space-y-6'>
+      <div
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className='max-h-[65vh] overflow-y-auto pr-4 -mr-4 pb-16 space-y-6'
+      >
         {sortedAssessments.map((assessment) => (
           <div
             key={assessment.AssessmentId}
@@ -282,6 +293,12 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
             </div>
           </div>
         ))}
+
+        {isLoading && (
+          <div className='flex justify-center py-4'>
+            <div className='animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent'></div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -304,35 +321,63 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
   const [assessmentData, setAssessmentData] =
     useState<AssessmentResponse | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
 
-  // Fetch assessment data when popup opens
-  useEffect(() => {
-    const fetchAssessments = async () => {
-      if (isOpen && caseData) {
-        setIsLoading(true)
-        try {
-          const response = await axios.get<AssessmentResponse>(
-            `https://stage-rwanthro-backend.srv.axds.co/anthro/api/v1/monitoring_assessments/?case_id=${caseData.CaseId}&page_size=25`,
-            {
-              headers: {
-                accept: 'application/json',
-                Authorization: 'token 8186f023f5f80b21498be6162280820fd6144d75',
-                'X-CSRFToken':
-                  'TgNK6RFXdMwTkfwpKhgxJLPhIFvoZf3hHyROnPqNurZnzExIbbtH8wk55D0gCHcW',
-              },
-            }
-          )
-          setAssessmentData(response.data)
-        } catch (error) {
-          console.error('Error fetching assessments:', error)
-        } finally {
-          setIsLoading(false)
+  // Fetch assessment data
+  const fetchAssessments = async (page: number) => {
+    if (!caseData || !hasMore) return
+
+    setIsLoading(true)
+    try {
+      const response = await axios.get<AssessmentResponse>(
+        `https://stage-rwanthro-backend.srv.axds.co/anthro/api/v1/monitoring_assessments/?case_id=${caseData.CaseId}&page=${page}&page_size=25`,
+        {
+          headers: {
+            accept: 'application/json',
+            Authorization: 'token 8186f023f5f80b21498be6162280820fd6144d75',
+            'X-CSRFToken':
+              'TgNK6RFXdMwTkfwpKhgxJLPhIFvoZf3hHyROnPqNurZnzExIbbtH8wk55D0gCHcW',
+          },
         }
-      }
-    }
+      )
 
-    fetchAssessments()
+      if (page === 1) {
+        setAssessmentData(response.data)
+      } else {
+        setAssessmentData((prev) =>
+          prev
+            ? {
+                ...response.data,
+                results: [...prev.results, ...response.data.results],
+              }
+            : response.data
+        )
+      }
+
+      setHasMore(!!response.data.pagination.next)
+      setCurrentPage(page)
+    } catch (error) {
+      console.error('Error fetching assessments:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Initial fetch when popup opens
+  useEffect(() => {
+    if (isOpen && caseData) {
+      setCurrentPage(1)
+      setHasMore(true)
+      fetchAssessments(1)
+    }
   }, [isOpen, caseData])
+
+  const handleLoadMore = useCallback(() => {
+    if (!isLoading && hasMore) {
+      fetchAssessments(currentPage + 1)
+    }
+  }, [isLoading, hasMore, currentPage, fetchAssessments])
 
   // Handle escape key press
   const handleEscapeKey = useCallback(
@@ -432,6 +477,7 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
             <AssessmentContent
               assessments={assessmentData?.results || []}
               isLoading={isLoading}
+              onLoadMore={handleLoadMore}
             />
           )}
 
