@@ -15,7 +15,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       description: 'View entanglement-related injuries.',
     },
     '/injury/vessel-strike': {
-      title: 'Vessel Strike by Year',
+      title: 'Vessel Strikes',
       description: 'View vessel strike incidents by year.',
     },
   }
@@ -26,18 +26,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       links: [
         {
           href: '/injury/injury-type',
-          label: 'Injury Type by Year'
+          label: 'Total',
         },
         {
           href: '/injury/entanglement',
-          label: 'Entanglement'
+          label: 'Entanglement',
         },
         {
           href: '/injury/vessel-strike',
-          label: 'Vessel Strike by Year'
-        }
-      ]
-    }
+          label: 'Vessel Strikes',
+        },
+      ],
+    },
   ]
 
   return (

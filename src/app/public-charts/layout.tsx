@@ -105,7 +105,7 @@ export default function PublicChartsLayout({
     '/public-charts/vessel-strike': {
       title: 'Vessel Strike',
       description:
-        'Detected vessel strike events by type and severity. Vessel strike types can include propeller cuts (Prop), blunt force trauma (Blunt), large open wounds (Gash), and others such as skeg wounds (Other). can be detected with attached gear (i.e. Gear) or by wounds only and no attached gear (i.e. No Gear). Severity is an assessment of the resulting vessel strike injury and is classified as Superficial, Shallow or Deep. See XXXX for severity descriptions.',
+        'Detected vessel strike events by type and severity. Vessel strike types can include propeller cuts (Prop), blunt force trauma (Blunt), large open wounds (Gash), and others such as skeg wounds (Other). can be detected with attached gear (i.e. Gear) or by wounds only and no attached gear (i.e. No Gear). Severity is an assessment of the resulting vessel strike injury and is classified as Superficial (<2cm penetrating depth), Shallow (2-8cm penetrating depth), or Deep (> 8cm penetrating depth).',
     },
   }
 
