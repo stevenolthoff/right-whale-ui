@@ -236,10 +236,11 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
         {sortedAssessments.map((assessment) => (
           <div
             key={assessment.AssessmentId}
-            className='bg-white border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow'
+            className='bg-white border border-gray-100 rounded-xl p-4 sm:p-6 hover:shadow-md transition-shadow'
           >
-            <div className='flex items-center justify-between mb-3'>
-              <div className='flex items-center space-x-3'>
+            {/* Header with badges */}
+            <div className='flex flex-wrap items-start justify-between gap-2 mb-4'>
+              <div className='flex flex-wrap items-center gap-2'>
                 <span className='text-sm font-medium text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full'>
                   {assessment.AssessmentTypeDescription}
                 </span>
@@ -255,38 +256,44 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
                   {assessment.InjuryImpactDescription}
                 </span>
               </div>
-              <div className='text-sm text-gray-500'>
+              <div className='text-sm text-gray-500 shrink-0'>
                 ID: {assessment.AssessmentId}
               </div>
             </div>
 
-            <div className='space-y-2'>
-              <div className='grid grid-cols-2 gap-4'>
-                <div>
+            {/* Sighting Information */}
+            <div className='space-y-4'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+                <div className='space-y-1'>
                   <div className='text-sm font-medium text-gray-500'>
                     First Sighting
                   </div>
-                  <div className='text-sm'>
+                  <div className='text-sm text-gray-700'>
                     {new Date(
                       assessment.FirstSightingDate
-                    ).toLocaleDateString()}{' '}
-                    - {assessment.FirstSightingAreaDescription}
+                    ).toLocaleDateString()}
+                  </div>
+                  <div className='text-sm text-gray-600'>
+                    {assessment.FirstSightingAreaDescription}
                   </div>
                 </div>
-                <div>
+                <div className='space-y-1'>
                   <div className='text-sm font-medium text-gray-500'>
                     Last Sighting
                   </div>
-                  <div className='text-sm'>
-                    {new Date(assessment.LastSightingDate).toLocaleDateString()}{' '}
-                    - {assessment.LastSightingAreaDescription}
+                  <div className='text-sm text-gray-700'>
+                    {new Date(assessment.LastSightingDate).toLocaleDateString()}
+                  </div>
+                  <div className='text-sm text-gray-600'>
+                    {assessment.LastSightingAreaDescription}
                   </div>
                 </div>
               </div>
 
+              {/* Comments Section */}
               {assessment.InjuryImpactComments && (
-                <div className='mt-3'>
-                  <div className='text-sm font-medium text-gray-500 mb-1'>
+                <div className='pt-2'>
+                  <div className='text-sm font-medium text-gray-500 mb-1.5'>
                     Comments
                   </div>
                   <div className='text-sm text-gray-700 bg-gray-50 p-3 rounded-lg'>
@@ -295,12 +302,17 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
                 </div>
               )}
 
-              <div className='mt-3 flex items-center justify-between text-sm text-gray-500'>
-                <div>
-                  Monitor Remove: {assessment.IsMonitorRemove ? 'Yes' : 'No'}
+              {/* Monitor Status */}
+              <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 text-sm text-gray-600'>
+                <div className='flex items-center gap-2'>
+                  <span className='font-medium'>Monitor Remove:</span>
+                  <span>{assessment.IsMonitorRemove ? 'Yes' : 'No'}</span>
                 </div>
                 {assessment.MonitorRemoveReasonDescription !== 'No' && (
-                  <div>Reason: {assessment.MonitorRemoveReasonDescription}</div>
+                  <div className='flex items-center gap-2'>
+                    <span className='font-medium'>Reason:</span>
+                    <span>{assessment.MonitorRemoveReasonDescription}</span>
+                  </div>
                 )}
               </div>
             </div>
