@@ -20,6 +20,7 @@ import {
 } from '@heroicons/react/20/solid'
 import { TableFilters } from './TableFilters'
 import { useFilteredData } from '@/app/hooks/useFilteredData'
+import CaseDetailsPopup from './CaseDetailsPopup'
 
 interface MonitoringTableProps {
   showFilters?: boolean
@@ -41,6 +42,10 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
   const setColumns = useFilteredData((state) => state.setColumns)
   const columnHelper = createColumnHelper<InjuryCase>()
 
+  const [selectedCase, setSelectedCase] = React.useState<InjuryCase | null>(
+    null
+  )
+
   const columns = React.useMemo<ColumnDef<InjuryCase, any>[]>(() => {
     return [
       columnHelper.accessor('EGNo', {
@@ -50,7 +55,7 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
             href={`https://rwcatalog.neaq.org/#/whales/${info.getValue()}`}
             target='_blank'
             rel='noopener noreferrer'
-            className='text-blue-600 hover:text-blue-800'
+            className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
           >
             {info.getValue()}
           </a>
@@ -58,7 +63,14 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
       }),
       columnHelper.accessor('CaseId', {
         header: 'Case ID',
-        cell: (info) => info.getValue(),
+        cell: (info) => (
+          <button
+            onClick={() => setSelectedCase(info.row.original)}
+            className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+          >
+            {info.getValue()}
+          </button>
+        ),
         filterFn: (row, columnId, filterValue) => {
           if (!filterValue) return true
           const value = row.getValue(columnId)
@@ -230,6 +242,11 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
 
   return (
     <div className='w-full max-w-screen-xl mx-auto'>
+      <CaseDetailsPopup
+        caseData={selectedCase}
+        isOpen={selectedCase !== null}
+        onClose={() => setSelectedCase(null)}
+      />
       {showFilters && (
         <TableFilters
           table={table}
