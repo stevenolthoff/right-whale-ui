@@ -197,7 +197,7 @@ export default function Header() {
                   }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Monitoring
+                  Near Real-Time Injury Monitoring
                 </Link>
               )}
               {isLoggedIn && (
