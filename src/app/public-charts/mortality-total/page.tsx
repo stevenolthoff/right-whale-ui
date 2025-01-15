@@ -14,10 +14,10 @@ export default function MortalityTotal() {
   const chartData = (() => {
     if (!data) return []
 
-    // Create a map to store year -> cause of death -> count
-    const yearData = new Map<number, Map<string, number>>()
+    // Create a map to store total mortalities per year
+    const yearTotals = new Map<number, number>()
 
-    // Filter and group the data
+    // Filter and count total mortalities per year
     data
       .filter(
         (item) =>
@@ -25,53 +25,26 @@ export default function MortalityTotal() {
           item.year <= yearRangeProps.yearRange[1]
       )
       .forEach((item) => {
-        if (!yearData.has(item.year)) {
-          yearData.set(item.year, new Map())
-        }
-        const causeMap = yearData.get(item.year)!
-        causeMap.set(
-          item.causeOfDeath,
-          (causeMap.get(item.causeOfDeath) || 0) + 1
-        )
+        yearTotals.set(item.year, (yearTotals.get(item.year) || 0) + 1)
       })
 
-    // Convert to the format needed for the stacked chart
+    // Convert to the format needed for the chart
     const formattedData = []
     for (
       let year = yearRangeProps.yearRange[0];
       year <= yearRangeProps.yearRange[1];
       year++
     ) {
-      const entry: any = { year }
-      const causeCounts = yearData.get(year) || new Map()
-
-      // Add all causes of death, defaulting to 0 if not present
-      ;(
-        [
-          'Vessel Strike',
-          'Entanglement',
-          'Neonate',
-          'Unknown',
-          'Other',
-        ] as const
-      ).forEach((cause) => {
-        entry[cause] = causeCounts.get(cause) || 0
+      formattedData.push({
+        year,
+        total: yearTotals.get(year) || 0,
       })
-
-      formattedData.push(entry)
     }
 
     return formattedData.sort((a, b) => a.year - b.year)
   })()
 
-  const totalMortalities = chartData.reduce((sum, item) => {
-    return (
-      sum +
-      Object.entries(item)
-        .filter(([key]) => key !== 'year')
-        .reduce((yearSum, [, count]) => yearSum + (count as number), 0)
-    )
-  }, 0)
+  const totalMortalities = chartData.reduce((sum, item) => sum + item.total, 0)
 
   return (
     <ChartLayout
@@ -99,7 +72,7 @@ export default function MortalityTotal() {
     >
       <DataChart
         data={chartData}
-        stacked={true}
+        stacked={false}
         yAxisLabel='Number of Mortalities'
       />
     </ChartLayout>
