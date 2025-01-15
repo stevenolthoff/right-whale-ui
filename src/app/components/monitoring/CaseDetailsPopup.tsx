@@ -103,6 +103,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
     'FirstSightingDate' | 'LastSightingDate'
   >('FirstSightingDate')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+  const [impactFilter, setImpactFilter] = useState<string>('All')
 
   if (isLoading) {
     return (
@@ -120,8 +121,14 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
     )
   }
 
-  // Sort assessments based on selected field and direction
-  const sortedAssessments = [...assessments].sort((a, b) => {
+  // Filter assessments
+  const filteredAssessments =
+    impactFilter === 'All'
+      ? assessments
+      : assessments.filter((a) => a.InjuryImpactDescription === impactFilter)
+
+  // Sort filtered assessments
+  const sortedAssessments = [...filteredAssessments].sort((a, b) => {
     const dateA = new Date(a[sortField]).getTime()
     const dateB = new Date(b[sortField]).getTime()
     return sortDirection === 'desc' ? dateB - dateA : dateA - dateB
@@ -129,38 +136,75 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
 
   return (
     <div className='space-y-6'>
-      {/* Sorting Controls */}
-      <div className='flex items-center space-x-4 pb-4 border-b border-gray-100'>
-        <div className='text-sm text-gray-500'>Sort by:</div>
-        <button
-          onClick={() => setSortField('FirstSightingDate')}
-          className={`text-sm px-3 py-1 rounded-md ${
-            sortField === 'FirstSightingDate'
-              ? 'bg-blue-50 text-blue-600'
-              : 'text-gray-600 hover:bg-gray-50'
-          }`}
-        >
-          First Sighting
-        </button>
-        <button
-          onClick={() => setSortField('LastSightingDate')}
-          className={`text-sm px-3 py-1 rounded-md ${
-            sortField === 'LastSightingDate'
-              ? 'bg-blue-50 text-blue-600'
-              : 'text-gray-600 hover:bg-gray-50'
-          }`}
-        >
-          Last Sighting
-        </button>
-        <div className='flex-1'></div>
-        <button
-          onClick={() =>
-            setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc')
-          }
-          className='text-sm text-gray-600 hover:text-gray-900'
-        >
-          {sortDirection === 'desc' ? '↓ Newest First' : '↑ Oldest First'}
-        </button>
+      {/* Controls */}
+      <div className='flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 pb-4 border-b border-gray-100'>
+        {/* Sort Controls */}
+        <div className='flex items-center space-x-4'>
+          <div className='text-sm text-gray-500'>Sort by:</div>
+          <button
+            onClick={() => setSortField('FirstSightingDate')}
+            className={`text-sm px-3 py-1 rounded-md ${
+              sortField === 'FirstSightingDate'
+                ? 'bg-blue-50 text-blue-600'
+                : 'text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            First Sighting
+          </button>
+          <button
+            onClick={() => setSortField('LastSightingDate')}
+            className={`text-sm px-3 py-1 rounded-md ${
+              sortField === 'LastSightingDate'
+                ? 'bg-blue-50 text-blue-600'
+                : 'text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            Last Sighting
+          </button>
+          <button
+            onClick={() =>
+              setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc')
+            }
+            className='text-sm text-gray-600 hover:text-gray-900'
+          >
+            {sortDirection === 'desc' ? '↓ Newest First' : '↑ Oldest First'}
+          </button>
+        </div>
+
+        {/* Filter Controls */}
+        <div className='flex items-center space-x-4 sm:ml-8'>
+          <div className='text-sm text-gray-500'>Impact:</div>
+          <select
+            value={impactFilter}
+            onChange={(e) => setImpactFilter(e.target.value)}
+            className='text-sm border-gray-200 rounded-md py-1 px-2 text-gray-600 hover:border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+          >
+            {[
+              'All',
+              'Decline',
+              'Extended Monitor',
+              'Inconclusive',
+              'No Impact',
+            ].map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+          {impactFilter !== 'All' && (
+            <button
+              onClick={() => setImpactFilter('All')}
+              className='text-sm text-gray-400 hover:text-gray-600'
+              aria-label='Clear filter'
+            >
+              ✕
+            </button>
+          )}
+          <div className='text-sm text-gray-400'>
+            {filteredAssessments.length} result
+            {filteredAssessments.length !== 1 ? 's' : ''}
+          </div>
+        </div>
       </div>
 
       {/* Assessment List */}
