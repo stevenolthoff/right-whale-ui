@@ -110,6 +110,14 @@ export default function VesselStrike() {
     })(),
   }
 
+  const totalVesselStrikes = chartData.byType.reduce((sum, yearData) => {
+    // Sum all values except the year property
+    const yearTotal = Object.entries(yearData)
+      .filter(([key]) => key !== 'year')
+      .reduce((yearSum, [_, count]) => yearSum + (count as number), 0)
+    return sum + yearTotal
+  }, 0)
+
   return (
     <div className='flex flex-col space-y-4 bg-white p-4'>
       <div className='flex justify-between items-center'>
@@ -136,9 +144,10 @@ export default function VesselStrike() {
           <h2 className='text-xl font-semibold mb-1'>
             Right Whale Vessel Strike Analysis
           </h2>
-          <p className='text-sm text-gray-600 mb-4'>
+          <p className='text-sm text-gray-600'>
             Data from {yearRangeProps.yearRange[0]} to{' '}
-            {yearRangeProps.yearRange[1]}
+            {yearRangeProps.yearRange[1]} • Total Count:{' '}
+            <span className='text-blue-700'>{totalVesselStrikes}</span>
           </p>
         </div>
         <div className='space-y-8'>
