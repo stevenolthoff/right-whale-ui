@@ -101,10 +101,10 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
   isLoading,
   onLoadMore,
 }) => {
-  const [sortField, setSortField] = useState<
-    'FirstSightingDate' | 'LastSightingDate'
-  >('FirstSightingDate')
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+  const [sortField] = useState<'FirstSightingDate' | 'LastSightingDate'>(
+    'FirstSightingDate'
+  )
+  const [sortDirection] = useState<'asc' | 'desc'>('asc')
   const [impactFilter, setImpactFilter] = useState<string>('All')
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
@@ -145,51 +145,6 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
     <div className='space-y-6'>
       {/* Controls */}
       <div className='flex flex-col space-y-4 pb-6'>
-        {/* Sort Controls */}
-        <div className='flex flex-wrap items-center gap-3'>
-          <div className='text-sm font-medium text-gray-700'>Sort by:</div>
-          <div className='flex gap-2 flex-wrap'>
-            <button
-              onClick={() => setSortField('FirstSightingDate')}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                sortField === 'FirstSightingDate'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              First Sighting
-            </button>
-            <button
-              onClick={() => setSortField('LastSightingDate')}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                sortField === 'LastSightingDate'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              Last Sighting
-            </button>
-            <button
-              onClick={() =>
-                setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc')
-              }
-              className='inline-flex items-center gap-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors'
-            >
-              {sortDirection === 'desc' ? (
-                <>
-                  <span>Newest First</span>
-                  <span className='text-gray-400'>↓</span>
-                </>
-              ) : (
-                <>
-                  <span>Oldest First</span>
-                  <span className='text-gray-400'>↑</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-
         {/* Filter Controls */}
         <div className='flex flex-wrap items-center gap-3'>
           <div className='text-sm font-medium text-gray-700'>Impact:</div>
@@ -356,7 +311,7 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
     setIsLoading(true)
     try {
       const response = await axios.get<AssessmentResponse>(
-        `https://stage-rwanthro-backend.srv.axds.co/anthro/api/v1/monitoring_assessments/?case_id=${caseData.CaseId}&page=${page}&page_size=25`,
+        `https://stage-rwanthro-backend.srv.axds.co/anthro/api/v1/monitoring_assessments/?Case__CaseId=${caseData.CaseId}&page=${page}&page_size=25`,
         {
           headers: {
             accept: 'application/json',
