@@ -41,7 +41,7 @@ const TextFilter: React.FC<FilterProps> = ({ value, onChange }) => (
     value={value as string}
     onChange={(e) => onChange(e.target.value)}
     placeholder='Filter...'
-    className='px-3 py-1 border rounded text-sm'
+    className='px-3 py-1 border rounded text-sm bg-white'
   />
 )
 
@@ -91,6 +91,16 @@ const SelectFilter: React.FC<FilterProps> = ({
         className='text-sm'
         placeholder='Select...'
         isClearable
+        styles={{
+          control: (base) => ({
+            ...base,
+            backgroundColor: 'white',
+          }),
+          menu: (base) => ({
+            ...base,
+            backgroundColor: 'white',
+          }),
+        }}
       />
       {isMulti &&
         column === 'UnusualMortalityEventDescription' &&
