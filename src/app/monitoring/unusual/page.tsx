@@ -106,6 +106,7 @@ const Unusual = () => {
           DetectionDate: [yearRange[0], yearRange[1]],
           UnusualMortalityEventDescription: 'all-yes',
         }}
+        filtersExpanded={false}
       />
     </div>
   )

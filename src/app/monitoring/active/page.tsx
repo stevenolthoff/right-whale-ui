@@ -106,6 +106,7 @@ const Active = () => {
           IsActiveCase: 'Yes',
           DetectionDate: [yearRange[0], yearRange[1]],
         }}
+        filtersExpanded={false}
       />
     </div>
   )

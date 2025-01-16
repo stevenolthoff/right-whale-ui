@@ -30,12 +30,14 @@ interface MonitoringTableProps {
     [key: string]: any
   }
   visibleColumns?: string[]
+  filtersExpanded?: boolean
 }
 
 const MonitoringTable: React.FC<MonitoringTableProps> = ({
   showFilters = true,
   defaultFilters,
   visibleColumns,
+  filtersExpanded,
 }) => {
   const { results, loading, error } = useMonitoringData()
   const setFilteredData = useFilteredData((state) => state.setFilteredData)
@@ -55,7 +57,9 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
             href={`https://rwcatalog.neaq.org/#/whales/${info.getValue()}`}
             target='_blank'
             rel='noopener noreferrer'
-            className={`text-blue-600 hover:text-blue-800 ${info.getValue() ? 'bg-blue-100' : ''} px-2 py-1 rounded-md`}
+            className={`text-blue-600 hover:text-blue-800 ${
+              info.getValue() ? 'bg-blue-100' : ''
+            } px-2 py-1 rounded-md`}
           >
             {info.getValue()}
           </a>
@@ -252,6 +256,7 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
           table={table}
           data={results || []}
           defaultFilters={defaultFilters}
+          defaultExpanded={filtersExpanded}
         />
       )}
       <div className='relative overflow-hidden border rounded-lg shadow'>
