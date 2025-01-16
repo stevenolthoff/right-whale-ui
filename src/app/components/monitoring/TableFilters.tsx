@@ -6,6 +6,22 @@ import { YearRangeSlider } from '../monitoring/YearRangeSlider'
 import { useFilteredData } from '@/app/hooks/useFilteredData'
 import Select from 'react-select'
 
+const useMediaQuery = (query: string) => {
+  const [matches, setMatches] = React.useState(false)
+
+  React.useEffect(() => {
+    const media = window.matchMedia(query)
+    if (media.matches !== matches) {
+      setMatches(media.matches)
+    }
+    const listener = () => setMatches(media.matches)
+    media.addEventListener('change', listener)
+    return () => media.removeEventListener('change', listener)
+  }, [matches, query])
+
+  return matches
+}
+
 interface FilterProps {
   column: string
   value: string | string[]
@@ -142,6 +158,7 @@ interface TableFiltersProps {
   data: InjuryCase[]
   className?: string
   defaultFilters?: Record<string, any>
+  defaultExpanded?: boolean
 }
 
 export const TableFilters: React.FC<TableFiltersProps> = ({
@@ -149,9 +166,21 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
   data,
   className = '',
   defaultFilters,
+  defaultExpanded,
 }) => {
+  const isDesktop = useMediaQuery('(min-width: 768px)')
+  const [isExpanded, setIsExpanded] = React.useState(
+    defaultExpanded ?? isDesktop
+  )
+
+  // Update expanded state when screen size changes and defaultExpanded is not set
+  React.useEffect(() => {
+    if (defaultExpanded === undefined) {
+      setIsExpanded(isDesktop)
+    }
+  }, [isDesktop, defaultExpanded])
+
   const setFilteredData = useFilteredData((state) => state.setFilteredData)
-  const [isExpanded, setIsExpanded] = React.useState(true)
 
   // Get unique values for each column that needs a select filter
   const filterOptions = React.useMemo(() => {
