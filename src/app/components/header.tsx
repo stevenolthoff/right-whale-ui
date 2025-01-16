@@ -25,6 +25,12 @@ export default function Header() {
   // Add scroll effect
   useEffect(() => {
     const handleScroll = () => {
+      // Close mobile menu when scrolling starts
+      if (isMenuOpen) {
+        setIsMenuOpen(false)
+        return
+      }
+
       const currentScrollY = window.scrollY
 
       // Always update isScrolled state for shadow effect
@@ -50,7 +56,7 @@ export default function Header() {
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [lastScrollY]) // Add lastScrollY as dependency
+  }, [lastScrollY, isMenuOpen]) // Add isMenuOpen as dependency
 
   return (
     <header
@@ -176,7 +182,7 @@ export default function Header() {
             isMenuOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
-          <div className='p-5'>
+          <div className='p-5 bg-white h-screen'>
             <div className='flex justify-between items-center mb-8'>
               <h2 className='font-bold text-xl'>Menu</h2>
               <button
