@@ -47,9 +47,6 @@ export default function Footer() {
             <ul className='space-y-2'>
               {[
                 { text: 'New England Aquarium', url: 'https://www.neaq.org' },
-                { text: 'Conservation Efforts', url: '#' },
-                { text: 'Research Papers', url: '#' },
-                { text: 'Data Sources', url: '#' },
               ].map((link) => (
                 <li key={link.text}>
                   <a
