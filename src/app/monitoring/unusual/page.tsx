@@ -102,12 +102,10 @@ const Unusual = () => {
       <Download />
 
       <Table
-        visibleColumns={['EGNo', 'CaseId', 'DetectionDate']}
         defaultFilters={{
           DetectionDate: [yearRange[0], yearRange[1]],
           UnusualMortalityEventDescription: 'all-yes',
         }}
-        showFilters={false}
       />
     </div>
   )

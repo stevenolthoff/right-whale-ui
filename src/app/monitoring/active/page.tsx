@@ -102,12 +102,10 @@ const Active = () => {
       <Download />
 
       <Table
-        visibleColumns={['EGNo', 'CaseId', 'DetectionDate']}
         defaultFilters={{
           IsActiveCase: 'Yes',
           DetectionDate: [yearRange[0], yearRange[1]],
         }}
-        showFilters={false}
       />
     </div>
   )
