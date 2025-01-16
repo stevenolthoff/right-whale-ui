@@ -5,6 +5,11 @@ import { InjuryCase } from '@/app/types/monitoring'
 import { YearRangeSlider } from '../monitoring/YearRangeSlider'
 import { useFilteredData } from '@/app/hooks/useFilteredData'
 import Select from 'react-select'
+import {
+  ChevronUpIcon,
+  ChevronDownIcon,
+  ArrowPathIcon,
+} from '@heroicons/react/20/solid'
 
 const useMediaQuery = (query: string) => {
   const [matches, setMatches] = React.useState(false)
@@ -255,14 +260,25 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
         <div className='flex gap-2'>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className='px-3 py-1 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded shadow-sm hover:bg-gray-50'
+            className='px-3 py-1 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded shadow-sm hover:bg-gray-50 flex items-center gap-1'
           >
-            {isExpanded ? 'Collapse' : 'Expand'}
+            {isExpanded ? (
+              <>
+                <ChevronUpIcon className='w-4 h-4' />
+                Collapse
+              </>
+            ) : (
+              <>
+                <ChevronDownIcon className='w-4 h-4' />
+                Expand
+              </>
+            )}
           </button>
           <button
             onClick={resetFilters}
-            className='px-3 py-1 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded shadow-sm hover:bg-gray-50'
+            className='px-3 py-1 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded shadow-sm hover:bg-gray-50 flex items-center gap-1'
           >
+            <ArrowPathIcon className='w-4 h-4' />
             Reset Filters
           </button>
         </div>
