@@ -170,7 +170,7 @@ export default function Header() {
 
         {/* Mobile Menu Overlay */}
         <div
-          className={`fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
+          className={`fixed inset-0 bg-black/50 backdrop-blur-sm h-screen transition-opacity duration-300 lg:hidden ${
             isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
           onClick={() => setIsMenuOpen(false)}
