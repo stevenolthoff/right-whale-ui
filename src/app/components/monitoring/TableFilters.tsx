@@ -151,6 +151,7 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
   defaultFilters,
 }) => {
   const setFilteredData = useFilteredData((state) => state.setFilteredData)
+  const [isExpanded, setIsExpanded] = React.useState(true)
 
   // Get unique values for each column that needs a select filter
   const filterOptions = React.useMemo(() => {
@@ -222,49 +223,59 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
     <div className={`space-y-4 bg-gray-50 p-4 ${className}`}>
       <div className='flex justify-between items-center'>
         <h3 className='text-sm font-medium text-gray-700'>Filters</h3>
-        <button
-          onClick={resetFilters}
-          className='px-3 py-1 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded shadow-sm hover:bg-gray-50'
-        >
-          Reset Filters
-        </button>
+        <div className='flex gap-2'>
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className='px-3 py-1 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded shadow-sm hover:bg-gray-50'
+          >
+            {isExpanded ? 'Collapse' : 'Expand'}
+          </button>
+          <button
+            onClick={resetFilters}
+            className='px-3 py-1 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded shadow-sm hover:bg-gray-50'
+          >
+            Reset Filters
+          </button>
+        </div>
       </div>
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-        {table.getAllColumns().map((column) => {
-          const columnId = column.id as keyof typeof filterOptions
-          const filterValue = (column.getFilterValue() as string) ?? ''
+      {isExpanded && (
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+          {table.getAllColumns().map((column) => {
+            const columnId = column.id as keyof typeof filterOptions
+            const filterValue = (column.getFilterValue() as string) ?? ''
 
-          return (
-            <div key={column.id} className='flex flex-col gap-1'>
-              <label className='text-xs font-medium text-gray-500 uppercase'>
-                {column.columnDef.header as string}
-              </label>
-              {column.id === 'DetectionDate' ? (
-                <YearFilter
-                  column={column.id}
-                  value={filterValue}
-                  onChange={(value) => column.setFilterValue(value)}
-                  data={data}
-                />
-              ) : ['EGNo', 'FieldId', 'CaseId'].includes(column.id) ? (
-                <TextFilter
-                  column={column.id}
-                  value={filterValue}
-                  onChange={(value) => column.setFilterValue(value)}
-                />
-              ) : (
-                <SelectFilter
-                  column={column.id}
-                  value={filterValue}
-                  onChange={(value) => column.setFilterValue(value)}
-                  options={filterOptions[columnId] || []}
-                  isMulti={column.id === 'UnusualMortalityEventDescription'}
-                />
-              )}
-            </div>
-          )
-        })}
-      </div>
+            return (
+              <div key={column.id} className='flex flex-col gap-1'>
+                <label className='text-xs font-medium text-gray-500 uppercase'>
+                  {column.columnDef.header as string}
+                </label>
+                {column.id === 'DetectionDate' ? (
+                  <YearFilter
+                    column={column.id}
+                    value={filterValue}
+                    onChange={(value) => column.setFilterValue(value)}
+                    data={data}
+                  />
+                ) : ['EGNo', 'FieldId', 'CaseId'].includes(column.id) ? (
+                  <TextFilter
+                    column={column.id}
+                    value={filterValue}
+                    onChange={(value) => column.setFilterValue(value)}
+                  />
+                ) : (
+                  <SelectFilter
+                    column={column.id}
+                    value={filterValue}
+                    onChange={(value) => column.setFilterValue(value)}
+                    options={filterOptions[columnId] || []}
+                    isMulti={column.id === 'UnusualMortalityEventDescription'}
+                  />
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 } 
