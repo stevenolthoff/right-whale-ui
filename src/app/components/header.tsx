@@ -11,6 +11,8 @@ export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true)
+  const [lastScrollY, setLastScrollY] = useState(0)
 
   useEffect(() => {
     if (token) {
@@ -23,11 +25,32 @@ export default function Header() {
   // Add scroll effect
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10)
+      const currentScrollY = window.scrollY
+
+      // Always update isScrolled state for shadow effect
+      setIsScrolled(currentScrollY > 10)
+
+      // For mobile: hide/show based on scroll direction
+      if (window.innerWidth < 1024) {
+        // lg breakpoint
+        if (currentScrollY > lastScrollY) {
+          // Scrolling down
+          setIsHeaderVisible(false)
+        } else {
+          // Scrolling up
+          setIsHeaderVisible(true)
+        }
+      } else {
+        // On desktop, always show header
+        setIsHeaderVisible(true)
+      }
+
+      setLastScrollY(currentScrollY)
     }
+
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [lastScrollY]) // Add lastScrollY as dependency
 
   return (
     <header
@@ -35,7 +58,7 @@ export default function Header() {
         isScrolled
           ? 'bg-white/95 backdrop-blur-sm shadow-md py-3'
           : 'bg-white py-4'
-      }`}
+      } ${!isHeaderVisible ? '-translate-y-full' : 'translate-y-0'}`}
     >
       <div className='max-w-7xl mx-auto px-4 flex items-center justify-between gap-5'>
         <Link href='/' className='shrink-0'>
