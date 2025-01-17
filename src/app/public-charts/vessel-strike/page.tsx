@@ -1,5 +1,5 @@
 'use client'
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { useInjuryData } from '@/app/hooks/useInjuryData'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { useInjuryYearRange } from '@/app/hooks/useInjuryYearRange'
@@ -10,6 +10,7 @@ import { ParsedInjuryCase } from '@/app/types/injury'
 
 export default function VesselStrike() {
   const chartRef = useRef<HTMLDivElement>(null)
+  const [isSideBySide, setIsSideBySide] = useState(true)
   const { data, loading, error } = useInjuryData()
   const yearRangeProps = useInjuryYearRange(
     loading ? null : data,
@@ -120,6 +121,17 @@ export default function VesselStrike() {
 
   return (
     <div className='flex flex-col space-y-4 bg-white p-4'>
+      <div className='flex justify-center mb-4'>
+        <button
+          onClick={() => setIsSideBySide(!isSideBySide)}
+          className='hidden lg:block px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors'
+        >
+          {isSideBySide
+            ? 'Switch to Vertical Layout'
+            : 'Switch to Side by Side'}
+        </button>
+      </div>
+
       <div className='flex justify-between items-center'>
         <div className='flex-grow'>
           <YearRangeSlider
@@ -137,9 +149,7 @@ export default function VesselStrike() {
         />
       </div>
 
-      <div ref={chartRef} className='h-[1400px] w-full'>
-        {' '}
-        {/* Doubled height to fit both charts */}
+      <div ref={chartRef} className='w-full'>
         <div className='text-center'>
           <h2 className='text-xl font-semibold mb-1'>
             Right Whale Vessel Strike Analysis
@@ -150,9 +160,15 @@ export default function VesselStrike() {
             <span className='text-blue-700'>{totalVesselStrikes}</span>
           </p>
         </div>
-        <div className='space-y-8'>
+        <div
+          className={`grid grid-cols-1 ${
+            isSideBySide ? 'lg:grid-cols-2' : 'lg:grid-cols-1'
+          } gap-8`}
+        >
           <div className='h-[600px]'>
-            <h3 className='text-lg font-semibold mb-4'>Vessel Strike Types</h3>
+            <div className='text-center mb-4'>
+              <h3 className='text-lg font-semibold'>Vessel Strike Types</h3>
+            </div>
             <DataChart
               data={chartData.byType}
               stacked={true}
@@ -161,7 +177,9 @@ export default function VesselStrike() {
           </div>
 
           <div className='h-[600px]'>
-            <h3 className='text-lg font-semibold mb-4'>Severity Levels</h3>
+            <div className='text-center mb-4'>
+              <h3 className='text-lg font-semibold'>Severity Levels</h3>
+            </div>
             <DataChart
               data={chartData.bySeverity}
               stacked={true}
