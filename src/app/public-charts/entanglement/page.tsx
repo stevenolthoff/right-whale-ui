@@ -1,5 +1,5 @@
 'use client'
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { useInjuryData } from '@/app/hooks/useInjuryData'
 import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
 import { useInjuryYearRange } from '../../hooks/useInjuryYearRange'
@@ -10,9 +10,9 @@ import { ExportChart } from '@/app/components/monitoring/ExportChart'
 export default function Entanglement() {
   const chartRef = useRef<HTMLDivElement>(null)
   const { data, loading, error } = useInjuryData()
-  const yearRangeProps = useInjuryYearRange(
-    loading ? null : data,
-    item => item.type.includes('Entanglement')
+  const [isSideBySide, setIsSideBySide] = useState(true)
+  const yearRangeProps = useInjuryYearRange(loading ? null : data, (item) =>
+    item.type.includes('Entanglement')
   )
 
   if (loading) return <Loader />
@@ -21,70 +21,92 @@ export default function Entanglement() {
   // Filter and format data for both charts
   const chartData = {
     byType: (() => {
-      const types = Array.from(new Set(
-        data
-          .filter(item => item.type.includes('Entanglement'))
-          .map(item => item.account)
-      )).sort()
+      const types = Array.from(
+        new Set(
+          data
+            .filter((item) => item.type.includes('Entanglement'))
+            .map((item) => item.account)
+        )
+      ).sort()
 
       const yearData = new Map<number, Record<string, number>>()
-      
+
       data
-        .filter(item => 
-          item.year >= yearRangeProps.yearRange[0] && 
-          item.year <= yearRangeProps.yearRange[1] &&
-          item.type.includes('Entanglement')
+        .filter(
+          (item) =>
+            item.year >= yearRangeProps.yearRange[0] &&
+            item.year <= yearRangeProps.yearRange[1] &&
+            item.type.includes('Entanglement')
         )
-        .forEach(item => {
+        .forEach((item) => {
           if (!yearData.has(item.year)) {
-            yearData.set(item.year, Object.fromEntries(types.map(t => [t, 0])))
+            yearData.set(
+              item.year,
+              Object.fromEntries(types.map((t) => [t, 0]))
+            )
           }
           yearData.get(item.year)![item.account]++
         })
 
       const formattedData = []
-      for (let year = yearRangeProps.yearRange[0]; year <= yearRangeProps.yearRange[1]; year++) {
+      for (
+        let year = yearRangeProps.yearRange[0];
+        year <= yearRangeProps.yearRange[1];
+        year++
+      ) {
         formattedData.push({
           year,
-          ...(yearData.get(year) || Object.fromEntries(types.map(t => [t, 0])))
+          ...(yearData.get(year) ||
+            Object.fromEntries(types.map((t) => [t, 0]))),
         })
       }
-      
+
       return formattedData.sort((a, b) => a.year - b.year)
     })(),
 
     bySeverity: (() => {
-      const severities = Array.from(new Set(
-        data
-          .filter(item => item.type.includes('Entanglement'))
-          .map(item => item.severity)
-      )).sort()
+      const severities = Array.from(
+        new Set(
+          data
+            .filter((item) => item.type.includes('Entanglement'))
+            .map((item) => item.severity)
+        )
+      ).sort()
 
       const yearData = new Map<number, Record<string, number>>()
-      
+
       data
-        .filter(item => 
-          item.year >= yearRangeProps.yearRange[0] && 
-          item.year <= yearRangeProps.yearRange[1] &&
-          item.type.includes('Entanglement')
+        .filter(
+          (item) =>
+            item.year >= yearRangeProps.yearRange[0] &&
+            item.year <= yearRangeProps.yearRange[1] &&
+            item.type.includes('Entanglement')
         )
-        .forEach(item => {
+        .forEach((item) => {
           if (!yearData.has(item.year)) {
-            yearData.set(item.year, Object.fromEntries(severities.map(s => [s, 0])))
+            yearData.set(
+              item.year,
+              Object.fromEntries(severities.map((s) => [s, 0]))
+            )
           }
           yearData.get(item.year)![item.severity]++
         })
 
       const formattedData = []
-      for (let year = yearRangeProps.yearRange[0]; year <= yearRangeProps.yearRange[1]; year++) {
+      for (
+        let year = yearRangeProps.yearRange[0];
+        year <= yearRangeProps.yearRange[1];
+        year++
+      ) {
         formattedData.push({
           year,
-          ...(yearData.get(year) || Object.fromEntries(severities.map(s => [s, 0])))
+          ...(yearData.get(year) ||
+            Object.fromEntries(severities.map((s) => [s, 0]))),
         })
       }
-      
+
       return formattedData.sort((a, b) => a.year - b.year)
-    })()
+    })(),
   }
 
   const totalEntanglements = chartData.byType.reduce((sum, yearData) => {
@@ -97,6 +119,17 @@ export default function Entanglement() {
 
   return (
     <div className='flex flex-col space-y-4 bg-white p-4'>
+      <div className='flex justify-center mb-4'>
+        <button
+          onClick={() => setIsSideBySide(!isSideBySide)}
+          className='hidden lg:block px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors'
+        >
+          {isSideBySide
+            ? 'Switch to Vertical Layout'
+            : 'Switch to Side by Side'}
+        </button>
+      </div>
+
       <div className='flex justify-between items-center'>
         <div className='flex-grow'>
           <YearRangeSlider
@@ -114,9 +147,7 @@ export default function Entanglement() {
         />
       </div>
 
-      <div ref={chartRef} className='h-[1400px] w-full'>
-        {' '}
-        {/* Doubled height to fit both charts */}
+      <div ref={chartRef} className='w-full'>
         <div className='text-center'>
           <h2 className='text-xl font-semibold mb-1'>
             Right Whale Entanglement Analysis
@@ -127,7 +158,11 @@ export default function Entanglement() {
             <span className='text-blue-700'>{totalEntanglements}</span>
           </p>
         </div>
-        <div className='space-y-8'>
+        <div
+          className={`grid grid-cols-1 ${
+            isSideBySide ? 'lg:grid-cols-2' : 'lg:grid-cols-1'
+          } gap-8`}
+        >
           <div className='h-[600px]'>
             <h3 className='text-lg font-semibold mb-4'>
               Entanglement Account Types
