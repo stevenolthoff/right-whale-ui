@@ -17,99 +17,89 @@ export default function Entanglement() {
     item.type.includes('Entanglement')
   )
 
-  // Memoize chart data to prevent unnecessary recalculations
-  const chartData = React.useMemo(
-    () => ({
-      byType: (() => {
-        const types = Array.from(
-          new Set(
-            data
-              .filter((item) => item.type.includes('Entanglement'))
-              .map((item) => item.account)
-          )
-        ).sort()
+  // Compute type chart data - only depends on severity filters
+  const typeChartData = React.useMemo(() => {
+    const filteredData = data.filter((item) => {
+      const matchesYear =
+        item.year >= yearRangeProps.yearRange[0] &&
+        item.year <= yearRangeProps.yearRange[1]
+      const matchesType = item.type.includes('Entanglement')
+      const passesSeverityFilter =
+        severityFilters.size === 0 || !severityFilters.has(item.severity)
+      return matchesYear && matchesType && passesSeverityFilter
+    })
 
-        const yearData = new Map<number, Record<string, number>>()
+    const types = Array.from(
+      new Set(filteredData.map((item) => item.account))
+    ).sort()
 
-        data
-          .filter(
-            (item) =>
-              item.year >= yearRangeProps.yearRange[0] &&
-              item.year <= yearRangeProps.yearRange[1] &&
-              item.type.includes('Entanglement')
-          )
-          .forEach((item) => {
-            if (!yearData.has(item.year)) {
-              yearData.set(
-                item.year,
-                Object.fromEntries(types.map((t) => [t, 0]))
-              )
-            }
-            yearData.get(item.year)![item.account]++
-          })
+    const yearData = new Map<number, Record<string, number>>()
 
-        const formattedData = []
-        for (
-          let year = yearRangeProps.yearRange[0];
-          year <= yearRangeProps.yearRange[1];
-          year++
-        ) {
-          formattedData.push({
-            year,
-            ...(yearData.get(year) ||
-              Object.fromEntries(types.map((t) => [t, 0]))),
-          })
-        }
+    filteredData.forEach((item) => {
+      if (!yearData.has(item.year)) {
+        yearData.set(item.year, Object.fromEntries(types.map((t) => [t, 0])))
+      }
+      yearData.get(item.year)![item.account]++
+    })
 
-        return formattedData.sort((a, b) => a.year - b.year)
-      })(),
+    const formattedData = []
+    for (
+      let year = yearRangeProps.yearRange[0];
+      year <= yearRangeProps.yearRange[1];
+      year++
+    ) {
+      formattedData.push({
+        year,
+        ...(yearData.get(year) || Object.fromEntries(types.map((t) => [t, 0]))),
+      })
+    }
 
-      bySeverity: (() => {
-        const severities = Array.from(
-          new Set(
-            data
-              .filter((item) => item.type.includes('Entanglement'))
-              .map((item) => item.severity)
-          )
-        ).sort()
+    return formattedData.sort((a, b) => a.year - b.year)
+  }, [data, yearRangeProps.yearRange, severityFilters])
 
-        const yearData = new Map<number, Record<string, number>>()
+  // Compute severity chart data - only depends on type filters
+  const severityChartData = React.useMemo(() => {
+    const filteredData = data.filter((item) => {
+      const matchesYear =
+        item.year >= yearRangeProps.yearRange[0] &&
+        item.year <= yearRangeProps.yearRange[1]
+      const matchesType = item.type.includes('Entanglement')
+      const passesTypeFilter =
+        typeFilters.size === 0 || !typeFilters.has(item.account)
+      return matchesYear && matchesType && passesTypeFilter
+    })
 
-        data
-          .filter(
-            (item) =>
-              item.year >= yearRangeProps.yearRange[0] &&
-              item.year <= yearRangeProps.yearRange[1] &&
-              item.type.includes('Entanglement')
-          )
-          .forEach((item) => {
-            if (!yearData.has(item.year)) {
-              yearData.set(
-                item.year,
-                Object.fromEntries(severities.map((s) => [s, 0]))
-              )
-            }
-            yearData.get(item.year)![item.severity]++
-          })
+    const severities = Array.from(
+      new Set(filteredData.map((item) => item.severity))
+    ).sort()
 
-        const formattedData = []
-        for (
-          let year = yearRangeProps.yearRange[0];
-          year <= yearRangeProps.yearRange[1];
-          year++
-        ) {
-          formattedData.push({
-            year,
-            ...(yearData.get(year) ||
-              Object.fromEntries(severities.map((s) => [s, 0]))),
-          })
-        }
+    const yearData = new Map<number, Record<string, number>>()
 
-        return formattedData.sort((a, b) => a.year - b.year)
-      })(),
-    }),
-    [data, yearRangeProps.yearRange]
-  )
+    filteredData.forEach((item) => {
+      if (!yearData.has(item.year)) {
+        yearData.set(
+          item.year,
+          Object.fromEntries(severities.map((s) => [s, 0]))
+        )
+      }
+      yearData.get(item.year)![item.severity]++
+    })
+
+    const formattedData = []
+    for (
+      let year = yearRangeProps.yearRange[0];
+      year <= yearRangeProps.yearRange[1];
+      year++
+    ) {
+      formattedData.push({
+        year,
+        ...(yearData.get(year) ||
+          Object.fromEntries(severities.map((s) => [s, 0]))),
+      })
+    }
+
+    return formattedData.sort((a, b) => a.year - b.year)
+  }, [data, yearRangeProps.yearRange, typeFilters])
 
   const handleFilterChange = React.useCallback(
     (chartType: 'type' | 'severity', filters: Set<string>) => {
@@ -118,7 +108,7 @@ export default function Entanglement() {
       const filtersArray = Array.from(filters)
       const currentFiltersArray = Array.from(currentFilters)
 
-      // Only log if the filters have actually changed
+      // Only update if the filters have actually changed
       if (
         filtersArray.length !== currentFiltersArray.length ||
         filtersArray.some((f) => !currentFilters.has(f)) ||
@@ -130,10 +120,10 @@ export default function Entanglement() {
           hiddenSeries: filtersArray,
           visibleSeries:
             chartType === 'type'
-              ? Object.keys(chartData.byType[0] || {}).filter(
+              ? Object.keys(typeChartData[0] || {}).filter(
                   (k) => k !== 'year' && !filters.has(k)
                 )
-              : Object.keys(chartData.bySeverity[0] || {}).filter(
+              : Object.keys(severityChartData[0] || {}).filter(
                   (k) => k !== 'year' && !filters.has(k)
                 ),
         })
@@ -145,7 +135,7 @@ export default function Entanglement() {
         }
       }
     },
-    [chartData, typeFilters, severityFilters]
+    [typeChartData, severityChartData, typeFilters, severityFilters]
   )
 
   if (loading) return <Loader />
@@ -203,7 +193,7 @@ export default function Entanglement() {
               </h3>
             </div>
             <DataChart
-              data={chartData.byType}
+              data={typeChartData}
               stacked={true}
               yAxisLabel='Entanglements'
               onFilterChange={(filters) => handleFilterChange('type', filters)}
@@ -215,7 +205,7 @@ export default function Entanglement() {
               <h3 className='text-lg font-semibold'>Severity Levels</h3>
             </div>
             <DataChart
-              data={chartData.bySeverity}
+              data={severityChartData}
               stacked={true}
               yAxisLabel='Entanglements'
               onFilterChange={(filters) =>
