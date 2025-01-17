@@ -11,6 +11,8 @@ export default function Entanglement() {
   const chartRef = useRef<HTMLDivElement>(null)
   const { data, loading, error } = useInjuryData()
   const [isSideBySide, setIsSideBySide] = useState(true)
+  const [typeFilters, setTypeFilters] = useState<Set<string>>(new Set())
+  const [severityFilters, setSeverityFilters] = useState<Set<string>>(new Set())
   const yearRangeProps = useInjuryYearRange(loading ? null : data, (item) =>
     item.type.includes('Entanglement')
   )
@@ -164,6 +166,7 @@ export default function Entanglement() {
               data={chartData.byType}
               stacked={true}
               yAxisLabel='Entanglements'
+              onFilterChange={setTypeFilters}
             />
           </div>
 
@@ -175,6 +178,7 @@ export default function Entanglement() {
               data={chartData.bySeverity}
               stacked={true}
               yAxisLabel='Entanglements'
+              onFilterChange={setSeverityFilters}
             />
           </div>
         </div>

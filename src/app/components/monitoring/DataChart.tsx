@@ -15,15 +15,22 @@ interface DataChartProps {
   data: any[]
   stacked?: boolean
   yAxisLabel?: string
+  onFilterChange?: (hiddenSeries: Set<string>) => void
 }
 
-export const DataChart: React.FC<DataChartProps> = ({ data, stacked = false, yAxisLabel = 'Number of Mortalities' }) => {
+export const DataChart: React.FC<DataChartProps> = ({
+  data,
+  stacked = false,
+  yAxisLabel = 'Number of Mortalities',
+  onFilterChange,
+}) => {
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
   const [showResetButton, setShowResetButton] = useState(false)
 
   useEffect(() => {
     setShowResetButton(hiddenSeries.size > 0)
-  }, [hiddenSeries])
+    onFilterChange?.(hiddenSeries)
+  }, [hiddenSeries, onFilterChange])
 
   // Get all series names (excluding 'year')
   const keys = Object.keys(data[0] || {}).filter((key) => key !== 'year')
