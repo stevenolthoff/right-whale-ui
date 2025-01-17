@@ -11,113 +11,131 @@ import { ParsedInjuryCase } from '@/app/types/injury'
 export default function VesselStrike() {
   const chartRef = useRef<HTMLDivElement>(null)
   const [isSideBySide, setIsSideBySide] = useState(true)
+  const [typeFilters, setTypeFilters] = useState<Set<string>>(new Set())
+  const [severityFilters, setSeverityFilters] = useState<Set<string>>(new Set())
   const { data, loading, error } = useInjuryData()
   const yearRangeProps = useInjuryYearRange(
     loading ? null : data,
     (item: ParsedInjuryCase) => item.type.includes('Vessel Strike')
   )
 
-  if (loading) return <Loader />
-  if (error) return <div className='p-4 text-red-500'>Error: {error}</div>
+  // Compute type chart data - only depends on severity filters
+  const typeChartData = React.useMemo(() => {
+    const filteredData = data.filter((item) => {
+      const matchesYear =
+        item.year >= yearRangeProps.yearRange[0] &&
+        item.year <= yearRangeProps.yearRange[1]
+      const matchesType = item.type.includes('Vessel Strike')
+      const passesSeverityFilter =
+        severityFilters.size === 0 || !severityFilters.has(item.severity)
+      return matchesYear && matchesType && passesSeverityFilter
+    })
 
-  // Filter and format data for both charts
-  const chartData = {
-    byType: (() => {
-      const types = Array.from(
-        new Set(
-          data
-            .filter((item) => item.type.includes('Vessel Strike'))
-            .map((item) => item.account)
-        )
-      ).sort()
+    const types = Array.from(
+      new Set(filteredData.map((item) => item.account))
+    ).sort()
 
-      const yearData = new Map<number, Record<string, number>>()
+    const yearData = new Map<number, Record<string, number>>()
 
-      data
-        .filter(
-          (item) =>
-            item.year >= yearRangeProps.yearRange[0] &&
-            item.year <= yearRangeProps.yearRange[1] &&
-            item.type.includes('Vessel Strike')
-        )
-        .forEach((item) => {
-          if (!yearData.has(item.year)) {
-            yearData.set(
-              item.year,
-              Object.fromEntries(types.map((t) => [t, 0]))
-            )
-          }
-          yearData.get(item.year)![item.account]++
-        })
-
-      const formattedData = []
-      for (
-        let year = yearRangeProps.yearRange[0];
-        year <= yearRangeProps.yearRange[1];
-        year++
-      ) {
-        formattedData.push({
-          year,
-          ...(yearData.get(year) ||
-            Object.fromEntries(types.map((t) => [t, 0]))),
-        })
+    filteredData.forEach((item) => {
+      if (!yearData.has(item.year)) {
+        yearData.set(item.year, Object.fromEntries(types.map((t) => [t, 0])))
       }
+      yearData.get(item.year)![item.account]++
+    })
 
-      return formattedData.sort((a, b) => a.year - b.year)
-    })(),
+    const formattedData = []
+    for (
+      let year = yearRangeProps.yearRange[0];
+      year <= yearRangeProps.yearRange[1];
+      year++
+    ) {
+      formattedData.push({
+        year,
+        ...(yearData.get(year) || Object.fromEntries(types.map((t) => [t, 0]))),
+      })
+    }
 
-    bySeverity: (() => {
-      const severities = Array.from(
-        new Set(
-          data
-            .filter((item) => item.type.includes('Vessel Strike'))
-            .map((item) => item.severity)
+    return formattedData.sort((a, b) => a.year - b.year)
+  }, [data, yearRangeProps.yearRange, severityFilters])
+
+  // Compute severity chart data - only depends on type filters
+  const severityChartData = React.useMemo(() => {
+    const filteredData = data.filter((item) => {
+      const matchesYear =
+        item.year >= yearRangeProps.yearRange[0] &&
+        item.year <= yearRangeProps.yearRange[1]
+      const matchesType = item.type.includes('Vessel Strike')
+      const passesTypeFilter =
+        typeFilters.size === 0 || !typeFilters.has(item.account)
+      return matchesYear && matchesType && passesTypeFilter
+    })
+
+    const severities = Array.from(
+      new Set(filteredData.map((item) => item.severity))
+    ).sort()
+
+    const yearData = new Map<number, Record<string, number>>()
+
+    filteredData.forEach((item) => {
+      if (!yearData.has(item.year)) {
+        yearData.set(
+          item.year,
+          Object.fromEntries(severities.map((s) => [s, 0]))
         )
-      ).sort()
-
-      const yearData = new Map<number, Record<string, number>>()
-
-      data
-        .filter(
-          (item) =>
-            item.year >= yearRangeProps.yearRange[0] &&
-            item.year <= yearRangeProps.yearRange[1] &&
-            item.type.includes('Vessel Strike')
-        )
-        .forEach((item) => {
-          if (!yearData.has(item.year)) {
-            yearData.set(
-              item.year,
-              Object.fromEntries(severities.map((s) => [s, 0]))
-            )
-          }
-          yearData.get(item.year)![item.severity]++
-        })
-
-      const formattedData = []
-      for (
-        let year = yearRangeProps.yearRange[0];
-        year <= yearRangeProps.yearRange[1];
-        year++
-      ) {
-        formattedData.push({
-          year,
-          ...(yearData.get(year) ||
-            Object.fromEntries(severities.map((s) => [s, 0]))),
-        })
       }
+      yearData.get(item.year)![item.severity]++
+    })
 
-      return formattedData.sort((a, b) => a.year - b.year)
-    })(),
-  }
+    const formattedData = []
+    for (
+      let year = yearRangeProps.yearRange[0];
+      year <= yearRangeProps.yearRange[1];
+      year++
+    ) {
+      formattedData.push({
+        year,
+        ...(yearData.get(year) ||
+          Object.fromEntries(severities.map((s) => [s, 0]))),
+      })
+    }
 
-  const totalVesselStrikes = chartData.byType.reduce((sum, yearData) => {
+    return formattedData.sort((a, b) => a.year - b.year)
+  }, [data, yearRangeProps.yearRange, typeFilters])
+
+  const handleFilterChange = React.useCallback(
+    (chartType: 'type' | 'severity', filters: Set<string>) => {
+      const currentFilters =
+        chartType === 'type' ? typeFilters : severityFilters
+      const filtersArray = Array.from(filters)
+      const currentFiltersArray = Array.from(currentFilters)
+
+      // Only update if the filters have actually changed
+      if (
+        filtersArray.length !== currentFiltersArray.length ||
+        filtersArray.some((f) => !currentFilters.has(f)) ||
+        currentFiltersArray.some((f) => !filters.has(f))
+      ) {
+        if (chartType === 'type') {
+          setTypeFilters(filters)
+        } else {
+          setSeverityFilters(filters)
+        }
+      }
+    },
+    [typeFilters, severityFilters]
+  )
+
+  const totalVesselStrikes = typeChartData.reduce((sum, yearData) => {
     // Sum all values except the year property
     const yearTotal = Object.entries(yearData)
       .filter(([key]) => key !== 'year')
       .reduce((yearSum, [_, count]) => yearSum + (count as number), 0)
     return sum + yearTotal
   }, 0)
+
+  if (loading) return <Loader />
+  if (error) return <div className='p-4 text-red-500'>Error: {error}</div>
 
   return (
     <div className='flex flex-col space-y-4 bg-white p-4'>
@@ -170,9 +188,10 @@ export default function VesselStrike() {
               <h3 className='text-lg font-semibold'>Vessel Strike Types</h3>
             </div>
             <DataChart
-              data={chartData.byType}
+              data={typeChartData}
               stacked={true}
               yAxisLabel='Vessel Strikes'
+              onFilterChange={(filters) => handleFilterChange('type', filters)}
             />
           </div>
 
@@ -181,9 +200,12 @@ export default function VesselStrike() {
               <h3 className='text-lg font-semibold'>Severity Levels</h3>
             </div>
             <DataChart
-              data={chartData.bySeverity}
+              data={severityChartData}
               stacked={true}
               yAxisLabel='Vessel Strikes'
+              onFilterChange={(filters) =>
+                handleFilterChange('severity', filters)
+              }
             />
           </div>
         </div>
