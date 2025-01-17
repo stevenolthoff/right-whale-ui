@@ -17,6 +17,30 @@ export default function Entanglement() {
     item.type.includes('Entanglement')
   )
 
+  const handleFilterChange = (
+    chartType: 'type' | 'severity',
+    filters: Set<string>
+  ) => {
+    console.log(`Filter change in ${chartType} chart:`, {
+      timestamp: new Date().toISOString(),
+      chartType,
+      hiddenSeries: Array.from(filters),
+      visibleSeries:
+        chartType === 'type'
+          ? Object.keys(chartData.byType[0] || {}).filter(
+              (k) => k !== 'year' && !filters.has(k)
+            )
+          : Object.keys(chartData.bySeverity[0] || {}).filter(
+              (k) => k !== 'year' && !filters.has(k)
+            ),
+    })
+    if (chartType === 'type') {
+      setTypeFilters(filters)
+    } else {
+      setSeverityFilters(filters)
+    }
+  }
+
   if (loading) return <Loader />
   if (error) return <div className='p-4 text-red-500'>Error: {error}</div>
 
@@ -166,7 +190,7 @@ export default function Entanglement() {
               data={chartData.byType}
               stacked={true}
               yAxisLabel='Entanglements'
-              onFilterChange={setTypeFilters}
+              onFilterChange={(filters) => handleFilterChange('type', filters)}
             />
           </div>
 
@@ -178,7 +202,9 @@ export default function Entanglement() {
               data={chartData.bySeverity}
               stacked={true}
               yAxisLabel='Entanglements'
-              onFilterChange={setSeverityFilters}
+              onFilterChange={(filters) =>
+                handleFilterChange('severity', filters)
+              }
             />
           </div>
         </div>
