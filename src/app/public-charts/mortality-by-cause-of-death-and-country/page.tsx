@@ -75,7 +75,6 @@ const formatChartDataForCountry = (
 }
 
 export default function MortalityByCauseAndCountry() {
-  console.count('MortalityByCauseAndCountry render')
   const chartRefUS = useRef<HTMLDivElement>(null)
   const chartRefCA = useRef<HTMLDivElement>(null)
   const { data, loading, error } = useMortalityData()
@@ -89,30 +88,25 @@ export default function MortalityByCauseAndCountry() {
   }, [hiddenSeries])
 
   const usChartData = useMemo(() => {
-    console.time('data-formatting-us')
     const result = formatChartDataForCountry(
       data,
       yearRangeProps.yearRange,
       'US'
     )
-    console.timeEnd('data-formatting-us')
     return result
   }, [data, yearRangeProps.yearRange])
 
   const canadaChartData = useMemo(() => {
-    console.time('data-formatting-canada')
     const result = formatChartDataForCountry(
       data,
       yearRangeProps.yearRange,
       'Canada'
     )
-    console.timeEnd('data-formatting-canada')
     return result
   }, [data, yearRangeProps.yearRange])
 
   const getTotalMortalities = useMemo(
     () => (chartData: any[]) => {
-      console.time('getTotalMortalities')
       const result = chartData.reduce(
         (sum, item) =>
           sum +
@@ -123,7 +117,6 @@ export default function MortalityByCauseAndCountry() {
           item.year,
         0
       )
-      console.timeEnd('getTotalMortalities')
       return result
     },
     []
@@ -215,7 +208,6 @@ export default function MortalityByCauseAndCountry() {
       showResetButton: boolean
       yearRange: [number, number]
     }) => {
-      console.count(`${country} ChartComponent render`)
       return (
         <ChartLayout
           title={title}

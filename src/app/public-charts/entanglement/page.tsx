@@ -114,20 +114,6 @@ export default function Entanglement() {
         filtersArray.some((f) => !currentFilters.has(f)) ||
         currentFiltersArray.some((f) => !filters.has(f))
       ) {
-        console.log(`Filter change in ${chartType} chart:`, {
-          timestamp: new Date().toISOString(),
-          chartType,
-          hiddenSeries: filtersArray,
-          visibleSeries:
-            chartType === 'type'
-              ? Object.keys(typeChartData[0] || {}).filter(
-                  (k) => k !== 'year' && !filters.has(k)
-                )
-              : Object.keys(severityChartData[0] || {}).filter(
-                  (k) => k !== 'year' && !filters.has(k)
-                ),
-        })
-
         if (chartType === 'type') {
           setTypeFilters(filters)
         } else {
