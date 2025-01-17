@@ -109,14 +109,6 @@ export default function Entanglement() {
     })(),
   }
 
-  const totalEntanglements = chartData.byType.reduce((sum, yearData) => {
-    // Sum all values except the year property
-    const yearTotal = Object.entries(yearData)
-      .filter(([key]) => key !== 'year')
-      .reduce((yearSum, [_, count]) => yearSum + (count as number), 0)
-    return sum + yearTotal
-  }, 0)
-
   return (
     <div className='flex flex-col space-y-4 bg-white p-4'>
       <div className='flex justify-center mb-4'>
@@ -154,8 +146,7 @@ export default function Entanglement() {
           </h2>
           <p className='text-sm text-gray-600'>
             Data from {yearRangeProps.yearRange[0]} to{' '}
-            {yearRangeProps.yearRange[1]} • Total Count:{' '}
-            <span className='text-blue-700'>{totalEntanglements}</span>
+            {yearRangeProps.yearRange[1]}
           </p>
         </div>
         <div
@@ -164,9 +155,11 @@ export default function Entanglement() {
           } gap-8`}
         >
           <div className='h-[600px]'>
-            <h3 className='text-lg font-semibold mb-4'>
-              Entanglement Account Types
-            </h3>
+            <div className='text-center mb-4'>
+              <h3 className='text-lg font-semibold'>
+                Entanglement Account Types
+              </h3>
+            </div>
             <DataChart
               data={chartData.byType}
               stacked={true}
@@ -175,7 +168,9 @@ export default function Entanglement() {
           </div>
 
           <div className='h-[600px]'>
-            <h3 className='text-lg font-semibold mb-4'>Severity Levels</h3>
+            <div className='text-center mb-4'>
+              <h3 className='text-lg font-semibold'>Severity Levels</h3>
+            </div>
             <DataChart
               data={chartData.bySeverity}
               stacked={true}

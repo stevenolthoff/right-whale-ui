@@ -29,6 +29,14 @@ export const DataChart: React.FC<DataChartProps> = ({ data, stacked = false, yAx
   const keys = Object.keys(data[0] || {}).filter((key) => key !== 'year')
   const isMultiSeries = keys.length > 1
 
+  // Calculate total from visible series
+  const totalCount = data.reduce((sum, yearData) => {
+    const yearTotal = Object.entries(yearData)
+      .filter(([key]) => key !== 'year' && !hiddenSeries.has(key))
+      .reduce((yearSum, [_, count]) => yearSum + (count as number), 0)
+    return sum + yearTotal
+  }, 0)
+
   const handleLegendClick = (entry: any, index: number) => {
     const seriesName = entry.dataKey?.toString()
     if (!seriesName) return
@@ -38,7 +46,7 @@ export const DataChart: React.FC<DataChartProps> = ({ data, stacked = false, yAx
       if (newHidden.has(seriesName)) {
         newHidden.delete(seriesName)
       } else {
-        keys.forEach(name => newHidden.add(name))
+        keys.forEach((name) => newHidden.add(name))
         newHidden.delete(seriesName)
       }
       return newHidden
@@ -48,13 +56,13 @@ export const DataChart: React.FC<DataChartProps> = ({ data, stacked = false, yAx
   const handleBarClick = (data: any, index: number) => {
     const seriesName = keys[index]
     if (seriesName) {
-      setHiddenSeries(prev => {
+      setHiddenSeries((prev) => {
         const newHidden = new Set(prev)
         if (newHidden.has(seriesName)) {
           newHidden.delete(seriesName)
         } else {
           // Hide all except the clicked one
-          keys.forEach(name => newHidden.add(name))
+          keys.forEach((name) => newHidden.add(name))
           newHidden.delete(seriesName)
         }
         return newHidden
@@ -68,6 +76,11 @@ export const DataChart: React.FC<DataChartProps> = ({ data, stacked = false, yAx
 
   return (
     <div className='space-y-4'>
+      <div className='text-center'>
+        <p className='text-sm text-gray-600'>
+          Total Count: <span className='text-blue-700'>{totalCount}</span>
+        </p>
+      </div>
       <div className='relative'>
         <div className='h-[500px]'>
           <ResponsiveContainer width='100%' height='100%'>
@@ -81,16 +94,16 @@ export const DataChart: React.FC<DataChartProps> = ({ data, stacked = false, yAx
               }}
             >
               <CartesianGrid strokeDasharray='3 3' />
-              <XAxis 
-                dataKey="year"
-                label={{ 
-                  value: 'Year', 
-                  position: 'insideBottom', 
-                  offset: -15
+              <XAxis
+                dataKey='year'
+                label={{
+                  value: 'Year',
+                  position: 'insideBottom',
+                  offset: -15,
                 }}
                 interval={4}
                 angle={-45}
-                textAnchor="end"
+                textAnchor='end'
                 height={60}
                 tickMargin={10}
               />
@@ -104,25 +117,29 @@ export const DataChart: React.FC<DataChartProps> = ({ data, stacked = false, yAx
               />
               <Tooltip />
               {isMultiSeries && (
-                <Legend 
+                <Legend
                   onClick={handleLegendClick}
-                  wrapperStyle={{ 
+                  wrapperStyle={{
                     cursor: 'pointer',
-                    paddingTop: '20px'
+                    paddingTop: '20px',
                   }}
-                  verticalAlign="bottom"
-                  align="center"
+                  verticalAlign='bottom'
+                  align='center'
                 />
               )}
               {keys.map((key, index) => (
                 <Bar
-                  key={key} 
-                  dataKey={key} 
+                  key={key}
+                  dataKey={key}
                   stackId={stacked ? 'stack' : undefined}
                   fill={COLORS[index % COLORS.length]}
                   name={key}
                   hide={hiddenSeries.has(key)}
-                  onClick={isMultiSeries ? (data) => handleBarClick(data, index) : undefined}
+                  onClick={
+                    isMultiSeries
+                      ? (data) => handleBarClick(data, index)
+                      : undefined
+                  }
                   style={isMultiSeries ? { cursor: 'pointer' } : undefined}
                 />
               ))}
@@ -131,10 +148,10 @@ export const DataChart: React.FC<DataChartProps> = ({ data, stacked = false, yAx
         </div>
       </div>
       {showResetButton && isMultiSeries && (
-        <div className="flex justify-center">
+        <div className='flex justify-center'>
           <button
             onClick={resetVisibility}
-            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            className='px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors'
           >
             Show All
           </button>
