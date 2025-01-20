@@ -58,145 +58,147 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
             />
           </div>
 
-          {/* Hero Image */}
-          <div className='relative w-full h-48 md:h-64 flex-shrink-0'>
-            <Image
-              src='/whale-info.webp'
-              alt='Whale Tail'
-              fill
-              className='object-cover'
-            />
-          </div>
-
           {/* Scrollable Content */}
-          <div className='flex-grow overflow-y-auto p-4 md:p-6'>
-            <p className='mb-6'>
-              The North Atlantic Right Whale Anthropogenic Events Visualization
-              Site was developed to provide improved access to, and
-              visualization of, information and data associated with
-              anthropogenic injuries to right whales. The data illustrated on
-              this site represent a nearly 50-year collaboration of stakeholders
-              in the North Atlantic Right Whale Consortium.
-            </p>
-
-            <p className='mb-6'>
-              To learn more about North Atlantic Right Whales and anthropogenic
-              impacts on the species, please visit the&nbsp;
-              <a href='/resources' className='text-blue-500'>
-                resources page
-              </a>
-              .
-            </p>
-
-            <p className='mb-6'>
-              Click here to visit the{' '}
-              <a
-                href='https://www.neaq.org/animal/right-whales/'
-                className='text-blue-500'
-              >
-                New England Aquarium Site
-              </a>
-              .
-            </p>
-
-            {/* Button Section */}
-            <div className='grid grid-cols-2 gap-4 mb-8'>
-              <button
-                className='btn bg-blue-700 hover:bg-blue-800 text-white'
-                onClick={scrollToAbout}
-              >
-                ABOUT
-              </button>
-              <button
-                className='btn bg-blue-700 hover:bg-blue-800 text-white'
-                onClick={scrollToDataAccess}
-              >
-                DATA ACCESS & USE
-              </button>
+          <div className='flex-grow overflow-y-auto'>
+            {/* Hero Image */}
+            <div className='relative w-full h-48 md:h-64 flex-shrink-0'>
+              <Image
+                src='/whale-info.webp'
+                alt='Whale Tail'
+                fill
+                className='object-cover'
+              />
             </div>
 
-            <h2
-              ref={aboutSectionRef}
-              className='text-xl font-bold mb-3 scroll-mt-6'
-            >
-              About the Platform
-            </h2>
-            <p className='mb-6'>
-              The North Atlantic right whale remains one of the most endangered
-              large whales in the world, and the population has been in decline
-              since 2010. Anthropogenic sources of mortality continue to plague
-              this species; all adult and juvenile right whale mortalities from
-              2003-2018 for which a cause of death could be determined were due
-              to human activities (entanglement or vessel strike). Anthropogenic
-              injuries, including vessel strikes and entanglement in fishing
-              gear, may also have a more significant impact on the growth rates
-              of the North Atlantic population than other large whale species
-              and are likely reducing the biological potential of reproductive
-              females.
-            </p>
+            <div className='p-4 md:p-6'>
+              <p className='mb-6'>
+                The North Atlantic Right Whale Anthropogenic Events
+                Visualization Site was developed to provide improved access to,
+                and visualization of, information and data associated with
+                anthropogenic injuries to right whales. The data illustrated on
+                this site represent a nearly 50-year collaboration of
+                stakeholders in the North Atlantic Right Whale Consortium.
+              </p>
 
-            <p className='mb-6'>
-              The ability to comprehensively evaluate trends in and
-              characteristics of anthropogenic injury on right whales is
-              critical to not only understanding their biological impact but
-              also to effectively mitigate deleterious interactions between
-              right whales and humans and evaluate these mitigation measures.
-              Although the data to do so exist in various locations, consistent
-              and standardized outputs that can be easily accessed and provided
-              to interested parties have not been available.
-            </p>
+              <p className='mb-6'>
+                To learn more about North Atlantic Right Whales and
+                anthropogenic impacts on the species, please visit the&nbsp;
+                <a href='/resources' className='text-blue-500'>
+                  resources page
+                </a>
+                .
+              </p>
 
-            <p className='mb-6'>
-              To better integrate injury data and improve efficacy and
-              efficiency of data extraction and reporting, the Anthropogenic
-              Events Database (AED) was created. This database is housed and
-              curated at the New England Aquarium, collates available
-              information on injury events (including injury type, severity,
-              gear type, rope diameter and breaking strength, vessel size
-              estimates, necropsy and gear reports) into one place, and is
-              linked to the Right Whale Catalog (also referred to as the North
-              Atlantic Right Whale Consortium Identification Database), allowing
-              for semi-automated linkage and retrieval of injury and life
-              history related information for individual whales.
-            </p>
+              <p className='mb-6'>
+                Click here to visit the{' '}
+                <a
+                  href='https://www.neaq.org/animal/right-whales/'
+                  className='text-blue-500'
+                >
+                  New England Aquarium Site
+                </a>
+                .
+              </p>
 
-            <p className='mb-6'>
-              The Right Whale Anthropogenic Event Visualization Site allows for
-              public access to, and viewing of, general mortality, calving, and
-              injury data. Additionally, permissioned users can interact with
-              and view AED data through data filters and pre-packaged queries.
-              Data visualization output products are available for regularly
-              sought after data extracts.
-            </p>
+              {/* Button Section */}
+              <div className='grid grid-cols-2 gap-4 mb-8'>
+                <button
+                  className='btn bg-blue-700 hover:bg-blue-800 text-white'
+                  onClick={scrollToAbout}
+                >
+                  ABOUT
+                </button>
+                <button
+                  className='btn bg-blue-700 hover:bg-blue-800 text-white'
+                  onClick={scrollToDataAccess}
+                >
+                  DATA ACCESS & USE
+                </button>
+              </div>
 
-            <h2
-              ref={dataAccessSectionRef}
-              className='text-xl font-bold mb-3 scroll-mt-6'
-            >
-              Data Access & Use
-            </h2>
-            <p className='mb-6'>
-              The Right Whale Anthropogenic Event Visualization Site serves
-              multiple user purposes and as such, data and visualization output
-              access varies by user. Publicly available data and graphics are
-              accessible through the "Explore" tab. Near real time injury
-              monitoring data are accessible by field teams and managers and are
-              meant to facilitate efforts in support of the ongoing Unusual
-              Mortality Event. Injury event data, derived from detailed annual
-              assessments of scars, active entanglements, and associated data,
-              are accessible for management and related activities. Access to,
-              and use of, data on this site are under the purview of the North
-              Atlantic Right Whale Consortium Data Access Protocols. Data may
-              not be shared or used without a formal data access request
-              submission available through the{' '}
-              <a
-                href='https://www.narwc.org/accessing-narwc-data.html'
-                className='text-blue-500'
+              <h2
+                ref={aboutSectionRef}
+                className='text-xl font-bold mb-3 scroll-mt-6'
               >
-                NARWC
-              </a>
-              .
-            </p>
+                About the Platform
+              </h2>
+              <p className='mb-6'>
+                The North Atlantic right whale remains one of the most
+                endangered large whales in the world, and the population has
+                been in decline since 2010. Anthropogenic sources of mortality
+                continue to plague this species; all adult and juvenile right
+                whale mortalities from 2003-2018 for which a cause of death
+                could be determined were due to human activities (entanglement
+                or vessel strike). Anthropogenic injuries, including vessel
+                strikes and entanglement in fishing gear, may also have a more
+                significant impact on the growth rates of the North Atlantic
+                population than other large whale species and are likely
+                reducing the biological potential of reproductive females.
+              </p>
+
+              <p className='mb-6'>
+                The ability to comprehensively evaluate trends in and
+                characteristics of anthropogenic injury on right whales is
+                critical to not only understanding their biological impact but
+                also to effectively mitigate deleterious interactions between
+                right whales and humans and evaluate these mitigation measures.
+                Although the data to do so exist in various locations,
+                consistent and standardized outputs that can be easily accessed
+                and provided to interested parties have not been available.
+              </p>
+
+              <p className='mb-6'>
+                To better integrate injury data and improve efficacy and
+                efficiency of data extraction and reporting, the Anthropogenic
+                Events Database (AED) was created. This database is housed and
+                curated at the New England Aquarium, collates available
+                information on injury events (including injury type, severity,
+                gear type, rope diameter and breaking strength, vessel size
+                estimates, necropsy and gear reports) into one place, and is
+                linked to the Right Whale Catalog (also referred to as the North
+                Atlantic Right Whale Consortium Identification Database),
+                allowing for semi-automated linkage and retrieval of injury and
+                life history related information for individual whales.
+              </p>
+
+              <p className='mb-6'>
+                The Right Whale Anthropogenic Event Visualization Site allows
+                for public access to, and viewing of, general mortality,
+                calving, and injury data. Additionally, permissioned users can
+                interact with and view AED data through data filters and
+                pre-packaged queries. Data visualization output products are
+                available for regularly sought after data extracts.
+              </p>
+
+              <h2
+                ref={dataAccessSectionRef}
+                className='text-xl font-bold mb-3 scroll-mt-6'
+              >
+                Data Access & Use
+              </h2>
+              <p className='mb-6'>
+                The Right Whale Anthropogenic Event Visualization Site serves
+                multiple user purposes and as such, data and visualization
+                output access varies by user. Publicly available data and
+                graphics are accessible through the "Explore" tab. Near real
+                time injury monitoring data are accessible by field teams and
+                managers and are meant to facilitate efforts in support of the
+                ongoing Unusual Mortality Event. Injury event data, derived from
+                detailed annual assessments of scars, active entanglements, and
+                associated data, are accessible for management and related
+                activities. Access to, and use of, data on this site are under
+                the purview of the North Atlantic Right Whale Consortium Data
+                Access Protocols. Data may not be shared or used without a
+                formal data access request submission available through the{' '}
+                <a
+                  href='https://www.narwc.org/accessing-narwc-data.html'
+                  className='text-blue-500'
+                >
+                  NARWC
+                </a>
+                .
+              </p>
+            </div>
           </div>
 
           {/* Fixed Footer */}
