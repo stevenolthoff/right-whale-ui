@@ -1,17 +1,21 @@
 'use client'
-import { useLocalStorage } from '@uidotdev/usehooks'
 import { useEffect } from 'react'
 import { redirect } from 'next/navigation'
-import React from 'react'
+import { useAuthStore } from '../store/auth'
+
 export default function Token() {
-  console.log('/token')
-  const [token, setToken] = useLocalStorage('token', '')
+  const { token, setToken, fetchUserData } = useAuthStore()
+
   useEffect(() => {
-    console.log('token', token)
-    setToken(globalThis.location.hash.split('#')[1])
-    if (token) {
-      redirect('/injury/injury-type')
+    const hashToken = globalThis.location.hash.split('#')[1]
+    if (hashToken) {
+      setToken(hashToken)
+      fetchUserData()
     }
-  }, [token, setToken])
+    if (token) {
+      redirect('/monitoring/overview')
+    }
+  }, [token, setToken, fetchUserData])
+
   return <></>
 }
