@@ -3,13 +3,15 @@
 import React from 'react'
 import CsvDownload from 'react-json-to-csv'
 import { useFilteredData } from '@/app/hooks/useFilteredData'
+import { useAuthStore } from '@/app/store/auth'
 
 const DownloadButton = () => {
   const { filteredData, columns } = useFilteredData()
+  const { canExportCsv } = useAuthStore()
 
-  if (!filteredData.length) return null
+  if (!filteredData.length || !canExportCsv()) return null
 
-  const formattedData = filteredData.map(row => {
+  const formattedData = filteredData.map((row) => {
     const formattedRow: Record<string, any> = { ...row }
 
     if (formattedRow.DetectionDate) {

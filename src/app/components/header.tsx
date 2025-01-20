@@ -1,26 +1,23 @@
 'use client'
 import Link from 'next/link'
-import { useLocalStorage } from '@uidotdev/usehooks'
 import { useState, useEffect } from 'react'
 import { redirect, usePathname } from 'next/navigation'
+import { useAuthStore } from '../store/auth'
 
 export default function Header() {
   const pathname = usePathname()
   const topPath = pathname.split('/')[1]
-  const [token, setToken] = useLocalStorage('token', '')
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const {
+    isAuthenticated,
+    clearToken,
+    canAccessMonitoring,
+    canAccessInjury,
+    canAccessAdmin,
+  } = useAuthStore()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isHeaderVisible, setIsHeaderVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
-
-  useEffect(() => {
-    if (token) {
-      setIsLoggedIn(true)
-    } else {
-      setIsLoggedIn(false)
-    }
-  }, [token])
 
   // Add scroll effect
   useEffect(() => {
@@ -56,7 +53,7 @@ export default function Header() {
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [lastScrollY, isMenuOpen]) // Add isMenuOpen as dependency
+  }, [lastScrollY, isMenuOpen])
 
   return (
     <header
@@ -86,7 +83,7 @@ export default function Header() {
           >
             Explore
           </Link>
-          {isLoggedIn && (
+          {isAuthenticated && canAccessMonitoring() && (
             <Link
               href='/monitoring/overview'
               className={`${
@@ -98,7 +95,7 @@ export default function Header() {
               Near Real-Time Injury Monitoring
             </Link>
           )}
-          {isLoggedIn && (
+          {isAuthenticated && canAccessInjury() && (
             <Link
               href='/injury/injury-type'
               className={`${
@@ -120,7 +117,7 @@ export default function Header() {
           >
             Resources
           </Link>
-          {isLoggedIn && (
+          {isAuthenticated && canAccessAdmin() && (
             <Link
               href='https://stage-rwanthro-backend.srv.axds.co/admin/'
               className={`${
@@ -137,8 +134,8 @@ export default function Header() {
         <div className='flex items-center gap-3 ml-auto'>
           <button
             onClick={() => {
-              if (isLoggedIn) {
-                setToken('')
+              if (isAuthenticated) {
+                clearToken()
               } else {
                 const host = globalThis.location.hostname
                 let redirectUrl =
@@ -150,7 +147,7 @@ export default function Header() {
             }}
             className='whitespace-nowrap px-4 py-2 text-sm rounded-lg font-semibold text-white bg-blue-600 transition-all duration-300 hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5'
           >
-            {isLoggedIn ? 'Sign Out' : 'Login'}
+            {isAuthenticated ? 'Sign Out' : 'Login'}
           </button>
 
           {/* Mobile Menu Button */}
@@ -216,7 +213,7 @@ export default function Header() {
               >
                 Explore
               </Link>
-              {isLoggedIn && (
+              {isAuthenticated && canAccessMonitoring() && (
                 <Link
                   href='/monitoring/active'
                   className={`block px-4 py-3 rounded-lg font-semibold transition-colors ${
@@ -229,7 +226,7 @@ export default function Header() {
                   Near Real-Time Injury Monitoring
                 </Link>
               )}
-              {isLoggedIn && (
+              {isAuthenticated && canAccessInjury() && (
                 <Link
                   href='/injury/injury-type'
                   className={`block px-4 py-3 rounded-lg font-semibold transition-colors ${

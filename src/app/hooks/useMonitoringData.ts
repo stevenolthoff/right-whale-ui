@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { InjuryCase } from '../types/monitoring'
+import { useAuthStore } from '../store/auth'
 
 export const useMonitoringData = () => {
   const [results, setResults] = useState<InjuryCase[]>([])
@@ -17,9 +18,7 @@ export const useMonitoringData = () => {
           {
             headers: {
               accept: 'application/json',
-              Authorization: 'token 8186f023f5f80b21498be6162280820fd6144d75',
-              'X-CSRFToken':
-                'TgNK6RFXdMwTkfwpKhgxJLPhIFvoZf3hHyROnPqNurZnzExIbbtH8wk55D0gCHcW',
+              Authorization: `token ${useAuthStore.getState().token}`,
             },
           }
         )

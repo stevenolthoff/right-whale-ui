@@ -2,6 +2,7 @@ import React, { useEffect, useCallback, useState, useRef } from 'react'
 import { InjuryCase } from '../../types/monitoring'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import axios from 'axios'
+import { useAuthStore } from '@/app/store/auth'
 
 interface AssessmentPagination {
   next: string | null
@@ -315,9 +316,7 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
         {
           headers: {
             accept: 'application/json',
-            Authorization: 'token 8186f023f5f80b21498be6162280820fd6144d75',
-            'X-CSRFToken':
-              'TgNK6RFXdMwTkfwpKhgxJLPhIFvoZf3hHyROnPqNurZnzExIbbtH8wk55D0gCHcW',
+            Authorization: `token ${useAuthStore.getState().token}`,
           },
         }
       )
