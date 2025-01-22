@@ -382,6 +382,15 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
     }
   }, [isOpen, handleEscapeKey])
 
+  useEffect(() => {
+    if (!isOpen) {
+      setAssessmentData(null)
+      setCurrentPage(1)
+      setHasMore(true)
+      setActiveTab('details')
+    }
+  }, [isOpen])
+
   if (!isOpen || !caseData) return null
 
   // Handle click outside
@@ -393,6 +402,7 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
 
   return (
     <div
+      key={caseData.CaseId}
       className='fixed inset-0 z-[9999] overflow-y-auto bg-gray-900/25 backdrop-blur-sm'
       onClick={handleBackdropClick}
       role='dialog'
