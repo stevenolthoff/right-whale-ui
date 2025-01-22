@@ -8,6 +8,11 @@ export function AuthCheck() {
   const { checkPermissions, isAuthenticated, token, setToken } = useAuthStore()
   const pathname = usePathname()
 
+  // Hydrate the store
+  useEffect(() => {
+    useAuthStore.persist.rehydrate()
+  }, [])
+
   // Initialize token from localStorage
   useEffect(() => {
     const storedToken = localStorage.getItem('token')

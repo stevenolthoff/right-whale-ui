@@ -16,9 +16,16 @@ export default function RootLayout({
   const pathname = usePathname()
   const { isAuthenticated, canAccessMonitoring, canAccessInjury, user } =
     useAuthStore()
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
 
   // Check authorization
   useEffect(() => {
+    if (!isHydrated) return // Wait for hydration
+
     const topPath = pathname.split('/')[1]
     const publicPaths = ['', 'public-charts', 'resources', 'token']
 
