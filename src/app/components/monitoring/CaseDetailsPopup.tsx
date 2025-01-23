@@ -225,9 +225,15 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
                     First Sighting
                   </div>
                   <div className='text-sm text-gray-700'>
-                    {new Date(
-                      assessment.FirstSightingDate
-                    ).toLocaleDateString()}
+                    {new Date(assessment.FirstSightingDate).toLocaleString(
+                      'en-US',
+                      {
+                        year: 'numeric',
+                        month: 'numeric',
+                        day: 'numeric',
+                        timeZone: 'UTC',
+                      }
+                    )}
                   </div>
                   <div className='text-sm text-gray-600'>
                     {assessment.FirstSightingAreaDescription}
@@ -238,7 +244,15 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
                     Last Sighting
                   </div>
                   <div className='text-sm text-gray-700'>
-                    {new Date(assessment.LastSightingDate).toLocaleDateString()}
+                    {new Date(assessment.LastSightingDate).toLocaleString(
+                      'en-US',
+                      {
+                        year: 'numeric',
+                        month: 'numeric',
+                        day: 'numeric',
+                        timeZone: 'UTC',
+                      }
+                    )}
                   </div>
                   <div className='text-sm text-gray-600'>
                     {assessment.LastSightingAreaDescription}
