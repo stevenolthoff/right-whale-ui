@@ -14,7 +14,7 @@ interface WordPressPost {
 export default async function Resources() {
   const data = await fetch(
     'https://right-whale.sites.axds.co/wp-json/wp/v2/pages?slug=resources',
-    { next: { revalidate: 3600 } } // Revalidate every hour
+    { next: { revalidate: 10 } }
   )
   const posts = await data.json() as WordPressPost[]
 
