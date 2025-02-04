@@ -1,4 +1,5 @@
-import React from 'react'
+'use client'
+import React, { useEffect, useState } from 'react'
 import './resources.css'
 
 interface WordPressPost {
@@ -11,12 +12,30 @@ interface WordPressPost {
   }
 }
 
-export default async function Resources() {
-  const data = await fetch(
-    'https://right-whale.sites.axds.co/wp-json/wp/v2/pages?slug=resources',
-    { next: { revalidate: 10 } }
-  )
-  const posts = await data.json() as WordPressPost[]
+export default function Resources() {
+  const [posts, setPosts] = useState<WordPressPost[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(
+          'https://right-whale.sites.axds.co/wp-json/wp/v2/pages?slug=resources'
+        )
+        const json = await res.json()
+        setPosts(json)
+      } catch (error) {
+        console.error('Error fetching resources:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+    const interval = setInterval(fetchData, 10000) // Poll every 10s
+
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <div className='min-h-screen bg-gradient-to-b from-white to-slate-50'>
@@ -25,8 +44,8 @@ export default async function Resources() {
         <div className='text-center mb-12'>
           <h1 className='text-4xl font-bold text-blue-900 mb-4'>Resources</h1>
           <p className='text-slate-600 max-w-2xl mx-auto'>
-            Access valuable information and research materials about North Atlantic Right Whales
-            and conservation efforts.
+            Access valuable information and research materials about North
+            Atlantic Right Whales and conservation efforts.
           </p>
         </div>
 
@@ -39,11 +58,19 @@ export default async function Resources() {
 
         {/* Content Section */}
         <div className='bg-white rounded-2xl shadow-sm border border-slate-200 p-8'>
-          {posts.map((post) => (
-            <div key={post.id} className='prose prose-slate max-w-none'>
-              <div dangerouslySetInnerHTML={{ __html: post.content.rendered }} />
+          {isLoading ? (
+            <div className='text-center py-8'>
+              <p className='text-slate-600'>Loading resources...</p>
             </div>
-          ))}
+          ) : (
+            posts.map((post) => (
+              <div key={post.id} className='prose prose-slate max-w-none'>
+                <div
+                  dangerouslySetInnerHTML={{ __html: post.content.rendered }}
+                />
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
