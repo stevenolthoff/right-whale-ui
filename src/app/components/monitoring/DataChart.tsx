@@ -16,6 +16,8 @@ interface DataChartProps {
   stacked?: boolean
   yAxisLabel?: string
   onFilterChange?: (hiddenSeries: Set<string>) => void
+  showTotal?: boolean
+  customOrder?: string[]
 }
 
 export const DataChart: React.FC<DataChartProps> = ({
@@ -23,6 +25,8 @@ export const DataChart: React.FC<DataChartProps> = ({
   stacked = false,
   yAxisLabel = 'Number of Mortalities',
   onFilterChange,
+  showTotal = true,
+  customOrder,
 }) => {
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
   const [showResetButton, setShowResetButton] = useState(false)
@@ -34,7 +38,10 @@ export const DataChart: React.FC<DataChartProps> = ({
 
   // Get all series names (excluding 'year')
   const keys = Object.keys(data[0] || {}).filter((key) => key !== 'year')
-  const isMultiSeries = keys.length > 1
+  const sortedKeys = customOrder
+    ? keys.sort((a, b) => customOrder.indexOf(a) - customOrder.indexOf(b))
+    : keys
+  const isMultiSeries = sortedKeys.length > 1
 
   // Calculate total from visible series
   const totalCount = data.reduce((sum, yearData) => {
@@ -61,7 +68,7 @@ export const DataChart: React.FC<DataChartProps> = ({
   }
 
   const handleBarClick = (data: any, index: number) => {
-    const seriesName = keys[index]
+    const seriesName = sortedKeys[index]
     if (seriesName) {
       setHiddenSeries((prev) => {
         const newHidden = new Set(prev)
@@ -83,11 +90,13 @@ export const DataChart: React.FC<DataChartProps> = ({
 
   return (
     <div className='space-y-4'>
-      <div className='text-center'>
-        <p className='text-sm text-gray-600'>
-          Total Count: <span className='text-blue-700'>{totalCount}</span>
-        </p>
-      </div>
+      {showTotal && (
+        <div className='text-center'>
+          <p className='text-sm text-gray-600'>
+            Total Count: <span className='text-blue-700'>{totalCount}</span>
+          </p>
+        </div>
+      )}
       <div className='relative'>
         <div className='h-[500px]'>
           <ResponsiveContainer width='100%' height='100%'>
@@ -119,7 +128,7 @@ export const DataChart: React.FC<DataChartProps> = ({
                   value: yAxisLabel,
                   angle: -90,
                   position: 'insideLeft',
-                  offset: 15,
+                  offset: 5,
                 }}
               />
               <Tooltip />
@@ -134,7 +143,7 @@ export const DataChart: React.FC<DataChartProps> = ({
                   align='center'
                 />
               )}
-              {keys.map((key, index) => (
+              {sortedKeys.map((key, index) => (
                 <Bar
                   key={key}
                   dataKey={key}
@@ -169,14 +178,16 @@ export const DataChart: React.FC<DataChartProps> = ({
 }
 
 const COLORS = [
-  '#1f77b4',
-  '#ff7f0e',
-  '#2ca02c',
-  '#d62728',
-  '#9467bd',
-  '#8c564b',
-  '#e377c2',
-  '#7f7f7f',
-  '#bcbd22',
-  '#17becf',
+  '#9F0162', // deep magenta
+  '#009F81', // paolo veronese green
+  '#FF5AAF', // brilliant rose
+  '#00FCCF', // bright teal
+  '#8400CD', // french violet
+  '#008DF9', // dodger blue
+  '#00C2F9', // spiro disco ball
+  '#FFB2FD', // plum
+  '#A40122', // strong crimson
+  '#E20134', // vivid crimson
+  '#FF6E3A', // burning orange
+  '#FFC33B', // bright spark
 ]

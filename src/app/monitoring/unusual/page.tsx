@@ -96,6 +96,11 @@ const Unusual = () => {
           data={chartData}
           stacked={true}
           yAxisLabel='Number of Unusual Mortality Events'
+          customOrder={[
+            'Yes - Mortality',
+            'Yes - Serious Injury',
+            'Yes - Morbidity',
+          ]}
         />
       </ChartLayout>
 
@@ -104,7 +109,11 @@ const Unusual = () => {
       <Table
         defaultFilters={{
           DetectionDate: [yearRange[0], yearRange[1]],
-          UnusualMortalityEventDescription: 'all-yes',
+          UnusualMortalityEventDescription: [
+            'Yes - Morbidity',
+            'Yes - Mortality',
+            'Yes - Serious Injury',
+          ],
         }}
         filtersExpanded={false}
       />

@@ -22,6 +22,11 @@ export const ExportChart: React.FC<ExportChartProps> = ({
       const dataUrl = await htmlToImage.toPng(chartRef.current, {
         quality: 1.0,
         backgroundColor: 'white',
+        height: chartRef.current.scrollHeight,
+        style: {
+          margin: '0',
+          padding: '0',
+        },
       })
       
       const link = document.createElement('a')

@@ -76,7 +76,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       ),
     },
     '/monitoring/custom': {
-      title: 'Tabular Data',
+      title: 'Injury Cases',
       description: (
         <>
           <p className='text-lg text-gray-700 leading-relaxed mb-4'>
@@ -118,7 +118,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         },
         {
           href: '/monitoring/custom',
-          label: 'Tabular Data',
+          label: 'Injury Cases',
         },
       ],
     },

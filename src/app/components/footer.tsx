@@ -1,23 +1,15 @@
 import Link from 'next/link'
+import Recognition from './recognition'
 
 export default function Footer() {
   return (
     <footer className='bg-gradient-to-b from-white to-slate-50 border-t border-slate-200'>
       {/* Main Footer Content */}
       <div className='max-w-7xl mx-auto pt-16 pb-8 px-6'>
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12'>
-          {/* About Section */}
-          <div className='space-y-4'>
-            <h3 className='text-blue-900 font-bold text-lg'>About</h3>
-            <p className='text-slate-600 text-sm leading-relaxed'>
-              Dedicated to tracking and visualizing North Atlantic Right Whale
-              injuries and mortality events to support conservation efforts.
-            </p>
-          </div>
-
+        <div className='grid grid-cols-1 lg:grid-cols-12 gap-x-16 gap-y-12 mb-12'>
           {/* Quick Links */}
-          <div className='space-y-4'>
-            <h3 className='text-blue-900 font-bold text-lg'>Quick Links</h3>
+          <div className='space-y-4 order-1 lg:col-span-3'>
+            <h3 className='text-[#2B4380] font-bold text-lg'>Quick Links</h3>
             <ul className='space-y-2'>
               {[
                 {
@@ -26,13 +18,11 @@ export default function Footer() {
                 },
                 { text: 'Calving Data', url: '/public-charts/calving' },
                 { text: 'Injury Data', url: '/public-charts/injury-total' },
-                // { text: 'Custom Analysis', url: '/monitoring/custom' },
-                // { text: 'Data Table', url: '/monitoring/table' },
               ].map((link) => (
                 <li key={link.text}>
                   <Link
                     href={link.url}
-                    className='text-slate-600 hover:text-blue-600 text-sm transition-colors duration-200'
+                    className='text-gray-700 hover:text-blue-600 text-sm transition-colors duration-200'
                   >
                     {link.text}
                   </Link>
@@ -42,8 +32,8 @@ export default function Footer() {
           </div>
 
           {/* Resources */}
-          <div className='space-y-4'>
-            <h3 className='text-blue-900 font-bold text-lg'>Resources</h3>
+          <div className='space-y-4 order-2 lg:col-span-3'>
+            <h3 className='text-[#2B4380] font-bold text-lg'>Resources</h3>
             <ul className='space-y-2'>
               {[
                 { text: 'New England Aquarium', url: 'https://www.neaq.org' },
@@ -53,7 +43,7 @@ export default function Footer() {
                     href={link.url}
                     target='_blank'
                     rel='noopener noreferrer'
-                    className='text-slate-600 hover:text-blue-600 text-sm transition-colors duration-200'
+                    className='text-gray-700 hover:text-blue-600 text-sm transition-colors duration-200'
                   >
                     {link.text}
                   </a>
@@ -63,10 +53,10 @@ export default function Footer() {
           </div>
 
           {/* Contact */}
-          <div className='space-y-4'>
-            <h3 className='text-blue-900 font-bold text-lg'>Contact</h3>
+          <div className='space-y-4 order-3 lg:col-span-3'>
+            <h3 className='text-[#2B4380] font-bold text-lg'>Contact</h3>
             <div className='space-y-2'>
-              <p className='text-slate-600 text-sm'>
+              <p className='text-gray-700 text-sm'>
                 Have questions about our data?
               </p>
               <a
@@ -89,6 +79,40 @@ export default function Footer() {
                 Contact Us
               </a>
             </div>
+          </div>
+
+          {/* About Section */}
+          <div className='space-y-4 order-4 lg:col-span-6'>
+            <h3 className='text-[#2B4380] font-bold text-lg'>About</h3>
+            <p className='text-gray-700 text-sm leading-relaxed'>
+              The North Atlantic right whale remains one of the most endangered
+              large whales in the world, and the population has been in decline
+              since 2010. Anthropogenic sources of mortality continue to plague
+              this species; all adult and juvenile right whale mortalities from
+              2003-2018 for which a cause of death could be determined were due
+              to human activities (entanglement or vessel strike).
+            </p>
+          </div>
+
+          {/* Data Access and Use */}
+          <div className='space-y-4 order-5 lg:col-span-6'>
+            <h3 className='text-[#2B4380] font-bold text-lg'>
+              Data Access and Use
+            </h3>
+            <p className='text-gray-700 text-sm leading-relaxed'>
+              The Right Whale Anthropogenic Event Visualization Site serves
+              multiple user purposes and as such, data and visualization output
+              access varies by user. Publicly available data and graphics are
+              accessible through the &quot;Explore&quot; tab. Near real time
+              injury monitoring data are accessible by field teams and managers
+              and are meant to facilitate efforts in support of the ongoing
+              Unusual Mortality Event.
+            </p>
+          </div>
+
+          {/* Recognition */}
+          <div className='lg:col-span-12 order-6'>
+            <Recognition />
           </div>
         </div>
 

@@ -14,17 +14,21 @@ import { useMortalityData } from '@/app/hooks/useMortalityData'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { useMortalityYearRange } from '@/app/hooks/useMortalityYearRange'
 import { ChartLayout } from '@/app/components/charts/ChartLayout'
+import { ExportChart } from '@/app/components/monitoring/ExportChart'
 
-// Color palette for different causes of death
 const COLORS = [
-  '#27aeef', // blue
-  '#bdcf32', // green
-  '#b33dc6', // purple
-  '#edbf33', // yellow
-  '#87bc45', // lime
-  '#ea5545', // red
-  '#ef9b20', // orange
-  '#9b19f5', // violet
+  '#9F0162', // deep magenta
+  '#009F81', // paolo veronese green
+  '#FF5AAF', // brilliant rose
+  '#00FCCF', // bright teal
+  '#8400CD', // french violet
+  '#008DF9', // dodger blue
+  '#00C2F9', // spiro disco ball
+  '#FFB2FD', // plum
+  '#A40122', // strong crimson
+  '#E20134', // vivid crimson
+  '#FF6E3A', // burning orange
+  '#FFC33B', // bright spark
 ]
 
 const formatChartDataForCountry = (
@@ -75,6 +79,7 @@ const formatChartDataForCountry = (
 }
 
 export default function MortalityByCauseAndCountry() {
+  const chartRef = useRef<HTMLDivElement>(null)
   const chartRefUS = useRef<HTMLDivElement>(null)
   const chartRefCA = useRef<HTMLDivElement>(null)
   const { data, loading, error } = useMortalityData()
@@ -314,37 +319,56 @@ export default function MortalityByCauseAndCountry() {
         </button>
       </div>
 
-      {yearRangeControl}
+      <div className='flex justify-between items-center'>
+        <div className='flex-grow'>{yearRangeControl}</div>
+        <ExportChart
+          chartRef={chartRef}
+          filename={`right-whale-mortality-analysis-${yearRangeProps.yearRange[0]}-${yearRangeProps.yearRange[1]}.png`}
+          title='Right Whale Mortality Analysis'
+          caption={`Data from ${yearRangeProps.yearRange[0]} to ${yearRangeProps.yearRange[1]}`}
+        />
+      </div>
 
-      <div
-        className={`grid grid-cols-1 ${
-          isSideBySide ? 'lg:grid-cols-2' : 'lg:grid-cols-1'
-        } gap-8`}
-      >
-        <ChartComponent
-          chartData={usChartData}
-          title='US Right Whale Mortalities'
-          chartRef={chartRefUS}
-          country='US'
-          onLegendClick={handleLegendClick}
-          onBarClick={handleBarClick}
-          onResetClick={handleResetClick}
-          hiddenSeries={hiddenSeries}
-          showResetButton={showResetButton}
-          yearRange={yearRangeProps.yearRange}
-        />
-        <ChartComponent
-          chartData={canadaChartData}
-          title='Canadian Right Whale Mortalities'
-          chartRef={chartRefCA}
-          country='Canada'
-          onLegendClick={handleLegendClick}
-          onBarClick={handleBarClick}
-          onResetClick={handleResetClick}
-          hiddenSeries={hiddenSeries}
-          showResetButton={showResetButton}
-          yearRange={yearRangeProps.yearRange}
-        />
+      <div ref={chartRef} className='w-full'>
+        <div className='text-center'>
+          <h2 className='text-xl font-semibold mb-1'>
+            Right Whale Mortality Analysis
+          </h2>
+          <p className='text-sm text-gray-600'>
+            Data from {yearRangeProps.yearRange[0]} to{' '}
+            {yearRangeProps.yearRange[1]}
+          </p>
+        </div>
+        <div
+          className={`grid grid-cols-1 ${
+            isSideBySide ? 'lg:grid-cols-2' : 'lg:grid-cols-1'
+          } gap-8`}
+        >
+          <ChartComponent
+            chartData={usChartData}
+            title='US Right Whale Mortalities'
+            chartRef={chartRefUS}
+            country='US'
+            onLegendClick={handleLegendClick}
+            onBarClick={handleBarClick}
+            onResetClick={handleResetClick}
+            hiddenSeries={hiddenSeries}
+            showResetButton={showResetButton}
+            yearRange={yearRangeProps.yearRange}
+          />
+          <ChartComponent
+            chartData={canadaChartData}
+            title='Canadian Right Whale Mortalities'
+            chartRef={chartRefCA}
+            country='Canada'
+            onLegendClick={handleLegendClick}
+            onBarClick={handleBarClick}
+            onResetClick={handleResetClick}
+            hiddenSeries={hiddenSeries}
+            showResetButton={showResetButton}
+            yearRange={yearRangeProps.yearRange}
+          />
+        </div>
       </div>
     </div>
   )
