@@ -96,6 +96,7 @@ const Active = () => {
           data={chartData}
           stacked={true}
           yAxisLabel='Number of Active Cases'
+          customOrder={['Vessel Strike', 'Entanglement', 'Unknown / Other']}
         />
       </ChartLayout>
 

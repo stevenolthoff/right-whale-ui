@@ -24,6 +24,12 @@ td a:hover {
     @apply text-blue-500 underline !important;
 }
 
+/* External Links */
+.prose a[target="_blank"]::after {
+    content: "↗";
+    @apply ml-1 text-xs inline-block !important;
+}
+
 /* Striped Table */
 .wp-block-table.is-style-stripes tbody tr:nth-child(odd) {
     @apply bg-slate-50/50 !important;

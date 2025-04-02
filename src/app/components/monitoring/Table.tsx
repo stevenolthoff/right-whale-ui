@@ -27,7 +27,15 @@ interface MonitoringTableProps {
   defaultFilters?: {
     DetectionDate?: [number, number]
     IsActiveCase?: 'Yes' | 'No'
-    [key: string]: any
+    MonitoringCaseAge?: [number, number]
+    UnusualMortalityEventDescription?: string[] | 'all-yes'
+    [key: string]:
+      | [number, number]
+      | 'Yes'
+      | 'No'
+      | string[]
+      | 'all-yes'
+      | undefined
   }
   visibleColumns?: string[]
   filtersExpanded?: boolean
@@ -148,6 +156,52 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
           return filterValue.includes(value)
         },
       }),
+      columnHelper.accessor(
+        (row) => {
+          if (!row.BirthYear) return null
+          const currentYear = new Date().getFullYear()
+          return currentYear - row.BirthYear
+        },
+        {
+          id: 'Age',
+          header: 'Age',
+          cell: (info) => info.getValue() ?? 'Unknown',
+          filterFn: (row, columnId, filterValue) => {
+            if (!filterValue) return true
+            const age = row.getValue<number | null>(columnId)
+            if (age === null) return false
+
+            let minAge: number | null = null
+            let maxAge: number | null = null
+            if (typeof filterValue === 'string') {
+              ;[minAge, maxAge] = JSON.parse(filterValue)
+            } else if (Array.isArray(filterValue)) {
+              ;[minAge, maxAge] = filterValue
+            }
+            if (minAge !== null && age < minAge) return false
+            if (maxAge !== null && age > maxAge) return false
+            return true
+          },
+        }
+      ),
+      columnHelper.accessor('MonitoringCaseAgeClass', {
+        header: 'Age Class',
+        cell: (info) => info.getValue() || 'N/A',
+        filterFn: (row, columnId, filterValue) => {
+          if (!filterValue || filterValue.length === 0) return true
+          const value = row.getValue(columnId) || 'N/A'
+          return filterValue.includes(value)
+        },
+      }),
+      columnHelper.accessor('GenderDescription', {
+        header: 'Sex',
+        cell: (info) => info.getValue() || 'Unknown',
+        filterFn: (row, columnId, filterValue) => {
+          if (!filterValue) return true
+          const value = row.getValue(columnId) || 'Unknown'
+          return value === filterValue
+        },
+      }),
     ]
   }, [columnHelper])
 
@@ -155,18 +209,53 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
   const filterOptions = React.useMemo(() => {
     if (!results?.length) return {}
 
-    const options: Record<string, Set<string>> = {
-      UnusualMortalityEventDescription: new Set(),
+    const stringSetOptions: Record<string, Set<string>> = {
+      UnusualMortalityEventDescription: new Set<string>(),
+      MonitoringCaseAgeClass: new Set<string>(),
     }
 
+    const rangeOptions: Record<string, { min: number; max: number }> = {}
+    let minAge = Infinity
+    let maxAge = -Infinity
+
     results.forEach((item) => {
-      const value = item.UnusualMortalityEventDescription
-      if (value) options.UnusualMortalityEventDescription.add(value.toString())
+      const umeValue = item.UnusualMortalityEventDescription
+      if (umeValue) {
+        stringSetOptions.UnusualMortalityEventDescription.add(
+          umeValue.toString()
+        )
+      }
+
+      const ageClassValue = item.MonitoringCaseAgeClass
+      if (ageClassValue) {
+        stringSetOptions.MonitoringCaseAgeClass.add(ageClassValue.toString())
+      }
+
+      const ageStr = item.MonitoringCaseAge
+      if (ageStr) {
+        const age = parseInt(ageStr)
+        if (!isNaN(age)) {
+          minAge = Math.min(minAge, age)
+          maxAge = Math.max(maxAge, age)
+        }
+      }
     })
 
-    return Object.fromEntries(
-      Object.entries(options).map(([key, set]) => [key, Array.from(set).sort()])
+    if (minAge !== Infinity && maxAge !== -Infinity) {
+      rangeOptions.MonitoringCaseAge = { min: minAge, max: maxAge }
+    }
+
+    const processedStringOptions = Object.fromEntries(
+      Object.entries(stringSetOptions).map(([key, set]) => [
+        key,
+        Array.from(set).sort(),
+      ])
     )
+
+    return {
+      ...processedStringOptions,
+      ...rangeOptions,
+    }
   }, [results])
 
   useEffect(() => {
@@ -181,15 +270,18 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
   React.useEffect(() => {
     if (defaultFilters && results?.length) {
       const initialFilters = Object.entries(defaultFilters).map(
-        ([id, value]) => ({
-          id,
-          value:
-            id === 'UnusualMortalityEventDescription' && value === 'all-yes'
-              ? filterOptions?.[id]?.filter((opt: string) =>
-                  opt.startsWith('Yes')
-                ) || []
-              : value,
-        })
+        ([id, value]) => {
+          if (
+            id === 'UnusualMortalityEventDescription' &&
+            Array.isArray(value)
+          ) {
+            return {
+              id,
+              value: value,
+            }
+          }
+          return { id, value }
+        }
       )
       setColumnFilters(initialFilters)
     }

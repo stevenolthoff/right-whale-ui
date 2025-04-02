@@ -6,7 +6,7 @@ import { useInjuryYearRange } from '../../hooks/useInjuryYearRange'
 import { DataChart } from '../../components/monitoring/DataChart'
 import { Loader } from '@/app/components/ui/Loader'
 import { ExportChart } from '@/app/components/monitoring/ExportChart'
-
+import ChartAttribution from '@/app/components/charts/ChartAttribution'
 export default function Entanglement() {
   const chartRef = useRef<HTMLDivElement>(null)
   const { data, loading, error } = useInjuryData()
@@ -174,9 +174,7 @@ export default function Entanglement() {
         >
           <div className='h-[600px]'>
             <div className='text-center mb-4'>
-              <h3 className='text-lg font-semibold'>
-                Entanglement Account Types
-              </h3>
+              <h3 className='text-lg font-semibold'>Entanglement Types</h3>
             </div>
             <DataChart
               data={typeChartData}
@@ -197,9 +195,11 @@ export default function Entanglement() {
               onFilterChange={(filters) =>
                 handleFilterChange('severity', filters)
               }
+              customOrder={['Severe', 'Moderate', 'Minor']}
             />
           </div>
         </div>
+        <ChartAttribution />
       </div>
     </div>
   )

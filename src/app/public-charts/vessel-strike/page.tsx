@@ -7,7 +7,7 @@ import { Loader } from '@/app/components/ui/Loader'
 import { DataChart } from '@/app/components/monitoring/DataChart'
 import { ExportChart } from '@/app/components/monitoring/ExportChart'
 import { ParsedInjuryCase } from '@/app/types/injury'
-
+import ChartAttribution from '@/app/components/charts/ChartAttribution'
 export default function VesselStrike() {
   const chartRef = useRef<HTMLDivElement>(null)
   const [isSideBySide, setIsSideBySide] = useState(true)
@@ -209,6 +209,7 @@ export default function VesselStrike() {
             />
           </div>
         </div>
+        <ChartAttribution />
       </div>
     </div>
   )

@@ -55,7 +55,6 @@ const CaseDetailsContent: React.FC<CaseDetailsContentProps> = ({
 }) => {
   const detailRows = [
     { label: 'EG No', value: caseData.EGNo },
-    { label: 'Case ID', value: caseData.CaseId },
     { label: 'Field EG No', value: caseData.FieldId },
     { label: 'Active Case', value: caseData.IsActiveCase ? 'Yes' : 'No' },
     { label: 'Injury Type', value: caseData.InjuryTypeDescription },
@@ -87,6 +86,55 @@ const CaseDetailsContent: React.FC<CaseDetailsContentProps> = ({
           </div>
         </div>
       ))}
+    </div>
+  )
+}
+
+interface WhaleInfoContentProps {
+  caseData: InjuryCase
+}
+
+const WhaleInfoContent: React.FC<WhaleInfoContentProps> = ({ caseData }) => {
+  const calculateAge = () => {
+    console.log('calculate Age', caseData)
+    if (!caseData.BirthYear) return 'Unknown'
+    const currentYear = new Date().getFullYear()
+    return `${currentYear - caseData.BirthYear} years`
+  }
+
+  const whaleInfoRows = [
+    { label: 'Age', value: calculateAge() },
+    { label: 'Age Class', value: caseData.MonitoringCaseAgeClass || 'Unknown' },
+    { label: 'Sex', value: caseData.GenderDescription || 'Unknown' },
+    {
+      label: 'Death from Injury',
+      value: caseData.IsDead ? 'Yes' : 'No',
+    },
+    {
+      label: 'Cause of Death',
+      value: caseData.DeathCauseDescription || 'N/A',
+    },
+  ]
+
+  return (
+    <div className='space-y-4 max-h-[75vh] sm:max-h-[65vh] overflow-y-auto pr-4 -mr-4 pb-16'>
+      {whaleInfoRows.map(({ label, value }) => (
+        <div
+          key={label}
+          className='group grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-1 sm:gap-8 py-4 border-b border-gray-100 hover:bg-gray-50/50 px-2 -mx-2 rounded-lg transition-colors'
+        >
+          <div className='font-medium text-gray-500 text-sm sm:text-base'>
+            {label}
+          </div>
+          <div className='text-gray-900 text-base sm:text-lg break-words'>
+            {value}
+          </div>
+        </div>
+      ))}
+      <div className='text-sm text-gray-500 italic mt-4'>
+        Note: Reproductive female status information is not currently available
+        in the data.
+      </div>
     </div>
   )
 }
@@ -310,14 +358,47 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
   isOpen,
   onClose,
 }) => {
-  const [activeTab, setActiveTab] = useState<'details' | 'additional'>(
-    'details'
-  )
+  const [activeTab, setActiveTab] = useState<
+    'details' | 'whale-info' | 'additional'
+  >('details')
   const [assessmentData, setAssessmentData] =
     useState<AssessmentResponse | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
+
+  // Handle tab navigation with arrow keys
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (!isOpen) return
+
+      const tabs: ('details' | 'whale-info' | 'additional')[] = [
+        'details',
+        'whale-info',
+        'additional',
+      ]
+      const currentIndex = tabs.indexOf(activeTab)
+
+      switch (event.key) {
+        case 'ArrowLeft':
+          event.preventDefault()
+          const prevIndex =
+            currentIndex === 0 ? tabs.length - 1 : currentIndex - 1
+          setActiveTab(tabs[prevIndex])
+          break
+        case 'ArrowRight':
+          event.preventDefault()
+          const nextIndex =
+            currentIndex === tabs.length - 1 ? 0 : currentIndex + 1
+          setActiveTab(tabs[nextIndex])
+          break
+        case 'Escape':
+          onClose()
+          break
+      }
+    },
+    [isOpen, activeTab, onClose]
+  )
 
   // Fetch assessment data
   const fetchAssessments = async (page: number) => {
@@ -372,29 +453,19 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
     }
   }, [isLoading, hasMore, currentPage, fetchAssessments])
 
-  // Handle escape key press
-  const handleEscapeKey = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose()
-      }
-    },
-    [onClose]
-  )
-
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
-      document.addEventListener('keydown', handleEscapeKey)
+      document.addEventListener('keydown', handleKeyDown)
     } else {
       document.body.style.overflow = 'unset'
     }
 
     return () => {
       document.body.style.overflow = 'unset'
-      document.removeEventListener('keydown', handleEscapeKey)
+      document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isOpen, handleEscapeKey])
+  }, [isOpen, handleKeyDown])
 
   useEffect(() => {
     if (!isOpen) {
@@ -461,6 +532,16 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
                 Details
               </button>
               <button
+                onClick={() => setActiveTab('whale-info')}
+                className={`${
+                  activeTab === 'whale-info'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                Whale Info
+              </button>
+              <button
                 onClick={() => setActiveTab('additional')}
                 className={`${
                   activeTab === 'additional'
@@ -476,6 +557,8 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
           {/* Tab Content */}
           {activeTab === 'details' ? (
             <CaseDetailsContent caseData={caseData} />
+          ) : activeTab === 'whale-info' ? (
+            <WhaleInfoContent caseData={caseData} />
           ) : (
             <AssessmentContent
               assessments={assessmentData?.results || []}

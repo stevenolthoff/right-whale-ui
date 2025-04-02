@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { redirect, usePathname } from 'next/navigation'
 import { useAuthStore } from '../store/auth'
+import { Waves } from 'lucide-react'
 
 export default function Header() {
   const pathname = usePathname()
@@ -65,10 +66,16 @@ export default function Header() {
     >
       <div className='max-w-7xl mx-auto px-4 flex items-center justify-between gap-5'>
         <Link href='/' className='shrink-0'>
-          <div className='hidden md:block font-bold text-black text-lg transition-colors hover:text-blue-600'>
-            NARW Anthropogenic Injury Event Tracker
+          <div className='hidden md:flex items-center gap-2'>
+            <Waves className='w-6 h-6 text-blue-600' />
+            <span className='font-bold text-black text-lg transition-colors hover:text-blue-600'>
+              NARW Anthropogenic Injury Visualization
+            </span>
           </div>
-          <div className='md:hidden font-bold text-black text-lg'>NARW</div>
+          <div className='md:hidden flex items-center gap-2'>
+            <Waves className='w-5 h-5 text-blue-600' />
+            <span className='font-bold text-black text-lg'>NARW</span>
+          </div>
         </Link>
 
         {/* Desktop Navigation */}
@@ -97,7 +104,7 @@ export default function Header() {
           )}
           {isAuthenticated && canAccessInjury() && (
             <Link
-              href='/injury/injury-type'
+              href='/injury/overview'
               className={`${
                 topPath === 'injury'
                   ? 'text-blue-600 after:w-full'
@@ -119,6 +126,7 @@ export default function Header() {
           </Link>
           {isAuthenticated && canAccessAdmin() && (
             <Link
+              target='_blank'
               href='https://stage-rwanthro-backend.srv.axds.co/admin/'
               className={`${
                 topPath === 'admin'
@@ -138,7 +146,7 @@ export default function Header() {
                 clearToken()
               } else {
                 const host = globalThis.location.hostname
-                let redirectUrl =
+                const redirectUrl =
                   host === 'localhost'
                     ? 'http://localhost:44208/u/accounts/amazon-cognito/login/?process='
                     : 'https://stage-rwanthro-backend.srv.axds.co/u/accounts/amazon-cognito/login/?process='
@@ -228,7 +236,7 @@ export default function Header() {
               )}
               {isAuthenticated && canAccessInjury() && (
                 <Link
-                  href='/injury/injury-type'
+                  href='/injury/overview'
                   className={`block px-4 py-3 rounded-lg font-semibold transition-colors ${
                     topPath === 'injury'
                       ? 'text-blue-600 bg-blue-50'

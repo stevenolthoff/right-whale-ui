@@ -3,6 +3,7 @@ import React from 'react'
 import { Table } from '@tanstack/react-table'
 import { InjuryCase } from '@/app/types/monitoring'
 import { YearRangeSlider } from '../monitoring/YearRangeSlider'
+import { AgeRangeSlider } from '../monitoring/AgeRangeSlider'
 import { useFilteredData } from '@/app/hooks/useFilteredData'
 import Select from 'react-select'
 import {
@@ -168,10 +169,67 @@ const YearFilter: React.FC<FilterProps & { data: InjuryCase[] }> = ({
   )
 }
 
+const AgeFilter: React.FC<FilterProps & { data: InjuryCase[] }> = ({
+  value,
+  onChange,
+  data,
+}) => {
+  // Calculate min and max ages from data
+  const { minAge, maxAge } = React.useMemo(() => {
+    const ages = data
+      .map((item) => {
+        if (!item.BirthYear) return null
+        const currentYear = new Date().getFullYear()
+        return currentYear - item.BirthYear
+      })
+      .filter((age): age is number => age !== null)
+    return {
+      minAge: ages.length ? Math.min(...ages) : 0,
+      maxAge: ages.length ? Math.max(...ages) : 100,
+    }
+  }, [data])
+
+  // Update ageRange when value changes (including reset)
+  React.useEffect(() => {
+    if (!value || Array.isArray(value)) {
+      setAgeRange([minAge, maxAge])
+      return
+    }
+    try {
+      const [min, max] = JSON.parse(value as string)
+      setAgeRange([min ?? minAge, max ?? maxAge])
+    } catch {
+      setAgeRange([minAge, maxAge])
+    }
+  }, [value, minAge, maxAge])
+
+  const [ageRange, setAgeRange] = React.useState<[number, number]>([
+    minAge,
+    maxAge,
+  ])
+
+  const handleChange = (newRange: [number, number]) => {
+    setAgeRange(newRange)
+    onChange(JSON.stringify(newRange))
+  }
+
+  return (
+    <div className='w-full'>
+      <AgeRangeSlider
+        ageRange={ageRange}
+        minAge={minAge}
+        maxAge={maxAge}
+        onChange={handleChange}
+      />
+    </div>
+  )
+}
+
 interface TableFiltersProps {
   table: Table<InjuryCase>
   data: InjuryCase[]
   className?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   defaultFilters?: Record<string, any>
   defaultExpanded?: boolean
 }
@@ -206,6 +264,8 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
       DetectionAreaDescription: new Set(),
       UnusualMortalityEventDescription: new Set(),
       IsActiveCase: new Set(['Yes', 'No']),
+      MonitoringCaseAgeClass: new Set(),
+      GenderDescription: new Set(),
     }
 
     data.forEach((item) => {
@@ -213,6 +273,7 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
         if (key === 'IsActiveCase') return // Skip as we already set the options
         const value = item[key as keyof InjuryCase]
         if (value) set.add(value.toString())
+        else if (key === 'MonitoringCaseAgeClass') set.add('N/A')
       })
     })
 
@@ -266,32 +327,24 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
   return (
     <div className={`space-y-4 bg-gray-50 p-4 ${className}`}>
       <div className='flex justify-between items-center'>
-        <h3 className='text-sm font-medium text-gray-700'>Filters</h3>
-        <div className='flex gap-2'>
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className='px-3 py-1 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded shadow-sm hover:bg-gray-50 flex items-center gap-1'
-          >
-            {isExpanded ? (
-              <>
-                <ChevronUpIcon className='w-4 h-4' />
-                Collapse
-              </>
-            ) : (
-              <>
-                <ChevronDownIcon className='w-4 h-4' />
-                Expand
-              </>
-            )}
-          </button>
-          <button
-            onClick={resetFilters}
-            className='px-3 py-1 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded shadow-sm hover:bg-gray-50 flex items-center gap-1'
-          >
-            <ArrowPathIcon className='w-4 h-4' />
-            Reset Filters
-          </button>
-        </div>
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className='flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900'
+        >
+          <h3>Filters</h3>
+          {isExpanded ? (
+            <ChevronUpIcon className='w-4 h-4' />
+          ) : (
+            <ChevronDownIcon className='w-4 h-4' />
+          )}
+        </button>
+        <button
+          onClick={resetFilters}
+          className='px-3 py-1 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded shadow-sm hover:bg-gray-50 flex items-center gap-1'
+        >
+          <ArrowPathIcon className='w-4 h-4' />
+          Reset Filters
+        </button>
       </div>
       {isExpanded && (
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
@@ -311,6 +364,13 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
                     onChange={(value) => column.setFilterValue(value)}
                     data={data}
                   />
+                ) : column.id === 'Age' ? (
+                  <AgeFilter
+                    column={column.id}
+                    value={filterValue}
+                    onChange={(value) => column.setFilterValue(value)}
+                    data={data}
+                  />
                 ) : ['EGNo', 'FieldId', 'CaseId'].includes(column.id) ? (
                   <TextFilter
                     column={column.id}
@@ -323,7 +383,10 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
                     value={filterValue}
                     onChange={(value) => column.setFilterValue(value)}
                     options={filterOptions[columnId] || []}
-                    isMulti={column.id === 'UnusualMortalityEventDescription'}
+                    isMulti={
+                      column.id === 'UnusualMortalityEventDescription' ||
+                      column.id === 'MonitoringCaseAgeClass'
+                    }
                   />
                 )}
               </div>

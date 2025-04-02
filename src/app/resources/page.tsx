@@ -37,6 +37,22 @@ export default function Resources() {
     return () => clearInterval(interval)
   }, [])
 
+  // Add effect to modify links
+  useEffect(() => {
+    const modifyLinks = () => {
+      const links = document.querySelectorAll('.prose a')
+      links.forEach((link) => {
+        link.setAttribute('target', '_blank')
+        link.setAttribute('rel', 'noopener noreferrer')
+      })
+    }
+
+    // Run after content is loaded
+    if (!isLoading) {
+      modifyLinks()
+    }
+  }, [isLoading])
+
   return (
     <div className='min-h-screen bg-gradient-to-b from-white to-slate-50'>
       <div className='max-w-4xl mx-auto px-4 pt-28 pb-20'>

@@ -5,9 +5,35 @@ import { usePathname } from 'next/navigation'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const text: Record<string, { title: string; description: string }> = {
+  const text: Record<
+    string,
+    { title: string; description: string | React.ReactNode }
+  > = {
+    '/injury/overview': {
+      title: 'Introduction to the Data',
+      description: (
+        <>
+          <p className='text-lg text-gray-700 leading-relaxed mb-4'>
+            The injury data presented here provides comprehensive information
+            about documented injuries to North Atlantic right whales. The data
+            is organized into three main categories:
+          </p>
+          <ul className='text-lg text-gray-700 list-disc pl-8 mb-4'>
+            <li>Total injuries by year and type</li>
+            <li>Entanglement incidents and their outcomes</li>
+            <li>Vessel strike incidents and their impacts</li>
+          </ul>
+          <p className='text-lg text-gray-700 leading-relaxed'>
+            Each section provides detailed analysis and visualization of injury
+            data, helping track and understand the threats facing this
+            endangered species. The data can be filtered and sorted to support
+            research and conservation efforts.
+          </p>
+        </>
+      ),
+    },
     '/injury/injury-type': {
-      title: 'Injury Type by Year',
+      title: 'Total Annual Injuries',
       description: 'View injury types categorized by year.',
     },
     '/injury/entanglement': {
@@ -22,11 +48,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const categories = [
     {
+      title: 'OVERVIEW',
+      links: [
+        {
+          href: '/injury/overview',
+          label: 'Introduction to the Data',
+        },
+      ],
+    },
+    {
       title: 'INJURY',
       links: [
         {
           href: '/injury/injury-type',
-          label: 'Total',
+          label: 'Total Annual Injuries',
         },
         {
           href: '/injury/entanglement',

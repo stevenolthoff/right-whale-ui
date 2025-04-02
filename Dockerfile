@@ -1,28 +1,24 @@
 # Install dependencies only when needed
-FROM node:18-alpine AS deps
+FROM oven/bun:1 AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
-# TODO: Maybe revisit this, as we probably shouldn't be relying on
-# legacy-peer-deps
-RUN npm ci --force
+COPY package.json bun.lockb ./
+RUN bun install --frozen-lockfile
 
 # Rebuild the source code only when needed
-FROM node:18-alpine AS builder
-RUN ls -als
-# RUN apk --no-cache add curl
+FROM oven/bun:1 AS builder
 WORKDIR /app
-COPY package.json package-lock.json ./
+COPY package.json bun.lockb ./
 COPY public  public
 COPY src  src
 COPY .eslintrc.json tailwind.config.ts next.config.ts postcss.config.mjs tsconfig.json ./
 COPY --from=deps /app/node_modules ./node_modules
-RUN npm run build
+RUN bun run build
 
-# Production image, copy all the files and run craco
+# Production image, copy all the files and run nginx
 FROM nginx:1.25.1 AS nginx
 WORKDIR /app
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 COPY --from=builder /app/out/ /usr/share/nginx/html
 

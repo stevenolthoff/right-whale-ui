@@ -72,7 +72,7 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
 
             <div className='p-4 md:p-6'>
               <p className='mb-6'>
-                The North Atlantic Right Whale Anthropogenic Events
+                The North Atlantic Right Whale Anthropogenic Injury
                 Visualization Site was developed to provide improved access to,
                 and visualization of, information and data associated with
                 anthropogenic injuries to right whales. The data illustrated on
@@ -195,6 +195,10 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
                   className='text-blue-500'
                 >
                   NARWC
+                </a>
+                &nbsp;For questions about site/data access, please contact the{' '}
+                <a href='mailto:hpettis@neaq.org' className='text-blue-500'>
+                  site admin
                 </a>
                 .
               </p>

@@ -50,6 +50,18 @@ export default function Overview() {
           users via the Injury Case pages.
         </p>
 
+        <p className='text-lg'>
+          Survey teams are encouraged to submit images from sightings of known
+          and new injury cases to the shared{' '}
+          <Link
+            href='https://drive.google.com/drive/folders/1MbC_qXcOnQUSMH9OkReeuLgjFwzz1gQj?usp=sharing'
+            className='text-blue-500 hover:text-blue-700'
+          >
+            Monitoring Drive
+          </Link>
+          .
+        </p>
+
         <p className='text-lg font-bold'>
           Data and visualizations available here may not be used or shared
           without an approved data access request from the{' '}
