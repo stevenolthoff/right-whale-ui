@@ -10,12 +10,12 @@ export default function Hero() {
       <div className='absolute inset-0'>
         <motion.div style={{ y }} className='absolute inset-0 scale-110'>
           <img
-            src='hero.webp'
+            src='hero-2.webp'
             alt='Background Image'
-            className='w-full h-full object-cover brightness-110 contrast-125 blur-[3px]'
+            className='w-full h-full object-cover'
           />
         </motion.div>
-        <div className='absolute inset-0 backdrop-blur-[2px] backdrop-brightness-105'></div>
+        {/* <div className='absolute inset-0 backdrop-blur-[2px] backdrop-brightness-105'></div> */}
         <div className='absolute inset-0 bg-gradient-to-b from-white/10 to-black/20 mix-blend-overlay'></div>
         <div className='absolute inset-0 bg-gradient-to-t from-blue-950/30 via-transparent to-transparent'></div>
         <div className='absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.1),transparent_60%)] mix-blend-overlay'></div>
