@@ -3,20 +3,32 @@ import React, { useRef } from 'react'
 import { useMonitoringData } from '../../hooks/useMonitoringData'
 import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
 import { DataChart } from '../../components/monitoring/DataChart'
-import { useYearRange } from '../../hooks/useYearRange'
 import { ChartLayout } from '@/app/components/charts/ChartLayout'
 import Table from '@/app/components/monitoring/Table'
 import Download from '@/app/components/monitoring/Download'
+import { useYearRangeStore } from '../../stores/useYearRangeStore'
 
 const Unusual = () => {
   const chartRef = useRef<HTMLDivElement>(null)
   const { results, loading, error } = useMonitoringData()
-  const { yearRange, setYearRange, minYear, maxYear } = useYearRange(
-    results,
-    (item) => item.IsUnusualMortalityEvent === true
-  )
+  const { yearRange, setYearRange, minYear, maxYear, setMinMaxYears } =
+    useYearRangeStore()
 
-  const chartData = (() => {
+  // Reset year range when component mounts
+  React.useEffect(() => {
+    if (minYear && maxYear) {
+      setYearRange([minYear, maxYear])
+    }
+  }, [minYear, maxYear, setYearRange])
+
+  // Set min/max years when data is loaded, filtering for unusual mortality events
+  React.useEffect(() => {
+    if (results?.length) {
+      setMinMaxYears(results, (item) => item.IsUnusualMortalityEvent)
+    }
+  }, [results, setMinMaxYears])
+
+  const chartData = React.useMemo(() => {
     if (!results) return []
 
     const yearCounts = results
@@ -44,9 +56,9 @@ const Unusual = () => {
       )
     )
 
-    const formattedData = []
+    const formattedData: Array<{ year: number; [key: string]: number }> = []
     for (let year = yearRange[0]; year <= yearRange[1]; year++) {
-      const dataPoint: any = { year }
+      const dataPoint: { year: number; [key: string]: number } = { year }
       uniqueDescriptions.forEach((desc) => {
         dataPoint[desc] = (yearCounts[year] && yearCounts[year][desc]) || 0
       })
@@ -54,13 +66,13 @@ const Unusual = () => {
     }
 
     return formattedData.sort((a, b) => a.year - b.year)
-  })()
+  }, [results, yearRange])
 
   const totalUnusualEvents = chartData.reduce(
     (sum, item) =>
       sum +
       Object.values(item).reduce(
-        (a: number, b: any) => (typeof b === 'number' ? a + b : a),
+        (a: number, b: number) => (typeof b === 'number' ? a + b : a),
         0
       ) -
       item.year,
@@ -108,7 +120,7 @@ const Unusual = () => {
 
       <Table
         defaultFilters={{
-          DetectionDate: [yearRange[0], yearRange[1]],
+          DetectionDate: yearRange,
           UnusualMortalityEventDescription: [
             'Yes - Morbidity',
             'Yes - Mortality',

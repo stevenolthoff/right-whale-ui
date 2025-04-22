@@ -20,10 +20,10 @@ const Active = () => {
     setMinMaxYears,
   } = useYearRangeStore()
 
-  // Set min/max years when data is loaded
+  // Set min/max years when data is loaded, filtering for active cases
   React.useEffect(() => {
     if (results?.length) {
-      setMinMaxYears(results)
+      setMinMaxYears(results, (item) => item.IsActiveCase)
     }
   }, [results, setMinMaxYears])
 
