@@ -133,24 +133,39 @@ const YearFilter: React.FC<FilterProps & { data: InjuryCase[] }> = ({
     }
   }, [data])
 
+  // Initialize yearRange with the value prop if it exists
+  const [yearRange, setYearRange] = React.useState<[number, number]>(() => {
+    if (!value) return [minYear, maxYear]
+    try {
+      if (Array.isArray(value)) {
+        const [min, max] = value
+        return [Number(min) || minYear, Number(max) || maxYear]
+      }
+      const [min, max] = JSON.parse(value as string)
+      return [Number(min) || minYear, Number(max) || maxYear]
+    } catch {
+      return [minYear, maxYear]
+    }
+  })
+
   // Update yearRange when value changes (including reset)
   React.useEffect(() => {
-    if (!value || Array.isArray(value)) {
+    if (!value) {
       setYearRange([minYear, maxYear])
       return
     }
     try {
-      const [min, max] = JSON.parse(value as string)
-      setYearRange([min ?? minYear, max ?? maxYear])
+      if (Array.isArray(value)) {
+        const [min, max] = value
+        setYearRange([Number(min) || minYear, Number(max) || maxYear])
+      } else {
+        const [min, max] = JSON.parse(value as string)
+        setYearRange([Number(min) || minYear, Number(max) || maxYear])
+      }
     } catch {
       setYearRange([minYear, maxYear])
     }
   }, [value, minYear, maxYear])
-
-  const [yearRange, setYearRange] = React.useState<[number, number]>([
-    minYear,
-    maxYear,
-  ])
 
   const handleChange = (newRange: [number, number]) => {
     setYearRange(newRange)
