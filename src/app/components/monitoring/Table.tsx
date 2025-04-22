@@ -21,6 +21,7 @@ import {
 import { TableFilters } from './TableFilters'
 import { useFilteredData } from '@/app/hooks/useFilteredData'
 import CaseDetailsPopup from './CaseDetailsPopup'
+import { useYearRangeStore } from '../../stores/useYearRangeStore'
 
 interface MonitoringTableProps {
   showFilters?: boolean
@@ -49,7 +50,7 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
 }) => {
   const { results, loading, error } = useMonitoringData()
   const setFilteredData = useFilteredData((state) => state.setFilteredData)
-  const setColumns = useFilteredData((state) => state.setColumns)
+  const { yearRange } = useYearRangeStore()
   const columnHelper = createColumnHelper<InjuryCase>()
 
   const [selectedCase, setSelectedCase] = React.useState<InjuryCase | null>(
@@ -258,35 +259,6 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
     }
   }, [results])
 
-  useEffect(() => {
-    setColumns(columns)
-  }, [columns, setColumns])
-
-  const [columnFilters, setColumnFilters] = React.useState<
-    { id: string; value: any }[]
-  >([])
-
-  // Initialize filters when defaultFilters change
-  React.useEffect(() => {
-    if (defaultFilters && results?.length) {
-      const initialFilters = Object.entries(defaultFilters).map(
-        ([id, value]) => {
-          if (
-            id === 'UnusualMortalityEventDescription' &&
-            Array.isArray(value)
-          ) {
-            return {
-              id,
-              value: value,
-            }
-          }
-          return { id, value }
-        }
-      )
-      setColumnFilters(initialFilters)
-    }
-  }, [defaultFilters, results, filterOptions])
-
   const table = useReactTable({
     data: results || [],
     columns,
@@ -294,35 +266,35 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    enableFilters: true,
-    state: {
-      columnFilters,
-    },
-    onColumnFiltersChange: setColumnFilters,
     initialState: {
       pagination: {
-        pageSize: 15,
+        pageSize: 10,
       },
-      columnVisibility: visibleColumns?.length
-        ? Object.fromEntries(
-            columns.map((col) => [
-              (col as { accessorKey: string }).accessorKey || col.id,
-              visibleColumns.includes(
-                (col as { accessorKey: string }).accessorKey ||
-                  (col.id as string)
-              ),
-            ])
-          )
-        : {},
-    },
-    onRowSelectionChange: () => {
-      setFilteredData(
-        table.getFilteredRowModel().rows.map((row) => row.original)
-      )
+      sorting: [
+        {
+          id: 'DetectionDate',
+          desc: true,
+        },
+      ],
+      columnFilters: [
+        {
+          id: 'DetectionDate',
+          value: yearRange,
+        },
+        ...(defaultFilters?.IsActiveCase
+          ? [
+              {
+                id: 'IsActiveCase',
+                value: defaultFilters.IsActiveCase,
+              },
+            ]
+          : []),
+      ],
     },
   })
 
-  useEffect(() => {
+  // Update filtered data when table state changes
+  React.useEffect(() => {
     setFilteredData(table.getFilteredRowModel().rows.map((row) => row.original))
   }, [table.getFilteredRowModel(), setFilteredData])
 

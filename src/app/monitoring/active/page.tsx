@@ -3,22 +3,52 @@ import React, { useRef } from 'react'
 import { useMonitoringData } from '../../hooks/useMonitoringData'
 import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
 import { DataChart } from '../../components/monitoring/DataChart'
-import { useYearRange } from '../../hooks/useYearRange'
 import { ChartLayout } from '@/app/components/charts/ChartLayout'
 import Download from '@/app/components/monitoring/Download'
 import Table from '@/app/components/monitoring/Table'
+import { useYearRangeStore } from '../../stores/useYearRangeStore'
 
 const Active = () => {
   const chartRef = useRef<HTMLDivElement>(null)
   const { results, loading, error } = useMonitoringData()
-  const yearRangeProps = useYearRange(
-    loading ? null : results,
-    (item) => item.IsActiveCase === true
+
+  // Calculate min and max years from the data
+  const { minYear, maxYear } = React.useMemo(() => {
+    if (!results?.length) return { minYear: 2000, maxYear: 2024 }
+    const years = results
+      .filter((item) => item.IsActiveCase)
+      .map((item) => new Date(item.DetectionDate).getFullYear())
+    return {
+      minYear: Math.min(...years),
+      maxYear: Math.max(...years),
+    }
+  }, [results])
+
+  const { yearRange, setYearRange, isUpdating } = useYearRangeStore()
+
+  // Initialize year range only once when data is first loaded
+  React.useEffect(() => {
+    if (
+      !isUpdating &&
+      minYear &&
+      maxYear &&
+      yearRange[0] === 2000 &&
+      yearRange[1] === 2024
+    ) {
+      setYearRange([minYear, maxYear])
+    }
+  }, [minYear, maxYear, setYearRange, isUpdating, yearRange])
+
+  const handleYearRangeChange = React.useCallback(
+    (range: [number, number]) => {
+      if (!isUpdating) {
+        setYearRange(range)
+      }
+    },
+    [setYearRange, isUpdating]
   )
 
-  const { yearRange, setYearRange, minYear, maxYear } = yearRangeProps
-
-  const chartData = (() => {
+  const chartData = React.useMemo(() => {
     if (!results) return []
 
     // First, filter the results based on year range and active cases
@@ -57,15 +87,18 @@ const Active = () => {
     }
 
     return formattedData.sort((a, b) => a.year - b.year)
-  })()
+  }, [results, yearRange])
 
-  const totalActiveCases =
-    results?.filter(
-      (item) =>
-        item.IsActiveCase &&
-        new Date(item.DetectionDate).getFullYear() >= yearRange[0] &&
-        new Date(item.DetectionDate).getFullYear() <= yearRange[1]
-    ).length || 0
+  const totalActiveCases = React.useMemo(
+    () =>
+      results?.filter(
+        (item) =>
+          item.IsActiveCase &&
+          new Date(item.DetectionDate).getFullYear() >= yearRange[0] &&
+          new Date(item.DetectionDate).getFullYear() <= yearRange[1]
+      ).length || 0,
+    [results, yearRange]
+  )
 
   return (
     <div className='wrapper'>
@@ -87,7 +120,7 @@ const Active = () => {
               yearRange={yearRange}
               minYear={minYear}
               maxYear={maxYear}
-              onChange={setYearRange}
+              onChange={handleYearRangeChange}
             />
           </>
         }
@@ -105,7 +138,7 @@ const Active = () => {
       <Table
         defaultFilters={{
           IsActiveCase: 'Yes',
-          DetectionDate: [yearRange[0], yearRange[1]],
+          DetectionDate: yearRange,
         }}
         filtersExpanded={false}
       />

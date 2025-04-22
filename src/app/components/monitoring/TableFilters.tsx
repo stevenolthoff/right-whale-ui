@@ -11,6 +11,7 @@ import {
   ChevronDownIcon,
   ArrowPathIcon,
 } from '@heroicons/react/20/solid'
+import { useYearRangeStore } from '../../stores/useYearRangeStore'
 
 const useMediaQuery = (query: string) => {
   const [matches, setMatches] = React.useState(false)
@@ -133,44 +134,38 @@ const YearFilter: React.FC<FilterProps & { data: InjuryCase[] }> = ({
     }
   }, [data])
 
-  // Initialize yearRange with the value prop if it exists
-  const [yearRange, setYearRange] = React.useState<[number, number]>(() => {
-    if (!value) return [minYear, maxYear]
-    try {
-      if (Array.isArray(value)) {
-        const [min, max] = value
-        return [Number(min) || minYear, Number(max) || maxYear]
-      }
-      const [min, max] = JSON.parse(value as string)
-      return [Number(min) || minYear, Number(max) || maxYear]
-    } catch {
-      return [minYear, maxYear]
-    }
-  })
+  const { yearRange, setYearRange, isUpdating } = useYearRangeStore()
 
-  // Update yearRange when value changes (including reset)
+  // Only update the store when the filter value changes and we're not already updating
   React.useEffect(() => {
-    if (!value) {
-      setYearRange([minYear, maxYear])
-      return
-    }
+    if (isUpdating) return
+    if (!value) return // Don't automatically reset to min/max
+
     try {
-      if (Array.isArray(value)) {
-        const [min, max] = value
-        setYearRange([Number(min) || minYear, Number(max) || maxYear])
-      } else {
-        const [min, max] = JSON.parse(value as string)
-        setYearRange([Number(min) || minYear, Number(max) || maxYear])
+      const [min, max] = Array.isArray(value)
+        ? value
+        : JSON.parse(value as string)
+      const newRange: [number, number] = [
+        Number(min) || minYear,
+        Number(max) || maxYear,
+      ]
+      if (newRange[0] !== yearRange[0] || newRange[1] !== yearRange[1]) {
+        setYearRange(newRange)
       }
     } catch {
-      setYearRange([minYear, maxYear])
+      // Don't reset on error
+      console.warn('Failed to parse year range value:', value)
     }
-  }, [value, minYear, maxYear])
+  }, [value, minYear, maxYear, setYearRange, yearRange, isUpdating])
 
-  const handleChange = (newRange: [number, number]) => {
-    setYearRange(newRange)
-    onChange(JSON.stringify(newRange))
-  }
+  const handleChange = React.useCallback(
+    (newRange: [number, number]) => {
+      if (!isUpdating) {
+        onChange(JSON.stringify(newRange))
+      }
+    },
+    [onChange, isUpdating]
+  )
 
   return (
     <div className='w-full'>
