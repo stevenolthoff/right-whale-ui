@@ -123,18 +123,21 @@ const YearFilter: React.FC<FilterProps & { data: InjuryCase[] }> = ({
   onChange,
   data,
 }) => {
-  // Calculate min and max years from data
-  const { minYear, maxYear } = React.useMemo(() => {
-    const years = data
-      .map((item) => new Date(item.DetectionDate).getFullYear())
-      .filter((year) => !isNaN(year))
-    return {
-      minYear: Math.min(...years),
-      maxYear: Math.max(...years),
-    }
-  }, [data])
+  const {
+    yearRange,
+    setYearRange,
+    isUpdating,
+    minYear,
+    maxYear,
+    setMinMaxYears,
+  } = useYearRangeStore()
 
-  const { yearRange, setYearRange, isUpdating } = useYearRangeStore()
+  // Set min/max years when data changes
+  React.useEffect(() => {
+    if (data?.length) {
+      setMinMaxYears(data)
+    }
+  }, [data, setMinMaxYears])
 
   // Only update the store when the filter value changes and we're not already updating
   React.useEffect(() => {

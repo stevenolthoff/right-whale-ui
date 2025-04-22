@@ -11,20 +11,21 @@ import { useYearRangeStore } from '../../stores/useYearRangeStore'
 const Active = () => {
   const chartRef = useRef<HTMLDivElement>(null)
   const { results, loading, error } = useMonitoringData()
+  const {
+    yearRange,
+    setYearRange,
+    isUpdating,
+    minYear,
+    maxYear,
+    setMinMaxYears,
+  } = useYearRangeStore()
 
-  // Calculate min and max years from the data
-  const { minYear, maxYear } = React.useMemo(() => {
-    if (!results?.length) return { minYear: 2000, maxYear: 2024 }
-    const years = results
-      .filter((item) => item.IsActiveCase)
-      .map((item) => new Date(item.DetectionDate).getFullYear())
-    return {
-      minYear: Math.min(...years),
-      maxYear: Math.max(...years),
+  // Set min/max years when data is loaded
+  React.useEffect(() => {
+    if (results?.length) {
+      setMinMaxYears(results)
     }
-  }, [results])
-
-  const { yearRange, setYearRange, isUpdating } = useYearRangeStore()
+  }, [results, setMinMaxYears])
 
   // Initialize year range only once when data is first loaded
   React.useEffect(() => {
