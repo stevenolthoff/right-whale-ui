@@ -46,12 +46,22 @@ interface AssessmentResponse {
   results: Assessment[]
 }
 
+interface CaseComment {
+  comment: string
+  created_at: string
+  created_by: string
+}
+
 interface CaseDetailsContentProps {
   caseData: InjuryCase
+  comments: CaseComment[] | null
+  isLoadingComments: boolean
 }
 
 const CaseDetailsContent: React.FC<CaseDetailsContentProps> = ({
   caseData,
+  comments,
+  isLoadingComments,
 }) => {
   const detailRows = [
     { label: 'EG No', value: caseData.EGNo },
@@ -72,20 +82,48 @@ const CaseDetailsContent: React.FC<CaseDetailsContentProps> = ({
   ]
 
   return (
-    <div className='space-y-4 max-h-[75vh] sm:max-h-[65vh] overflow-y-auto pr-4 -mr-4 pb-16'>
-      {detailRows.map(({ label, value }) => (
-        <div
-          key={label}
-          className='group grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-1 sm:gap-8 py-4 border-b border-gray-100 hover:bg-gray-50/50 px-2 -mx-2 rounded-lg transition-colors'
-        >
-          <div className='font-medium text-gray-500 text-sm sm:text-base'>
-            {label}
+    <div className='space-y-2 max-h-[75vh] sm:max-h-[65vh] overflow-y-auto pr-3 -mr-3'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 gap-2 pb-4'>
+        {detailRows.map(({ label, value }) => (
+          <div
+            key={label}
+            className='group bg-gray-50/50 rounded-lg p-2.5 hover:bg-gray-100/50 transition-colors'
+          >
+            <div className='font-medium text-gray-500 text-xs uppercase tracking-wide mb-1'>
+              {label}
+            </div>
+            <div className='text-gray-900 text-sm break-words'>{value}</div>
           </div>
-          <div className='text-gray-900 text-base sm:text-lg break-words'>
-            {value}
+        ))}
+      </div>
+
+      {/* Case Comments Section */}
+      <div className='border-t border-gray-100 pt-4'>
+        <h3 className='text-sm font-semibold text-gray-900 mb-3'>
+          Case Comments
+        </h3>
+        {isLoadingComments ? (
+          <div className='flex justify-center py-3'>
+            <div className='animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent'></div>
           </div>
-        </div>
-      ))}
+        ) : comments && comments.length > 0 ? (
+          <div className='space-y-2'>
+            {comments.map((comment, index) => (
+              <div key={index} className='bg-gray-50/50 rounded-lg p-2.5'>
+                <div className='text-xs text-gray-700'>{comment.comment}</div>
+                <div className='mt-1.5 text-[11px] text-gray-500 flex justify-between'>
+                  <span>{comment.created_by}</span>
+                  <span>{new Date(comment.created_at).toLocaleString()}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className='text-gray-500 text-xs py-2'>
+            No comments available
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -117,21 +155,21 @@ const WhaleInfoContent: React.FC<WhaleInfoContentProps> = ({ caseData }) => {
   ]
 
   return (
-    <div className='space-y-4 max-h-[75vh] sm:max-h-[65vh] overflow-y-auto pr-4 -mr-4 pb-16'>
-      {whaleInfoRows.map(({ label, value }) => (
-        <div
-          key={label}
-          className='group grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-1 sm:gap-8 py-4 border-b border-gray-100 hover:bg-gray-50/50 px-2 -mx-2 rounded-lg transition-colors'
-        >
-          <div className='font-medium text-gray-500 text-sm sm:text-base'>
-            {label}
+    <div className='space-y-2 max-h-[75vh] sm:max-h-[65vh] overflow-y-auto pr-3 -mr-3'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
+        {whaleInfoRows.map(({ label, value }) => (
+          <div
+            key={label}
+            className='group bg-gray-50/50 rounded-lg p-2.5 hover:bg-gray-100/50 transition-colors'
+          >
+            <div className='font-medium text-gray-500 text-xs uppercase tracking-wide mb-1'>
+              {label}
+            </div>
+            <div className='text-gray-900 text-sm break-words'>{value}</div>
           </div>
-          <div className='text-gray-900 text-base sm:text-lg break-words'>
-            {value}
-          </div>
-        </div>
-      ))}
-      <div className='text-sm text-gray-500 italic mt-4'>
+        ))}
+      </div>
+      <div className='text-xs text-gray-500 italic mt-2 px-1'>
         Note: Reproductive female status information is not currently available
         in the data.
       </div>
@@ -366,6 +404,8 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
   const [isLoading, setIsLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
+  const [comments, setComments] = useState<CaseComment[] | null>(null)
+  const [isLoadingComments, setIsLoadingComments] = useState(false)
 
   // Handle tab navigation with arrow keys
   const handleKeyDown = useCallback(
@@ -438,12 +478,37 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
     }
   }
 
+  // Fetch case comments
+  const fetchComments = async () => {
+    if (!caseData) return
+
+    setIsLoadingComments(true)
+    try {
+      const response = await axios.get<CaseComment[]>(
+        `https://stage-rwanthro-backend.srv.axds.co/anthro/api/v1/monitoring_cases/${caseData.CaseId}/`,
+        {
+          headers: {
+            accept: 'application/json',
+            Authorization: `token ${useAuthStore.getState().token}`,
+          },
+        }
+      )
+      setComments(response.data)
+    } catch (error) {
+      console.error('Error fetching case comments:', error)
+      setComments(null)
+    } finally {
+      setIsLoadingComments(false)
+    }
+  }
+
   // Initial fetch when popup opens
   useEffect(() => {
     if (isOpen && caseData) {
       setCurrentPage(1)
       setHasMore(true)
       fetchAssessments(1)
+      fetchComments()
     }
   }, [isOpen, caseData])
 
@@ -473,6 +538,7 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
       setCurrentPage(1)
       setHasMore(true)
       setActiveTab('details')
+      setComments(null)
     }
   }, [isOpen])
 
@@ -556,7 +622,11 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
 
           {/* Tab Content */}
           {activeTab === 'details' ? (
-            <CaseDetailsContent caseData={caseData} />
+            <CaseDetailsContent
+              caseData={caseData}
+              comments={comments}
+              isLoadingComments={isLoadingComments}
+            />
           ) : activeTab === 'whale-info' ? (
             <WhaleInfoContent caseData={caseData} />
           ) : (
