@@ -114,8 +114,8 @@ export default function Footer({ onOpenPopup }: FooterProps) {
           <div className='flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0'>
             {/* Copyright */}
             <p className='text-slate-500 text-sm'>
-              © {new Date().getFullYear()} NARW Anthropogenic Injury Event
-              Tracker. All rights reserved.
+              © {new Date().getFullYear()} NARW Anthropogenic Injury
+              Visualization site. All rights reserved.
             </p>
 
             {/* Social Links */}
