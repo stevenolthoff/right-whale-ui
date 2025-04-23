@@ -8,4 +8,6 @@ export interface PopulationData {
 export interface ParsedPopulationData {
   year: number
   estimate: number
+  lower: number
+  upper: number
 }

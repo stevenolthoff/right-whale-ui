@@ -3,8 +3,8 @@ import React, { useRef } from 'react'
 import { usePopulationData } from '@/app/hooks/usePopulationData'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { usePopulationYearRange } from '@/app/hooks/usePopulationYearRange'
-import { DataChart } from '@/app/components/monitoring/DataChart'
 import { ChartLayout } from '@/app/components/charts/ChartLayout'
+import { PopulationChart } from '@/app/components/monitoring/PopulationChart'
 
 export default function Population() {
   const chartRef = useRef<HTMLDivElement>(null)
@@ -14,16 +14,11 @@ export default function Population() {
   const chartData = (() => {
     if (!data) return []
 
-    return data
-      .filter(
-        (item) =>
-          item.year >= yearRangeProps.yearRange[0] &&
-          item.year <= yearRangeProps.yearRange[1]
-      )
-      .map((item) => ({
-        year: item.year,
-        total: item.estimate,
-      }))
+    return data.filter(
+      (item) =>
+        item.year >= yearRangeProps.yearRange[0] &&
+        item.year <= yearRangeProps.yearRange[1]
+    )
   })()
 
   return (
@@ -32,7 +27,7 @@ export default function Population() {
       chartRef={chartRef}
       exportFilename={`population-${yearRangeProps.yearRange[0]}-${yearRangeProps.yearRange[1]}.png`}
       yearRange={yearRangeProps.yearRange}
-      description='Data represents estimated population of North Atlantic Right Whales over time. Click and drag on the chart to zoom into specific periods.'
+      description='Data represents estimated population of North Atlantic Right Whales over time, with confidence intervals showing the upper and lower bounds of the estimates. Click and drag on the chart to zoom into specific periods.'
       loading={loading}
       error={error}
       controls={
@@ -49,12 +44,7 @@ export default function Population() {
         </>
       }
     >
-      <DataChart
-        data={chartData}
-        stacked={false}
-        yAxisLabel='Population Estimate'
-        showTotal={false}
-      />
+      <PopulationChart data={chartData} />
     </ChartLayout>
   )
 }

@@ -22,17 +22,30 @@ export const usePopulationData = () => {
           skipEmptyLines: true,
           complete: (results) => {
             const parsedData = (results.data as PopulationData[])
-              .filter((row) => row.Year && row['Population Estimate']) // Filter out incomplete rows
-              .map((row) => ({
-                year: parseInt(row.Year),
-                estimate: parseInt(row['Population Estimate']),
-              }))
+              .filter(
+                (row) =>
+                  row.Year &&
+                  row['Population Estimate'] &&
+                  row.Lower &&
+                  row.Upper
+              ) // Filter out incomplete rows
+              .map((row) => {
+                const estimate = parseInt(row['Population Estimate'])
+                const lowerDiff = Math.abs(parseInt(row.Lower))
+                const upperDiff = Math.abs(parseInt(row.Upper))
+                return {
+                  year: parseInt(row.Year),
+                  estimate: estimate,
+                  lower: estimate - lowerDiff,
+                  upper: estimate + upperDiff,
+                }
+              })
               .sort((a, b) => a.year - b.year) // Sort by year ascending
 
             setData(parsedData)
             setLoading(false)
           },
-          error: (error) => {
+          error: (error: { message: string }) => {
             setError(error.message)
             setLoading(false)
           },
