@@ -9,6 +9,8 @@ import { useAuthStore } from './store/auth'
 import { usePathname, redirect } from 'next/navigation'
 import DisclaimerPopup from './components/DisclaimerPopup'
 
+export type PopupSection = 'about' | 'data-access' | null
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -19,10 +21,21 @@ export default function RootLayout({
     useAuthStore()
   const [isHydrated, setIsHydrated] = useState(false)
   const [isPopupOpen, setIsPopupOpen] = useState(false)
+  const [activeSection, setActiveSection] = useState<PopupSection>(null)
 
   useEffect(() => {
     setIsHydrated(true)
   }, [])
+
+  const handleOpenPopup = (section: PopupSection) => {
+    setActiveSection(section)
+    setIsPopupOpen(true)
+  }
+
+  const handleClosePopup = () => {
+    setIsPopupOpen(false)
+    setActiveSection(null)
+  }
 
   // Check authorization
   useEffect(() => {
@@ -71,10 +84,11 @@ export default function RootLayout({
           <AuthCheck />
           <Header />
           <div className='flex-grow'>{children}</div>
-          <Footer onOpenPopup={() => setIsPopupOpen(true)} />
+          <Footer onOpenPopup={handleOpenPopup} />
           <DisclaimerPopup
             open={isPopupOpen}
-            onClose={() => setIsPopupOpen(false)}
+            onClose={handleClosePopup}
+            initialSection={activeSection}
           />
         </NoSsr>
       </body>

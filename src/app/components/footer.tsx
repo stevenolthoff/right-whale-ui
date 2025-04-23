@@ -1,11 +1,22 @@
 import Link from 'next/link'
 import Recognition from './recognition'
+import { PopupSection } from '../layout'
 
 interface FooterProps {
-  onOpenPopup?: () => void
+  onOpenPopup: (section: PopupSection) => void
 }
 
+type ResourceLink =
+  | { text: string; url: string }
+  | { text: string; section: PopupSection }
+
 export default function Footer({ onOpenPopup }: FooterProps) {
+  const resources: ResourceLink[] = [
+    { text: 'New England Aquarium', url: 'https://www.neaq.org' },
+    { text: 'About', section: 'about' },
+    { text: 'Data Access & Use', section: 'data-access' },
+  ]
+
   return (
     <footer className='bg-gradient-to-b from-white to-slate-50 border-t border-slate-200'>
       {/* Main Footer Content */}
@@ -39,13 +50,9 @@ export default function Footer({ onOpenPopup }: FooterProps) {
           <div className='space-y-4 order-2 lg:col-span-3'>
             <h3 className='text-[#2B4380] font-bold text-lg'>Resources</h3>
             <ul className='space-y-2'>
-              {[
-                { text: 'New England Aquarium', url: 'https://www.neaq.org' },
-                { text: 'About', onClick: onOpenPopup },
-                { text: 'Data Access & Use', onClick: onOpenPopup },
-              ].map((link) => (
+              {resources.map((link) => (
                 <li key={link.text}>
-                  {link.url ? (
+                  {'url' in link ? (
                     <a
                       href={link.url}
                       target='_blank'
@@ -56,7 +63,7 @@ export default function Footer({ onOpenPopup }: FooterProps) {
                     </a>
                   ) : (
                     <button
-                      onClick={link.onClick}
+                      onClick={() => onOpenPopup(link.section)}
                       className='text-gray-700 hover:text-blue-600 text-sm transition-colors duration-200'
                     >
                       {link.text}

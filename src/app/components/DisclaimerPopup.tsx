@@ -1,13 +1,19 @@
 import React, { useEffect, useRef } from 'react'
 import { twMerge } from 'tailwind-merge'
 import Image from 'next/image'
+import { PopupSection } from '../layout'
 
 interface DisclaimerPopupProps {
   open: boolean
   onClose: () => void
+  initialSection: PopupSection
 }
 
-export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
+export function DisclaimerPopup({
+  open,
+  onClose,
+  initialSection,
+}: DisclaimerPopupProps) {
   const aboutSectionRef = useRef<HTMLHeadingElement>(null)
   const dataAccessSectionRef = useRef<HTMLHeadingElement>(null)
 
@@ -22,19 +28,23 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
     return () => document.removeEventListener('keydown', handleEscape)
   }, [open, onClose])
 
-  const scrollToAbout = () => {
-    aboutSectionRef.current?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    })
-  }
-
-  const scrollToDataAccess = () => {
-    dataAccessSectionRef.current?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    })
-  }
+  useEffect(() => {
+    if (open && initialSection) {
+      setTimeout(() => {
+        if (initialSection === 'about') {
+          aboutSectionRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          })
+        } else if (initialSection === 'data-access') {
+          dataAccessSectionRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          })
+        }
+      }, 100) // Small delay to ensure the popup is fully rendered
+    }
+  }, [open, initialSection])
 
   return (
     <>
@@ -100,22 +110,6 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
                 .
               </p>
 
-              {/* Button Section */}
-              <div className='grid grid-cols-2 gap-4 mb-8'>
-                <button
-                  className='btn bg-blue-700 hover:bg-blue-800 text-white'
-                  onClick={scrollToAbout}
-                >
-                  ABOUT
-                </button>
-                <button
-                  className='btn bg-blue-700 hover:bg-blue-800 text-white'
-                  onClick={scrollToDataAccess}
-                >
-                  DATA ACCESS & USE
-                </button>
-              </div>
-
               <h2
                 ref={aboutSectionRef}
                 className='text-xl font-bold mb-3 scroll-mt-6'
@@ -180,16 +174,17 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
                 The Right Whale Anthropogenic Event Visualization Site serves
                 multiple user purposes and as such, data and visualization
                 output access varies by user. Publicly available data and
-                graphics are accessible through the "Explore" tab. Near real
-                time injury monitoring data are accessible by field teams and
-                managers and are meant to facilitate efforts in support of the
-                ongoing Unusual Mortality Event. Injury event data, derived from
-                detailed annual assessments of scars, active entanglements, and
-                associated data, are accessible for management and related
-                activities. Access to, and use of, data on this site are under
-                the purview of the North Atlantic Right Whale Consortium Data
-                Access Protocols. Data may not be shared or used without a
-                formal data access request submission available through the{' '}
+                graphics are accessible through the &quot;Explore&quot; tab.
+                Near real time injury monitoring data are accessible by field
+                teams and managers and are meant to facilitate efforts in
+                support of the ongoing Unusual Mortality Event. Injury event
+                data, derived from detailed annual assessments of scars, active
+                entanglements, and associated data, are accessible for
+                management and related activities. Access to, and use of, data
+                on this site are under the purview of the North Atlantic Right
+                Whale Consortium Data Access Protocols. Data may not be shared
+                or used without a formal data access request submission
+                available through the{' '}
                 <a
                   href='https://www.narwc.org/accessing-narwc-data.html'
                   className='text-blue-500'
