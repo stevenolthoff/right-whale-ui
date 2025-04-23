@@ -1,0 +1,8 @@
+---
+description: Document changes in git commits.
+globs: 
+alwaysApply: false
+---
+# Commit Rule
+
+After every significant chunk of work, write a terminal command in this format: `git commit -am <concise description of changes>`
