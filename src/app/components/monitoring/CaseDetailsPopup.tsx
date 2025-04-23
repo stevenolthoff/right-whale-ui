@@ -494,8 +494,14 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
       )
       setComments(response.data)
     } catch (error) {
-      console.error('Error fetching case comments:', error)
-      setComments(null)
+      // If it's a 404, just set comments to null silently
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        setComments(null)
+      } else {
+        // For other errors, log them but don't show to user
+        console.error('Error fetching case comments:', error)
+        setComments(null)
+      }
     } finally {
       setIsLoadingComments(false)
     }
