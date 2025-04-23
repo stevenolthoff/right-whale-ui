@@ -11,8 +11,17 @@ export default function HomeInfo() {
           </h2>
           <p className='text-lg text-neutral-700 leading-relaxed'>
             The North Atlantic Right Whale Anthropogenic Injury Visualization
-            Site was developed to provide improved access to, and visualization
-            of, data associated with anthropogenic injuries to right whales.
+            Site was developed by researchers at the New England Aquarium to
+            provide improved access to, and visualization of, data associated
+            with anthropogenic injuries to right whales.
+          </p>
+          <p className='text-lg text-neutral-700 leading-relaxed'>
+            This site serves multiple user purposes and as such, data and
+            visualization output access varies by user. Publicly available data
+            and graphics are accessible through the "Explore" tab. Near real
+            time injury monitoring data and Injury data are accessible by field
+            teams, researchers, and managers and are meant to facilitate efforts
+            in support of management, research, and conservation efforts.
           </p>
           <div className='pt-4'>
             <a
