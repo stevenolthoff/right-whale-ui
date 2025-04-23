@@ -46,7 +46,7 @@ export function DisclaimerPopup({ open, onClose }: DisclaimerPopupProps) {
           {/* Header */}
           <div className='p-6 flex justify-between items-center border-b flex-shrink-0'>
             <h1 className='text-2xl font-bold'>
-              Welcome to the North Atlantic Right Whale Anthropogenic Events
+              Welcome to the North Atlantic Right Whale Anthropogenic
               Visualization Site
             </h1>
             <Image
