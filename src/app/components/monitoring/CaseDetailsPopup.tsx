@@ -82,7 +82,7 @@ const CaseDetailsContent: React.FC<CaseDetailsContentProps> = ({
   ]
 
   return (
-    <div className='space-y-2 max-h-[75vh] sm:max-h-[65vh] overflow-y-auto pr-3 -mr-3'>
+    <div className='h-full overflow-y-auto pr-3 -mr-3 space-y-2'>
       <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
         {detailRows.map(({ label, value }) => (
           <div
@@ -153,7 +153,7 @@ const WhaleInfoContent: React.FC<WhaleInfoContentProps> = ({ caseData }) => {
   ]
 
   return (
-    <div className='space-y-2 max-h-[75vh] sm:max-h-[65vh] overflow-y-auto pr-3 -mr-3'>
+    <div className='h-full overflow-y-auto pr-3 -mr-3 space-y-2'>
       <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
         {whaleInfoRows.map(({ label, value }) => (
           <div
@@ -227,10 +227,9 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
   })
 
   return (
-    <div className='space-y-3'>
+    <div className='h-full flex flex-col'>
       {/* Controls */}
-      <div className='flex flex-col space-y-2 pb-3'>
-        {/* Filter Controls */}
+      <div className='flex-none pb-3'>
         <div className='flex flex-wrap items-center gap-2'>
           <div className='text-sm font-medium text-gray-700'>Impact:</div>
           <div className='flex items-center gap-2 flex-wrap'>
@@ -271,107 +270,109 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className='max-h-[65vh] overflow-y-auto pr-3 -mr-3 space-y-2'
+        className='flex-1 overflow-y-auto pr-3 -mr-3 min-h-0'
       >
-        {sortedAssessments.map((assessment) => (
-          <div
-            key={assessment.AssessmentId}
-            className='bg-gray-50/50 border border-gray-100 rounded-lg p-2.5 hover:shadow-sm transition-shadow'
-          >
-            {/* Header with badges */}
-            <div className='flex flex-wrap items-start justify-between gap-1.5 mb-2'>
-              <div className='flex flex-wrap items-center gap-1.5'>
-                <span className='text-sm font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full'>
-                  {assessment.AssessmentTypeDescription}
-                </span>
-                <span
-                  className={`text-sm font-medium px-2 py-0.5 rounded-full ${
-                    assessment.InjuryImpactDescription === 'No Impact'
-                      ? 'bg-green-50 text-green-600'
-                      : assessment.InjuryImpactDescription === 'Minor'
-                      ? 'bg-yellow-50 text-yellow-600'
-                      : 'bg-red-50 text-red-600'
-                  }`}
-                >
-                  {assessment.InjuryImpactDescription}
-                </span>
-              </div>
-              <div className='text-xs text-gray-500 shrink-0'>
-                ID: {assessment.AssessmentId}
-              </div>
-            </div>
-
-            {/* Sighting Information */}
-            <div className='space-y-2'>
-              <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
-                <div className='space-y-0.5'>
-                  <div className='text-xs font-medium text-gray-500'>
-                    First Sighting
-                  </div>
-                  <div className='text-sm text-gray-700'>
-                    {new Date(assessment.FirstSightingDate).toLocaleString(
-                      'en-US',
-                      {
-                        year: 'numeric',
-                        month: 'numeric',
-                        day: 'numeric',
-                        timeZone: 'UTC',
-                      }
-                    )}
-                  </div>
-                  <div className='text-xs text-gray-600'>
-                    {assessment.FirstSightingAreaDescription}
-                  </div>
+        <div className='space-y-2'>
+          {sortedAssessments.map((assessment) => (
+            <div
+              key={assessment.AssessmentId}
+              className='bg-gray-50/50 border border-gray-100 rounded-lg p-2.5 hover:shadow-sm transition-shadow'
+            >
+              {/* Header with badges */}
+              <div className='flex flex-wrap items-start justify-between gap-1.5 mb-2'>
+                <div className='flex flex-wrap items-center gap-1.5'>
+                  <span className='text-sm font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full'>
+                    {assessment.AssessmentTypeDescription}
+                  </span>
+                  <span
+                    className={`text-sm font-medium px-2 py-0.5 rounded-full ${
+                      assessment.InjuryImpactDescription === 'No Impact'
+                        ? 'bg-green-50 text-green-600'
+                        : assessment.InjuryImpactDescription === 'Minor'
+                        ? 'bg-yellow-50 text-yellow-600'
+                        : 'bg-red-50 text-red-600'
+                    }`}
+                  >
+                    {assessment.InjuryImpactDescription}
+                  </span>
                 </div>
-                <div className='space-y-0.5'>
-                  <div className='text-xs font-medium text-gray-500'>
-                    Last Sighting
-                  </div>
-                  <div className='text-sm text-gray-700'>
-                    {new Date(assessment.LastSightingDate).toLocaleString(
-                      'en-US',
-                      {
-                        year: 'numeric',
-                        month: 'numeric',
-                        day: 'numeric',
-                        timeZone: 'UTC',
-                      }
-                    )}
-                  </div>
-                  <div className='text-xs text-gray-600'>
-                    {assessment.LastSightingAreaDescription}
-                  </div>
+                <div className='text-xs text-gray-500 shrink-0'>
+                  ID: {assessment.AssessmentId}
                 </div>
               </div>
 
-              {/* Comments Section */}
-              {assessment.InjuryImpactComments && (
-                <div className='pt-1'>
-                  <div className='text-xs font-medium text-gray-500 mb-1'>
-                    Comments
+              {/* Sighting Information */}
+              <div className='space-y-2'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
+                  <div className='space-y-0.5'>
+                    <div className='text-xs font-medium text-gray-500'>
+                      First Sighting
+                    </div>
+                    <div className='text-sm text-gray-700'>
+                      {new Date(assessment.FirstSightingDate).toLocaleString(
+                        'en-US',
+                        {
+                          year: 'numeric',
+                          month: 'numeric',
+                          day: 'numeric',
+                          timeZone: 'UTC',
+                        }
+                      )}
+                    </div>
+                    <div className='text-xs text-gray-600'>
+                      {assessment.FirstSightingAreaDescription}
+                    </div>
                   </div>
-                  <div className='text-sm text-gray-700 bg-gray-100/50 p-2 rounded'>
-                    {assessment.InjuryImpactComments}
+                  <div className='space-y-0.5'>
+                    <div className='text-xs font-medium text-gray-500'>
+                      Last Sighting
+                    </div>
+                    <div className='text-sm text-gray-700'>
+                      {new Date(assessment.LastSightingDate).toLocaleString(
+                        'en-US',
+                        {
+                          year: 'numeric',
+                          month: 'numeric',
+                          day: 'numeric',
+                          timeZone: 'UTC',
+                        }
+                      )}
+                    </div>
+                    <div className='text-xs text-gray-600'>
+                      {assessment.LastSightingAreaDescription}
+                    </div>
                   </div>
                 </div>
-              )}
 
-              {/* Monitor Status */}
-              <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-1 pt-1 text-xs text-gray-600'>
-                <div className='flex items-center gap-1.5'>
-                  <span className='font-medium'>Monitor Remove:</span>
-                  <span>{assessment.IsMonitorRemove ? 'Yes' : 'No'}</span>
-                </div>
-                {assessment.MonitorRemoveReasonDescription !== 'No' && (
-                  <div className='flex items-center gap-1.5'>
-                    <span className='font-medium'>Reason:</span>
-                    <span>{assessment.MonitorRemoveReasonDescription}</span>
+                {/* Comments Section */}
+                {assessment.InjuryImpactComments && (
+                  <div className='pt-1'>
+                    <div className='text-xs font-medium text-gray-500 mb-1'>
+                      Comments
+                    </div>
+                    <div className='text-sm text-gray-700 bg-gray-100/50 p-2 rounded'>
+                      {assessment.InjuryImpactComments}
+                    </div>
                   </div>
                 )}
+
+                {/* Monitor Status */}
+                <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-1 pt-1 text-xs text-gray-600'>
+                  <div className='flex items-center gap-1.5'>
+                    <span className='font-medium'>Monitor Remove:</span>
+                    <span>{assessment.IsMonitorRemove ? 'Yes' : 'No'}</span>
+                  </div>
+                  {assessment.MonitorRemoveReasonDescription !== 'No' && (
+                    <div className='flex items-center gap-1.5'>
+                      <span className='font-medium'>Reason:</span>
+                      <span>{assessment.MonitorRemoveReasonDescription}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
 
         {isLoading && (
           <div className='flex justify-center py-2'>
@@ -552,16 +553,16 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
   return (
     <div
       key={caseData.CaseId}
-      className='fixed inset-0 z-[9999] overflow-y-auto bg-gray-900/25 backdrop-blur-sm'
+      className='fixed inset-0 z-[9999] bg-gray-900/25 backdrop-blur-sm'
       onClick={handleBackdropClick}
       role='dialog'
       aria-modal='true'
       aria-labelledby='case-details-title'
     >
-      <div className='flex items-center justify-center min-h-screen sm:p-4'>
-        <div className='relative bg-white w-full min-h-screen sm:min-h-fit sm:max-w-2xl sm:rounded-2xl shadow-2xl p-4 sm:p-8 z-[10000] sm:mx-auto sm:my-8 animate-in fade-in duration-300 slide-in-from-bottom-4'>
+      <div className='flex items-center justify-center min-h-screen'>
+        <div className='relative bg-white w-full h-screen sm:h-[600px] sm:max-w-2xl sm:rounded-2xl shadow-2xl sm:mx-auto sm:my-8 animate-in fade-in duration-300 slide-in-from-bottom-4 flex flex-col'>
           {/* Header Section */}
-          <div className='flex flex-col space-y-1 mb-4'>
+          <div className='flex-none flex flex-col space-y-1 p-4 sm:p-8 pb-4 border-b border-gray-100'>
             <div className='flex justify-between items-center'>
               <h2
                 id='case-details-title'
@@ -583,8 +584,8 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
           </div>
 
           {/* Tabs */}
-          <div className='border-b border-gray-200 mb-6'>
-            <nav className='-mb-px flex space-x-8' aria-label='Tabs'>
+          <div className='flex-none px-4 sm:px-8 border-b border-gray-200'>
+            <nav className='flex space-x-8' aria-label='Tabs'>
               <button
                 onClick={() => setActiveTab('details')}
                 className={`${
@@ -618,22 +619,25 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
             </nav>
           </div>
 
-          {/* Tab Content */}
-          {activeTab === 'details' ? (
-            <CaseDetailsContent
-              caseData={caseData}
-              comments={comments}
-              isLoadingComments={isLoadingComments}
-            />
-          ) : activeTab === 'whale-info' ? (
-            <WhaleInfoContent caseData={caseData} />
-          ) : (
-            <AssessmentContent
-              assessments={assessmentData?.results || []}
-              isLoading={isLoading}
-              onLoadMore={handleLoadMore}
-            />
-          )}
+          {/* Content Container */}
+          <div className='flex-1 p-4 sm:p-8 pt-6 min-h-0'>
+            {/* Tab Content */}
+            {activeTab === 'details' ? (
+              <CaseDetailsContent
+                caseData={caseData}
+                comments={comments}
+                isLoadingComments={isLoadingComments}
+              />
+            ) : activeTab === 'whale-info' ? (
+              <WhaleInfoContent caseData={caseData} />
+            ) : (
+              <AssessmentContent
+                assessments={assessmentData?.results || []}
+                isLoading={isLoading}
+                onLoadMore={handleLoadMore}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
