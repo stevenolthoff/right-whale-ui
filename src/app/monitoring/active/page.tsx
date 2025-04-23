@@ -59,17 +59,19 @@ const Active = () => {
     [yearRange]
   )
 
-  const chartData = React.useMemo(() => {
+  const yearFilteredData = useMemo(() => {
     if (!filteredData) return []
-
-    // First, filter the results based on year range and active cases
-    const filteredResults = filteredData.filter((item) => {
+    return filteredData.filter((item) => {
       const year = new Date(item.DetectionDate).getFullYear()
-      return item.IsActiveCase && year >= yearRange[0] && year <= yearRange[1]
+      return year >= yearRange[0] && year <= yearRange[1]
     })
+  }, [filteredData, yearRange])
+
+  const chartData = React.useMemo(() => {
+    if (!yearFilteredData) return []
 
     // Group by year and injury type
-    const yearTypeCount = filteredResults.reduce((acc, item) => {
+    const yearTypeCount = yearFilteredData.reduce((acc, item) => {
       const year = new Date(item.DetectionDate).getFullYear()
       const injuryType = item.InjuryTypeDescription || 'Unknown'
 
@@ -83,7 +85,7 @@ const Active = () => {
     // Get unique injury types
     const injuryTypes = Array.from(
       new Set(
-        filteredResults.map((item) => item.InjuryTypeDescription || 'Unknown')
+        yearFilteredData.map((item) => item.InjuryTypeDescription || 'Unknown')
       )
     )
 
@@ -98,17 +100,11 @@ const Active = () => {
     }
 
     return formattedData.sort((a, b) => a.year - b.year)
-  }, [filteredData, yearRange])
+  }, [yearFilteredData, yearRange])
 
   const totalActiveCases = React.useMemo(
-    () =>
-      filteredData?.filter(
-        (item) =>
-          item.IsActiveCase &&
-          new Date(item.DetectionDate).getFullYear() >= yearRange[0] &&
-          new Date(item.DetectionDate).getFullYear() <= yearRange[1]
-      ).length || 0,
-    [filteredData, yearRange]
+    () => yearFilteredData.length || 0,
+    [yearFilteredData]
   )
 
   return (
