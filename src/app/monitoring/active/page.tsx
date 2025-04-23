@@ -1,5 +1,5 @@
 'use client'
-import React, { useRef } from 'react'
+import React, { useRef, useMemo } from 'react'
 import { useMonitoringData } from '../../hooks/useMonitoringData'
 import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
 import { DataChart } from '../../components/monitoring/DataChart'
@@ -7,10 +7,12 @@ import { ChartLayout } from '@/app/components/charts/ChartLayout'
 import Download from '@/app/components/monitoring/Download'
 import Table from '@/app/components/monitoring/Table'
 import { useYearRangeStore } from '../../stores/useYearRangeStore'
+import { useFilteredData } from '../../hooks/useFilteredData'
 
 const Active = () => {
   const chartRef = useRef<HTMLDivElement>(null)
   const { results, loading, error } = useMonitoringData()
+  const { filteredData } = useFilteredData()
   const {
     yearRange,
     setYearRange,
@@ -49,11 +51,19 @@ const Active = () => {
     [setYearRange, isUpdating]
   )
 
+  const defaultFilters = useMemo(
+    () => ({
+      IsActiveCase: 'Yes' as const,
+      DetectionDate: yearRange,
+    }),
+    [yearRange]
+  )
+
   const chartData = React.useMemo(() => {
-    if (!results) return []
+    if (!filteredData) return []
 
     // First, filter the results based on year range and active cases
-    const filteredResults = results.filter((item) => {
+    const filteredResults = filteredData.filter((item) => {
       const year = new Date(item.DetectionDate).getFullYear()
       return item.IsActiveCase && year >= yearRange[0] && year <= yearRange[1]
     })
@@ -78,9 +88,9 @@ const Active = () => {
     )
 
     // Create array with all consecutive years and injury types
-    const formattedData = []
+    const formattedData: Array<{ year: number; [key: string]: number }> = []
     for (let year = yearRange[0]; year <= yearRange[1]; year++) {
-      const dataPoint: any = { year }
+      const dataPoint: { year: number; [key: string]: number } = { year }
       injuryTypes.forEach((injuryType) => {
         dataPoint[injuryType] = yearTypeCount[year]?.[injuryType] || 0
       })
@@ -88,17 +98,17 @@ const Active = () => {
     }
 
     return formattedData.sort((a, b) => a.year - b.year)
-  }, [results, yearRange])
+  }, [filteredData, yearRange])
 
   const totalActiveCases = React.useMemo(
     () =>
-      results?.filter(
+      filteredData?.filter(
         (item) =>
           item.IsActiveCase &&
           new Date(item.DetectionDate).getFullYear() >= yearRange[0] &&
           new Date(item.DetectionDate).getFullYear() <= yearRange[1]
       ).length || 0,
-    [results, yearRange]
+    [filteredData, yearRange]
   )
 
   return (
@@ -136,13 +146,7 @@ const Active = () => {
 
       <Download />
 
-      <Table
-        defaultFilters={{
-          IsActiveCase: 'Yes',
-          DetectionDate: yearRange,
-        }}
-        filtersExpanded={false}
-      />
+      <Table defaultFilters={defaultFilters} filtersExpanded={false} />
     </div>
   )
 }
