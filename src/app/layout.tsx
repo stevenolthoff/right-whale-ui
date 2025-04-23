@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react'
 import { AuthCheck } from './components/AuthCheck'
 import { useAuthStore } from './store/auth'
 import { usePathname, redirect } from 'next/navigation'
+import DisclaimerPopup from './components/DisclaimerPopup'
 
 export default function RootLayout({
   children,
@@ -17,6 +18,7 @@ export default function RootLayout({
   const { isAuthenticated, canAccessMonitoring, canAccessInjury, user } =
     useAuthStore()
   const [isHydrated, setIsHydrated] = useState(false)
+  const [isPopupOpen, setIsPopupOpen] = useState(false)
 
   useEffect(() => {
     setIsHydrated(true)
@@ -69,7 +71,11 @@ export default function RootLayout({
           <AuthCheck />
           <Header />
           <div className='flex-grow'>{children}</div>
-          <Footer />
+          <Footer onOpenPopup={() => setIsPopupOpen(true)} />
+          <DisclaimerPopup
+            open={isPopupOpen}
+            onClose={() => setIsPopupOpen(false)}
+          />
         </NoSsr>
       </body>
     </html>
