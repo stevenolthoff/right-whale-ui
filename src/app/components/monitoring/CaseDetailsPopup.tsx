@@ -83,7 +83,7 @@ const CaseDetailsContent: React.FC<CaseDetailsContentProps> = ({
 
   return (
     <div className='space-y-2 max-h-[75vh] sm:max-h-[65vh] overflow-y-auto pr-3 -mr-3'>
-      <div className='grid grid-cols-1 sm:grid-cols-2 gap-2 pb-4'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
         {detailRows.map(({ label, value }) => (
           <div
             key={label}
@@ -110,8 +110,8 @@ const CaseDetailsContent: React.FC<CaseDetailsContentProps> = ({
           <div className='space-y-2'>
             {comments.map((comment, index) => (
               <div key={index} className='bg-gray-50/50 rounded-lg p-2.5'>
-                <div className='text-xs text-gray-700'>{comment.comment}</div>
-                <div className='mt-1.5 text-[11px] text-gray-500 flex justify-between'>
+                <div className='text-sm text-gray-700'>{comment.comment}</div>
+                <div className='mt-1.5 text-xs text-gray-500 flex justify-between'>
                   <span>{comment.created_by}</span>
                   <span>{new Date(comment.created_at).toLocaleString()}</span>
                 </div>
@@ -119,9 +119,7 @@ const CaseDetailsContent: React.FC<CaseDetailsContentProps> = ({
             ))}
           </div>
         ) : (
-          <div className='text-gray-500 text-xs py-2'>
-            No comments available
-          </div>
+          <div className='text-sm text-gray-500'>No comments available</div>
         )}
       </div>
     </div>
@@ -169,7 +167,7 @@ const WhaleInfoContent: React.FC<WhaleInfoContentProps> = ({ caseData }) => {
           </div>
         ))}
       </div>
-      <div className='text-xs text-gray-500 italic mt-2 px-1'>
+      <div className='text-sm text-gray-500 italic mt-2 px-1'>
         Note: Reproductive female status information is not currently available
         in the data.
       </div>
@@ -209,7 +207,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
 
   if (!assessments?.length && !isLoading) {
     return (
-      <div className='h-96 flex items-center justify-center text-gray-500'>
+      <div className='h-96 flex items-center justify-center text-gray-500 text-sm'>
         No assessments found
       </div>
     )
@@ -229,17 +227,17 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
   })
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-3'>
       {/* Controls */}
-      <div className='flex flex-col space-y-4 pb-6'>
+      <div className='flex flex-col space-y-2 pb-3'>
         {/* Filter Controls */}
-        <div className='flex flex-wrap items-center gap-3'>
+        <div className='flex flex-wrap items-center gap-2'>
           <div className='text-sm font-medium text-gray-700'>Impact:</div>
-          <div className='flex items-center gap-3 flex-wrap'>
+          <div className='flex items-center gap-2 flex-wrap'>
             <select
               value={impactFilter}
               onChange={(e) => setImpactFilter(e.target.value)}
-              className='px-4 py-2 text-sm font-medium bg-white border border-gray-200 rounded-lg text-gray-700 hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors'
+              className='px-2 py-1 text-sm font-medium bg-white border border-gray-200 rounded-lg text-gray-700 hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors'
             >
               {[
                 'All',
@@ -256,7 +254,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
             {impactFilter !== 'All' && (
               <button
                 onClick={() => setImpactFilter('All')}
-                className='p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors'
+                className='p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors'
                 aria-label='Clear filter'
               >
                 <XMarkIcon className='h-4 w-4' />
@@ -273,21 +271,21 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className='max-h-[65vh] overflow-y-auto pr-4 -mr-4 pb-16 space-y-6'
+        className='max-h-[65vh] overflow-y-auto pr-3 -mr-3 space-y-2'
       >
         {sortedAssessments.map((assessment) => (
           <div
             key={assessment.AssessmentId}
-            className='bg-white border border-gray-100 rounded-xl p-4 sm:p-6 hover:shadow-md transition-shadow'
+            className='bg-gray-50/50 border border-gray-100 rounded-lg p-2.5 hover:shadow-sm transition-shadow'
           >
             {/* Header with badges */}
-            <div className='flex flex-wrap items-start justify-between gap-2 mb-4'>
-              <div className='flex flex-wrap items-center gap-2'>
-                <span className='text-sm font-medium text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full'>
+            <div className='flex flex-wrap items-start justify-between gap-1.5 mb-2'>
+              <div className='flex flex-wrap items-center gap-1.5'>
+                <span className='text-sm font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full'>
                   {assessment.AssessmentTypeDescription}
                 </span>
                 <span
-                  className={`text-sm font-medium px-2.5 py-0.5 rounded-full ${
+                  className={`text-sm font-medium px-2 py-0.5 rounded-full ${
                     assessment.InjuryImpactDescription === 'No Impact'
                       ? 'bg-green-50 text-green-600'
                       : assessment.InjuryImpactDescription === 'Minor'
@@ -298,16 +296,16 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
                   {assessment.InjuryImpactDescription}
                 </span>
               </div>
-              <div className='text-sm text-gray-500 shrink-0'>
+              <div className='text-xs text-gray-500 shrink-0'>
                 ID: {assessment.AssessmentId}
               </div>
             </div>
 
             {/* Sighting Information */}
-            <div className='space-y-4'>
-              <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                <div className='space-y-1'>
-                  <div className='text-sm font-medium text-gray-500'>
+            <div className='space-y-2'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
+                <div className='space-y-0.5'>
+                  <div className='text-xs font-medium text-gray-500'>
                     First Sighting
                   </div>
                   <div className='text-sm text-gray-700'>
@@ -321,12 +319,12 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
                       }
                     )}
                   </div>
-                  <div className='text-sm text-gray-600'>
+                  <div className='text-xs text-gray-600'>
                     {assessment.FirstSightingAreaDescription}
                   </div>
                 </div>
-                <div className='space-y-1'>
-                  <div className='text-sm font-medium text-gray-500'>
+                <div className='space-y-0.5'>
+                  <div className='text-xs font-medium text-gray-500'>
                     Last Sighting
                   </div>
                   <div className='text-sm text-gray-700'>
@@ -340,7 +338,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
                       }
                     )}
                   </div>
-                  <div className='text-sm text-gray-600'>
+                  <div className='text-xs text-gray-600'>
                     {assessment.LastSightingAreaDescription}
                   </div>
                 </div>
@@ -348,24 +346,24 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
 
               {/* Comments Section */}
               {assessment.InjuryImpactComments && (
-                <div className='pt-2'>
-                  <div className='text-sm font-medium text-gray-500 mb-1.5'>
+                <div className='pt-1'>
+                  <div className='text-xs font-medium text-gray-500 mb-1'>
                     Comments
                   </div>
-                  <div className='text-sm text-gray-700 bg-gray-50 p-3 rounded-lg'>
+                  <div className='text-sm text-gray-700 bg-gray-100/50 p-2 rounded'>
                     {assessment.InjuryImpactComments}
                   </div>
                 </div>
               )}
 
               {/* Monitor Status */}
-              <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 text-sm text-gray-600'>
-                <div className='flex items-center gap-2'>
+              <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-1 pt-1 text-xs text-gray-600'>
+                <div className='flex items-center gap-1.5'>
                   <span className='font-medium'>Monitor Remove:</span>
                   <span>{assessment.IsMonitorRemove ? 'Yes' : 'No'}</span>
                 </div>
                 {assessment.MonitorRemoveReasonDescription !== 'No' && (
-                  <div className='flex items-center gap-2'>
+                  <div className='flex items-center gap-1.5'>
                     <span className='font-medium'>Reason:</span>
                     <span>{assessment.MonitorRemoveReasonDescription}</span>
                   </div>
@@ -376,8 +374,8 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
         ))}
 
         {isLoading && (
-          <div className='flex justify-center py-4'>
-            <div className='animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent'></div>
+          <div className='flex justify-center py-2'>
+            <div className='animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent'></div>
           </div>
         )}
       </div>
