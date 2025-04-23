@@ -1,5 +1,5 @@
 'use client'
-import React, { useRef } from 'react'
+import React, { useRef, useMemo } from 'react'
 import { useMonitoringData } from '../../hooks/useMonitoringData'
 import { YearRangeSlider } from '../../components/monitoring/YearRangeSlider'
 import { DataChart } from '../../components/monitoring/DataChart'
@@ -7,10 +7,12 @@ import { ChartLayout } from '@/app/components/charts/ChartLayout'
 import Table from '@/app/components/monitoring/Table'
 import Download from '@/app/components/monitoring/Download'
 import { useYearRangeStore } from '../../stores/useYearRangeStore'
+import { useFilteredData } from '../../hooks/useFilteredData'
 
 const Unusual = () => {
   const chartRef = useRef<HTMLDivElement>(null)
   const { results, loading, error } = useMonitoringData()
+  const { filteredData } = useFilteredData()
   const { yearRange, setYearRange, minYear, maxYear, setMinMaxYears } =
     useYearRangeStore()
 
@@ -28,10 +30,22 @@ const Unusual = () => {
     }
   }, [results, setMinMaxYears])
 
-  const chartData = React.useMemo(() => {
-    if (!results) return []
+  const defaultFilters = useMemo(
+    () => ({
+      DetectionDate: yearRange,
+      UnusualMortalityEventDescription: [
+        'Yes - Morbidity',
+        'Yes - Mortality',
+        'Yes - Serious Injury',
+      ],
+    }),
+    [yearRange]
+  )
 
-    const yearCounts = results
+  const chartData = React.useMemo(() => {
+    if (!filteredData) return []
+
+    const yearCounts = filteredData
       .filter((item) => {
         const year = new Date(item.DetectionDate).getFullYear()
         return (
@@ -50,7 +64,7 @@ const Unusual = () => {
 
     const uniqueDescriptions = Array.from(
       new Set(
-        results
+        filteredData
           .filter((item) => item.IsUnusualMortalityEvent)
           .map((item) => item.UnusualMortalityEventDescription)
       )
@@ -66,7 +80,7 @@ const Unusual = () => {
     }
 
     return formattedData.sort((a, b) => a.year - b.year)
-  }, [results, yearRange])
+  }, [filteredData, yearRange])
 
   const totalUnusualEvents = chartData.reduce(
     (sum, item) =>
@@ -118,17 +132,7 @@ const Unusual = () => {
 
       <Download />
 
-      <Table
-        defaultFilters={{
-          DetectionDate: yearRange,
-          UnusualMortalityEventDescription: [
-            'Yes - Morbidity',
-            'Yes - Mortality',
-            'Yes - Serious Injury',
-          ],
-        }}
-        filtersExpanded={false}
-      />
+      <Table defaultFilters={defaultFilters} filtersExpanded={false} />
     </div>
   )
 }
