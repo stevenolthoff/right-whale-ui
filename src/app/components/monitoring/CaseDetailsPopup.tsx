@@ -52,14 +52,10 @@ interface CaseCommentResponse {
 
 interface CaseDetailsContentProps {
   caseData: InjuryCase
-  comments: string[] | null
-  isLoadingComments: boolean
 }
 
 const CaseDetailsContent: React.FC<CaseDetailsContentProps> = ({
   caseData,
-  comments,
-  isLoadingComments,
 }) => {
   const detailRows = [
     { label: 'EG No', value: caseData.EGNo },
@@ -94,29 +90,55 @@ const CaseDetailsContent: React.FC<CaseDetailsContentProps> = ({
           </div>
         ))}
       </div>
-
-      {/* Case Comments Section */}
-      <div className='border-t border-gray-100 pt-4'>
-        <h3 className='text-sm font-semibold text-gray-900 mb-3'>
-          Case Comments
-        </h3>
-        {isLoadingComments ? (
-          <div className='flex justify-center py-3'>
-            <div className='animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent'></div>
-          </div>
-        ) : comments && comments.length > 0 ? (
-          <div className='space-y-2'>
-            {comments.map((comment, index) => (
-              <div key={index} className='bg-gray-50/50 rounded-lg p-2.5'>
-                <div className='text-sm text-gray-700'>{comment}</div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className='text-sm text-gray-500'>No comments available</div>
-        )}
-      </div>
     </div>
+  )
+}
+
+interface CommentsContentProps {
+  comments: string[] | null
+  isLoadingComments: boolean
+}
+
+const CommentsContent: React.FC<CommentsContentProps> = ({
+  comments,
+  isLoadingComments,
+}) => {
+  return (
+    <div className='h-full overflow-y-auto pr-3 -mr-3'>
+      {isLoadingComments ? (
+        <div className='flex justify-center py-3'>
+          <div className='animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent'></div>
+        </div>
+      ) : comments && comments.length > 0 ? (
+        <div className='space-y-2'>
+          {comments.map((comment, index) => (
+            <div key={index} className='bg-gray-50/50 rounded-lg p-2.5'>
+              <div className='text-sm text-gray-700'>{comment}</div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className='text-sm text-gray-500 text-center py-8'>
+          No comments available
+        </div>
+      )}
+    </div>
+  )
+}
+
+interface CounterBadgeProps {
+  count: number
+}
+
+const CounterBadge: React.FC<CounterBadgeProps> = ({ count }) => {
+  return (
+    <span
+      className={`ml-1.5 inline-flex items-center justify-center px-1.5 min-w-[1.25rem] h-5 text-xs font-medium rounded-full ${
+        count > 0 ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-500'
+      }`}
+    >
+      {count}
+    </span>
   )
 }
 
@@ -390,7 +412,7 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
   onClose,
 }) => {
   const [activeTab, setActiveTab] = useState<
-    'details' | 'whale-info' | 'additional'
+    'details' | 'whale-info' | 'additional' | 'comments'
   >('details')
   const [assessmentData, setAssessmentData] =
     useState<AssessmentResponse | null>(null)
@@ -405,10 +427,11 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
     (event: KeyboardEvent) => {
       if (!isOpen) return
 
-      const tabs: ('details' | 'whale-info' | 'additional')[] = [
+      const tabs: ('details' | 'whale-info' | 'additional' | 'comments')[] = [
         'details',
         'whale-info',
         'additional',
+        'comments',
       ]
       const currentIndex = tabs.indexOf(activeTab)
 
@@ -622,6 +645,17 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
               >
                 Assessments
               </button>
+              <button
+                onClick={() => setActiveTab('comments')}
+                className={`${
+                  activeTab === 'comments'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+              >
+                Comments
+                <CounterBadge count={comments?.length || 0} />
+              </button>
             </nav>
           </div>
 
@@ -629,18 +663,19 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
           <div className='flex-1 p-4 sm:p-8 pt-6 min-h-0'>
             {/* Tab Content */}
             {activeTab === 'details' ? (
-              <CaseDetailsContent
-                caseData={caseData}
-                comments={comments}
-                isLoadingComments={isLoadingComments}
-              />
+              <CaseDetailsContent caseData={caseData} />
             ) : activeTab === 'whale-info' ? (
               <WhaleInfoContent caseData={caseData} />
-            ) : (
+            ) : activeTab === 'additional' ? (
               <AssessmentContent
                 assessments={assessmentData?.results || []}
                 isLoading={isLoading}
                 onLoadMore={handleLoadMore}
+              />
+            ) : (
+              <CommentsContent
+                comments={comments}
+                isLoadingComments={isLoadingComments}
               />
             )}
           </div>
