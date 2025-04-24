@@ -46,15 +46,13 @@ interface AssessmentResponse {
   results: Assessment[]
 }
 
-interface CaseComment {
-  comment: string
-  created_at: string
-  created_by: string
+interface CaseCommentResponse {
+  CaseComments: string
 }
 
 interface CaseDetailsContentProps {
   caseData: InjuryCase
-  comments: CaseComment[] | null
+  comments: string[] | null
   isLoadingComments: boolean
 }
 
@@ -110,11 +108,7 @@ const CaseDetailsContent: React.FC<CaseDetailsContentProps> = ({
           <div className='space-y-2'>
             {comments.map((comment, index) => (
               <div key={index} className='bg-gray-50/50 rounded-lg p-2.5'>
-                <div className='text-sm text-gray-700'>{comment.comment}</div>
-                <div className='mt-1.5 text-xs text-gray-500 flex justify-between'>
-                  <span>{comment.created_by}</span>
-                  <span>{new Date(comment.created_at).toLocaleString()}</span>
-                </div>
+                <div className='text-sm text-gray-700'>{comment}</div>
               </div>
             ))}
           </div>
@@ -403,7 +397,7 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
   const [isLoading, setIsLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
-  const [comments, setComments] = useState<CaseComment[] | null>(null)
+  const [comments, setComments] = useState<string[] | null>(null)
   const [isLoadingComments, setIsLoadingComments] = useState(false)
 
   // Handle tab navigation with arrow keys
@@ -483,7 +477,7 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
 
     setIsLoadingComments(true)
     try {
-      const response = await axios.get<CaseComment[]>(
+      const response = await axios.get<CaseCommentResponse>(
         `https://stage-rwanthro-backend.srv.axds.co/anthro/api/v1/monitoring_cases/${caseData.CaseId}/`,
         {
           headers: {
@@ -492,7 +486,13 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
           },
         }
       )
-      setComments(response.data)
+
+      // Split the comments string by newlines and filter out empty lines
+      const commentLines = response.data.CaseComments.split('\n').filter(
+        (line) => line.trim().length > 0
+      )
+
+      setComments(commentLines)
     } catch (error) {
       // If it's a 404, just set comments to null silently
       if (axios.isAxiosError(error) && error.response?.status === 404) {
