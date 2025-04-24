@@ -127,18 +127,36 @@ const CommentsContent: React.FC<CommentsContentProps> = ({
 }
 
 interface CounterBadgeProps {
-  count: number
+  count: number | null
+  isLoading: boolean
 }
 
-const CounterBadge: React.FC<CounterBadgeProps> = ({ count }) => {
+const CounterBadge: React.FC<CounterBadgeProps> = ({ count, isLoading }) => {
+  // Don't show anything if loading or count is null (initial state)
+  if (isLoading || count === null) return null
+
   return (
-    <span
-      className={`ml-1.5 inline-flex items-center justify-center px-1.5 min-w-[1.25rem] h-5 text-xs font-medium rounded-full ${
-        count > 0 ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-500'
-      }`}
-    >
-      {count}
-    </span>
+    <>
+      <style>
+        {`
+          @keyframes badgeFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+          .badge-fade-in {
+            opacity: 0;
+            animation: badgeFadeIn 0.2s ease-in forwards;
+          }
+        `}
+      </style>
+      <span
+        className={`ml-1.5 inline-flex items-center justify-center px-1.5 min-w-[1.25rem] h-5 text-xs font-medium rounded-full badge-fade-in ${
+          count > 0 ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-500'
+        }`}
+      >
+        {count}
+      </span>
+    </>
   )
 }
 
@@ -654,7 +672,10 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
               >
                 Comments
-                <CounterBadge count={comments?.length || 0} />
+                <CounterBadge
+                  count={comments === null ? null : comments.length}
+                  isLoading={isLoadingComments}
+                />
               </button>
             </nav>
           </div>
