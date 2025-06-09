@@ -51,17 +51,13 @@ export const useYearRangeStore = create<YearRangeState>((set) => ({
     const maxYear = Math.max(...years)
 
     set((state) => {
-      // Only update if the values are different
+      // Only update if the min/max values are different to avoid unnecessary re-renders
       if (state.minYear !== minYear || state.maxYear !== maxYear) {
-        // Also update the year range if it's outside the new bounds
-        const newYearRange = [...state.yearRange] as [number, number]
-        if (newYearRange[0] < minYear) newYearRange[0] = minYear
-        if (newYearRange[1] > maxYear) newYearRange[1] = maxYear
-
+        // When min/max years change, reset the yearRange to the full new range.
         return {
           minYear,
           maxYear,
-          yearRange: newYearRange,
+          yearRange: [minYear, maxYear],
         }
       }
       return state
