@@ -73,6 +73,17 @@ const CaseDetailsContent: React.FC<CaseDetailsContentProps> = ({
       label: 'UME Status',
       value: caseData.UnusualMortalityEventDescription || 'N/A',
     },
+    {
+      label: 'Date Last Assessed',
+      value: caseData.LastAssessedDate
+        ? new Date(caseData.LastAssessedDate).toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            timeZone: 'UTC',
+          })
+        : 'N/A',
+    },
   ]
 
   return (
@@ -176,6 +187,9 @@ const WhaleInfoContent: React.FC<WhaleInfoContentProps> = ({ caseData }) => {
     { label: 'Age', value: calculateAge() },
     { label: 'Age Class', value: caseData.MonitoringCaseAgeClass || 'Unknown' },
     { label: 'Sex', value: caseData.GenderDescription || 'Unknown' },
+    ...(caseData.GenderDescription?.toLowerCase() === 'female'
+      ? [{ label: 'Reproductive Female', value: caseData.Cow ? 'Yes' : 'No' }]
+      : []),
     {
       label: 'Death from Injury',
       value: caseData.IsDead ? 'Yes' : 'No',

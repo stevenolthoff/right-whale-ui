@@ -279,11 +279,12 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
       IsActiveCase: new Set(['Yes', 'No']),
       MonitoringCaseAgeClass: new Set(),
       GenderDescription: new Set(),
+      Cow: new Set(['Yes', 'No']),
     }
 
     data.forEach((item) => {
       Object.entries(options).forEach(([key, set]) => {
-        if (key === 'IsActiveCase') return // Skip as we already set the options
+        if (key === 'IsActiveCase' || key === 'Cow') return // Skip as we already set the options
         const value = item[key as keyof InjuryCase]
         if (value) set.add(value.toString())
         else if (key === 'MonitoringCaseAgeClass') set.add('N/A')
@@ -368,7 +369,9 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
             return (
               <div key={column.id} className='flex flex-col gap-1'>
                 <label className='text-xs font-medium text-gray-500 uppercase'>
-                  {column.columnDef.header as string}
+                  {column.id === 'Cow'
+                    ? 'Reproductive Female'
+                    : (column.columnDef.header as string)}
                 </label>
                 {column.id === 'DetectionDate' ? (
                   <YearFilter

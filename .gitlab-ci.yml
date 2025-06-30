@@ -27,8 +27,8 @@ push_production:
 
 push_staging:
   stage: push
-  only:
-    - development
+  except:
+    - main
   script:
     - docker tag $CI_PROJECT_NAME:$CI_PIPELINE_ID registry.axiom/$CI_PROJECT_NAME:staging
     - docker push registry.axiom/$CI_PROJECT_NAME:staging
@@ -43,8 +43,8 @@ clean_production:
 
 clean_staging:
   stage: clean
-  only:
-    - development
+  except:
+    - main
   script:
     - docker rmi --no-prune $CI_PROJECT_NAME:$CI_PIPELINE_ID
     - docker rmi --no-prune registry.axiom/$CI_PROJECT_NAME:staging
@@ -58,7 +58,7 @@ deploy_production:
 
 deploy_staging:
   stage: deploy
-  only:
-    - development
+  except:
+    - main
   script:
     - aps apps-stage right-whale-ui

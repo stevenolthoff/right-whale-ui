@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React from 'react'
 import {
   useReactTable,
   getCoreRowModel,
@@ -17,6 +17,8 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   ChevronUpDownIcon,
+  GlobeAltIcon,
+  EyeIcon,
 } from '@heroicons/react/20/solid'
 import { TableFilters } from './TableFilters'
 import { useFilteredData } from '@/app/hooks/useFilteredData'
@@ -45,7 +47,6 @@ interface MonitoringTableProps {
 const MonitoringTable: React.FC<MonitoringTableProps> = ({
   showFilters = true,
   defaultFilters,
-  visibleColumns,
   filtersExpanded,
 }) => {
   const { results, loading, error } = useMonitoringData()
@@ -57,22 +58,43 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
     null
   )
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const columns = React.useMemo<ColumnDef<InjuryCase, any>[]>(() => {
     return [
       columnHelper.accessor('EGNo', {
         header: 'EG No',
-        cell: (info) => (
-          <a
-            href={`https://rwcatalog.neaq.org/#/whales/${info.getValue()}`}
-            target='_blank'
-            rel='noopener noreferrer'
-            className={`text-blue-600 hover:text-blue-800 ${
-              info.getValue() ? 'bg-blue-100' : ''
-            } px-2 py-1 rounded-md`}
-          >
-            {info.getValue()}
-          </a>
-        ),
+        cell: (info) => {
+          const egNo = info.getValue()
+          if (!egNo) return null
+
+          return (
+            <div className='flex items-center gap-2'>
+              <span className='text-gray-900'>{egNo}</span>
+              <div className='flex gap-1'>
+                <a
+                  href={`https://rwcatalog.neaq.org/#/whales/${egNo}`}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='flex items-center gap-1 px-2 py-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-blue-600 transition-colors cursor-pointer'
+                  title='View on External Site'
+                  aria-label='View on External Site'
+                >
+                  <GlobeAltIcon className='h-3.5 w-3.5' />
+                  <span className='text-xs font-medium'>Ext</span>
+                </a>
+                <a
+                  href={`/whale?egno=${egNo}`}
+                  className='flex items-center gap-1 px-2 py-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-blue-600 transition-colors cursor-pointer'
+                  title='View Details'
+                  aria-label='View Details'
+                >
+                  <EyeIcon className='h-3.5 w-3.5' />
+                  <span className='text-xs font-medium'>View</span>
+                </a>
+              </div>
+            </div>
+          )
+        },
       }),
       columnHelper.accessor('CaseId', {
         header: 'Case ID',
@@ -203,61 +225,20 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
           return value === filterValue
         },
       }),
+      columnHelper.accessor('Cow', {
+        header: 'Reproductive Female',
+        cell: (info) => {
+          const value = info.getValue()
+          return value === true ? 'Yes' : 'No'
+        },
+        filterFn: (row, columnId, filterValue) => {
+          if (!filterValue) return true
+          const value = row.getValue(columnId)
+          return filterValue === 'Yes' ? value === true : value === false
+        },
+      }),
     ]
   }, [columnHelper])
-
-  // Calculate filter options
-  const filterOptions = React.useMemo(() => {
-    if (!results?.length) return {}
-
-    const stringSetOptions: Record<string, Set<string>> = {
-      UnusualMortalityEventDescription: new Set<string>(),
-      MonitoringCaseAgeClass: new Set<string>(),
-    }
-
-    const rangeOptions: Record<string, { min: number; max: number }> = {}
-    let minAge = Infinity
-    let maxAge = -Infinity
-
-    results.forEach((item) => {
-      const umeValue = item.UnusualMortalityEventDescription
-      if (umeValue) {
-        stringSetOptions.UnusualMortalityEventDescription.add(
-          umeValue.toString()
-        )
-      }
-
-      const ageClassValue = item.MonitoringCaseAgeClass
-      if (ageClassValue) {
-        stringSetOptions.MonitoringCaseAgeClass.add(ageClassValue.toString())
-      }
-
-      const ageStr = item.MonitoringCaseAge
-      if (ageStr) {
-        const age = parseInt(ageStr)
-        if (!isNaN(age)) {
-          minAge = Math.min(minAge, age)
-          maxAge = Math.max(maxAge, age)
-        }
-      }
-    })
-
-    if (minAge !== Infinity && maxAge !== -Infinity) {
-      rangeOptions.MonitoringCaseAge = { min: minAge, max: maxAge }
-    }
-
-    const processedStringOptions = Object.fromEntries(
-      Object.entries(stringSetOptions).map(([key, set]) => [
-        key,
-        Array.from(set).sort(),
-      ])
-    )
-
-    return {
-      ...processedStringOptions,
-      ...rangeOptions,
-    }
-  }, [results])
 
   const table = useReactTable({
     data: results || [],
