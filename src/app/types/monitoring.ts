@@ -33,6 +33,8 @@ interface InjuryCase {
   IsDead: boolean
   MortalityFieldID: string | null
   Necropsy: string
+  LastAssessedDate: string | null
+  Cow: boolean
 }
 
 export type { InjuryCase }

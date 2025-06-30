@@ -90,6 +90,18 @@ export default function Header() {
           >
             Explore
           </Link>
+          {isAuthenticated && (
+            <Link
+              href='/whale'
+              className={`${
+                topPath === 'whale'
+                  ? 'text-blue-600 after:w-full'
+                  : 'text-gray-700 after:w-0'
+              } font-semibold text-[15px] hover:text-blue-600 relative after:absolute after:bottom-[-4px] after:left-0 after:h-0.5 after:bg-blue-600 after:transition-all after:duration-300 hover:after:w-full`}
+            >
+              Whale
+            </Link>
+          )}
           {isAuthenticated && canAccessMonitoring() && (
             <Link
               href='/monitoring/overview'
@@ -258,6 +270,19 @@ export default function Header() {
               >
                 Resources
               </Link>
+              {isAuthenticated && (
+                <Link
+                  href='/whale'
+                  className={`block px-4 py-3 rounded-lg font-semibold transition-colors ${
+                    topPath === 'whale'
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Whale
+                </Link>
+              )}
             </nav>
           </div>
         </div>
