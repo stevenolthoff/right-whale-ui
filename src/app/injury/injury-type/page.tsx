@@ -12,7 +12,8 @@ const InjuryType = () => {
   const { results, loading, error } = useMonitoringData()
   const { yearRange, setYearRange, minYear, maxYear } = useYearRange(
     results,
-    (item) => true
+    () => true,
+    [1980, 2024]
   )
 
   const chartData = (() => {
