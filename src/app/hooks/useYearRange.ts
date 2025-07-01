@@ -9,7 +9,8 @@ interface HasYear {
 export function useYearRange<T extends HasYear>(
   data: T[] | null,
   filter?: (item: T) => boolean,
-  defaultYearRange?: [number, number]
+  defaultStartYear?: number,
+  defaultEndYear?: number
 ) {
   const { minYear, maxYear } = useMemo(() => {
     if (!data?.length) return { minYear: 2000, maxYear: 2024 }
@@ -24,28 +25,25 @@ export function useYearRange<T extends HasYear>(
   }, [data, filter])
 
   const [yearRange, setYearRange] = useState<[number, number]>(() => {
-    if (
-      defaultYearRange &&
-      defaultYearRange[0] >= minYear &&
-      defaultYearRange[1] <= maxYear
-    ) {
-      return defaultYearRange
-    }
-    return [minYear, maxYear]
+    const startYear =
+      defaultStartYear && defaultStartYear >= minYear
+        ? defaultStartYear
+        : minYear
+    const endYear =
+      defaultEndYear && defaultEndYear <= maxYear ? defaultEndYear : maxYear
+    return [startYear, endYear]
   })
 
   // Update yearRange when minYear/maxYear change
   useEffect(() => {
-    if (
-      defaultYearRange &&
-      defaultYearRange[0] >= minYear &&
-      defaultYearRange[1] <= maxYear
-    ) {
-      setYearRange(defaultYearRange)
-    } else {
-      setYearRange([minYear, maxYear])
-    }
-  }, [minYear, maxYear])
+    const startYear =
+      defaultStartYear && defaultStartYear >= minYear
+        ? defaultStartYear
+        : minYear
+    const endYear =
+      defaultEndYear && defaultEndYear <= maxYear ? defaultEndYear : maxYear
+    setYearRange([startYear, endYear])
+  }, [minYear, maxYear, defaultStartYear, defaultEndYear])
 
   return { yearRange, setYearRange, minYear, maxYear }
 }

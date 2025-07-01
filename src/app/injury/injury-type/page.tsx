@@ -13,7 +13,7 @@ const InjuryType = () => {
   const { yearRange, setYearRange, minYear, maxYear } = useYearRange(
     results,
     () => true,
-    [1980, 2024]
+    1980
   )
 
   const chartData = (() => {
