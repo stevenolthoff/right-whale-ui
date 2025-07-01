@@ -11,7 +11,8 @@ const Entanglement = () => {
   const { results, loading, error } = useMonitoringData()
   const { yearRange, setYearRange, minYear, maxYear } = useYearRange(
     results,
-    (item) => item.InjuryTypeDescription === 'Entanglement'
+    (item) => item.InjuryTypeDescription === 'Entanglement',
+    1980
   )
 
   const chartData = (() => {

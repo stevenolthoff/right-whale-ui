@@ -11,7 +11,8 @@ const VesselStrike = () => {
   const { data, loading, error } = useInjuryData()
   const { yearRange, setYearRange, minYear, maxYear } = useInjuryYearRange(
     data,
-    (item) => item.type === 'Vessel Strike'
+    (item) => item.type === 'Vessel Strike',
+    1980
   )
 
   const chartData = (() => {
