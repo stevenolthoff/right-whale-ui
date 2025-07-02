@@ -74,6 +74,12 @@ export interface WhaleInjury {
   }[]
 }
 
+// Simplified interface for injury timeframe chart - only the fields we actually use
+export interface InjuryTimeframeData {
+  DetectionDate: string
+  InjuryTimeFrame: number | null
+}
+
 export interface WhaleInjuryResponse {
   pagination: {
     next: string | null

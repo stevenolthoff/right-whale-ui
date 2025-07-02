@@ -1,14 +1,14 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import axios from 'axios'
-import { WhaleInjury, WhaleInjuryResponse } from '../types/whaleInjury'
+import { WhaleInjuryResponse, InjuryTimeframeData } from '../types/whaleInjury'
 import { useAuthStore } from '../store/auth'
 
 const API_BASE_URL =
   'https://stage-rwanthro-backend.srv.axds.co/anthro/api/v1/whale_injuries/'
 
 export const usePaginatedWhaleInjuryData = () => {
-  const [data, setData] = useState<WhaleInjury[]>([])
+  const [data, setData] = useState<InjuryTimeframeData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [nextPageUrl, setNextPageUrl] = useState<string | null>(API_BASE_URL)
@@ -37,7 +37,15 @@ export const usePaginatedWhaleInjuryData = () => {
           },
         })
 
-        setData((prevData) => [...prevData, ...response.data.results])
+        // Extract only the fields we need for the injury timeframe chart
+        const extractedData: InjuryTimeframeData[] = response.data.results.map(
+          (item) => ({
+            DetectionDate: item.DetectionDate,
+            InjuryTimeFrame: item.InjuryTimeFrame,
+          })
+        )
+
+        setData((prevData) => [...prevData, ...extractedData])
         setNextPageUrl(response.data.pagination.next)
         setTotalCount(response.data.pagination.count)
         setTotalPages(response.data.pagination.total_pages)
