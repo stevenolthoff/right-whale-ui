@@ -10,7 +10,6 @@ const API_BASE_URL =
 export const usePaginatedWhaleInjuryData = () => {
   const [data, setData] = useState<WhaleInjury[]>([])
   const [loading, setLoading] = useState(true)
-  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [nextPageUrl, setNextPageUrl] = useState<string | null>(API_BASE_URL)
   const [totalCount, setTotalCount] = useState(0)
@@ -23,12 +22,10 @@ export const usePaginatedWhaleInjuryData = () => {
     async (url: string) => {
       if (!url) {
         setLoading(false)
-        setLoadingMore(false)
         return
       }
 
       if (pagesLoaded === 0) setLoading(true)
-      else setLoadingMore(true)
 
       setError(null)
 
@@ -45,23 +42,32 @@ export const usePaginatedWhaleInjuryData = () => {
         setTotalCount(response.data.pagination.count)
         setTotalPages(response.data.pagination.total_pages)
         setPagesLoaded((prev) => prev + 1)
+
+        // Set loading to false only when we've loaded all pages
+        if (!response.data.pagination.next) {
+          setLoading(false)
+        }
       } catch (err) {
         setError(
           err instanceof Error ? err.message : 'An error occurred fetching data'
         )
-      } finally {
         setLoading(false)
-        setLoadingMore(false)
       }
     },
     [token, pagesLoaded]
   )
 
-  const loadMore = useCallback(() => {
-    if (nextPageUrl && !loadingMore) {
-      fetchData(nextPageUrl)
+  // Auto-fetch all pages
+  useEffect(() => {
+    if (token && nextPageUrl && pagesLoaded > 0) {
+      // Add a small delay to prevent overwhelming the API
+      const timer = setTimeout(() => {
+        fetchData(nextPageUrl)
+      }, 100)
+
+      return () => clearTimeout(timer)
     }
-  }, [nextPageUrl, loadingMore, fetchData])
+  }, [token, nextPageUrl, pagesLoaded, fetchData])
 
   // Initial fetch, depends on token
   useEffect(() => {
@@ -74,12 +80,9 @@ export const usePaginatedWhaleInjuryData = () => {
   return {
     data,
     loading,
-    loadingMore,
     error,
     totalCount,
     pagesLoaded,
     totalPages,
-    hasNextPage: !!nextPageUrl,
-    loadMore,
   }
 }

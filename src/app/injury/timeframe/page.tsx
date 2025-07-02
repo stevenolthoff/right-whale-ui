@@ -6,7 +6,7 @@ import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { DataChart } from '@/app/components/monitoring/DataChart'
 import { useYearRange } from '@/app/hooks/useYearRange'
 import { ChartLayout } from '@/app/components/charts/ChartLayout'
-import { Button } from '@/app/components/ui/button'
+
 
 // Helper function to categorize the injury timeframe into bins
 const getTimeframeBin = (days: number | null): string => {
@@ -34,17 +34,7 @@ const TIMEFRAME_BINS = [
 
 const InjuryTimeframeChart = () => {
   const chartRef = useRef<HTMLDivElement>(null)
-  const {
-    data,
-    loading,
-    error,
-    hasNextPage,
-    loadMore,
-    loadingMore,
-    pagesLoaded,
-    totalPages,
-    totalCount: apiTotalCount,
-  } = usePaginatedWhaleInjuryData()
+  const { data, loading, error } = usePaginatedWhaleInjuryData()
 
   const { yearRange, setYearRange, minYear, maxYear } = useYearRange(
     data,
@@ -135,17 +125,6 @@ const InjuryTimeframeChart = () => {
           customOrder={TIMEFRAME_BINS}
         />
       </ChartLayout>
-      <div className='mt-4 flex flex-col items-center justify-center space-y-2'>
-        {hasNextPage && (
-          <Button onClick={loadMore} disabled={loadingMore}>
-            {loadingMore ? 'Loading More...' : 'Load More Data'}
-          </Button>
-        )}
-        <p className='text-sm text-gray-500'>
-          {totalPages > 0 &&
-            `Loaded ${data.length} of ${apiTotalCount} records (${pagesLoaded} of ${totalPages} pages)`}
-        </p>
-      </div>
     </div>
   )
 }
