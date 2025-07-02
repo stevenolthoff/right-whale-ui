@@ -5,7 +5,7 @@ import { WhaleInjuryResponse, InjuryTimeframeData } from '../types/whaleInjury'
 import { useAuthStore } from '../store/auth'
 
 const API_BASE_URL =
-  'https://stage-rwanthro-backend.srv.axds.co/anthro/api/v1/whale_injuries/'
+  'https://stage-rwanthro-backend.srv.axds.co/anthro/api/v1/whale_injuries/?page_size=500'
 
 export const usePaginatedWhaleInjuryData = () => {
   const [data, setData] = useState<InjuryTimeframeData[]>([])
@@ -71,7 +71,7 @@ export const usePaginatedWhaleInjuryData = () => {
       // Add a small delay to prevent overwhelming the API
       const timer = setTimeout(() => {
         fetchData(nextPageUrl)
-      }, 100)
+      }, 0)
 
       return () => clearTimeout(timer)
     }
