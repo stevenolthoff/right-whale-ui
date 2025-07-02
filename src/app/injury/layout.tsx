@@ -85,6 +85,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       title: 'Vessel Strikes',
       description: 'View vessel strike incidents by year.',
     },
+    '/injury/timeframe': {
+      title: 'Injury Timeframe',
+      description: 'View injury timeframe by year.',
+    },
   }
 
   const categories = [
@@ -111,6 +115,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {
           href: '/injury/vessel-strike',
           label: 'Vessel Strikes',
+        },
+        {
+          href: '/injury/timeframe',
+          label: 'Injury Timeframe',
         },
       ],
     },
