@@ -74,12 +74,16 @@ export default function InjuryTimeframePage() {
         year,
         ...(yearData.get(year) || initialBins),
       }
-      // Only include years where the total is > 0
+      // Only include years where the total is > 0 and at least one bin other than 'Unknown' is > 0
       const total = TIMEFRAME_BINS.reduce(
         (sum, bin) => sum + (row[bin] || 0),
         0
       )
-      if (total > 0) {
+      const knownTotal = TIMEFRAME_BINS.filter((b) => b !== 'Unknown').reduce(
+        (sum, bin) => sum + (row[bin] || 0),
+        0
+      )
+      if (total > 0 && knownTotal > 0) {
         formattedData.push(row)
       }
     }
