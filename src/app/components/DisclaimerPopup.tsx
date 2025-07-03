@@ -156,7 +156,7 @@ export function DisclaimerPopup({
               </p>
 
               <p className='mb-6'>
-                The Right Whale Anthropogenic Event Visualization Site allows
+                The Right Whale Anthropogenic Injury Visualization Site allows
                 for public access to, and viewing of, general mortality,
                 calving, and injury data. Additionally, permissioned users can
                 interact with and view AED data through data filters and
@@ -171,7 +171,7 @@ export function DisclaimerPopup({
                 Data Access & Use
               </h2>
               <p className='mb-6'>
-                The Right Whale Anthropogenic Event Visualization Site serves
+                The Right Whale Anthropogenic Injury Visualization Site serves
                 multiple user purposes and as such, data and visualization
                 output access varies by user. Publicly available data and
                 graphics are accessible through the &quot;Explore&quot; tab.
