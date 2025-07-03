@@ -1,12 +1,14 @@
 'use client'
 
-import React, { useMemo, useRef } from 'react'
+import React, { useRef, useState, useMemo, useCallback } from 'react'
 import { usePaginatedWhaleInjuryData } from '@/app/hooks/usePaginatedWhaleInjuryData'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { DataChart } from '@/app/components/monitoring/DataChart'
 import { useYearRange } from '@/app/hooks/useYearRange'
-import { ChartLayout } from '@/app/components/charts/ChartLayout'
-
+import { Loader } from '@/app/components/ui/Loader'
+import { ErrorMessage } from '@/app/components/ui/ErrorMessage'
+import ChartAttribution from '@/app/components/charts/ChartAttribution'
+import { ExportChart } from '@/app/components/monitoring/ExportChart'
 
 // Helper function to categorize the injury timeframe into bins
 const getTimeframeBin = (days: number | null): string => {
@@ -32,43 +34,38 @@ const TIMEFRAME_BINS = [
   'Unknown',
 ]
 
-const InjuryTimeframeChart = () => {
+export default function InjuryTimeframePage() {
   const chartRef = useRef<HTMLDivElement>(null)
   const { data, loading, error } = usePaginatedWhaleInjuryData()
-
   const { yearRange, setYearRange, minYear, maxYear } = useYearRange(
     data,
-    undefined, // No pre-filtering needed here
+    undefined,
     1980
   )
 
+  const [isSideBySide, setIsSideBySide] = useState(true)
+
   const chartData = useMemo(() => {
     if (!data.length) return []
-
-    // 1. Filter data by the selected year range
     const yearFilteredData = data.filter((item) => {
       const year = new Date(item.DetectionDate).getFullYear()
       return year >= yearRange[0] && year <= yearRange[1]
     })
 
-    // 2. Group by year and timeframe bin
     const yearData = new Map<number, Record<string, number>>()
 
     yearFilteredData.forEach((item) => {
       const year = new Date(item.DetectionDate).getFullYear()
       const bin = getTimeframeBin(item.InjuryTimeFrame)
-
       if (!yearData.has(year)) {
         const initialBins: Record<string, number> = {}
         TIMEFRAME_BINS.forEach((b) => (initialBins[b] = 0))
         yearData.set(year, initialBins)
       }
-
       const yearCounts = yearData.get(year)!
-      yearCounts[bin] = (yearCounts[bin] || 0) + 1
+      yearCounts[bin]++
     })
 
-    // 3. Format for the chart, ensuring all years in the range are present
     const formattedData = []
     for (let year = yearRange[0]; year <= yearRange[1]; year++) {
       const initialBins: Record<string, number> = {}
@@ -82,51 +79,103 @@ const InjuryTimeframeChart = () => {
     return formattedData.sort((a, b) => a.year - b.year)
   }, [data, yearRange])
 
+  const handleFilterChange = useCallback((_filters: Set<string>) => {
+    // Filter changes are handled by the DataChart component internally
+  }, [])
+
   const totalInjuriesInView = useMemo(() => {
     return chartData.reduce(
       (sum, item) =>
         sum +
-        Object.entries(item)
-          .filter(([key]) => key !== 'year')
-          .reduce((acc, [, value]) => acc + (value as number), 0),
+        Object.values(item).reduce(
+          (acc: number, val) => (typeof val === 'number' ? acc + val : acc),
+          0
+        ) -
+        item.year,
       0
     )
   }, [chartData])
 
+  if (loading) return <Loader />
+  if (error) return <ErrorMessage error={error} />
+
   return (
-    <div className='space-y-4'>
-      <ChartLayout
-        title='Injury Timeframe Analysis'
-        chartRef={chartRef}
-        exportFilename={`injury-timeframe-${yearRange[0]}-${yearRange[1]}.png`}
-        yearRange={yearRange}
-        totalCount={totalInjuriesInView}
-        loading={loading} // Only show big loader on initial load
-        error={error || undefined}
-        description="Injury timeframe is the duration from the last known 'clean' sighting to the first detection of the injury."
-        controls={
+    <div className='flex flex-col space-y-4 bg-white p-4'>
+      <div className='flex justify-center mb-4'>
+        <button
+          onClick={() => setIsSideBySide(!isSideBySide)}
+          className='hidden lg:block px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors'
+        >
+          {isSideBySide
+            ? 'Switch to Vertical Layout'
+            : 'Switch to Side by Side'}
+        </button>
+      </div>
+
+      <div className='flex flex-col md:flex-row gap-4 md:items-center md:justify-between bg-slate-50 p-4 rounded-lg'>
+        <div className='flex-grow max-w-2xl'>
+          <label className='block text-sm font-medium text-slate-600 mb-2'>
+            Select Year Range
+          </label>
+          <YearRangeSlider
+            yearRange={yearRange}
+            minYear={minYear}
+            maxYear={maxYear}
+            onChange={setYearRange}
+          />
+        </div>
+        <ExportChart
+          chartRef={chartRef}
+          filename={`injury-timeframe-analysis-${yearRange[0]}-${yearRange[1]}.png`}
+          title='Right Whale Injury Timeframe Analysis'
+          caption={`Data from ${yearRange[0]} to ${yearRange[1]}`}
+        />
+      </div>
+
+      <div ref={chartRef} className='w-full bg-white p-4'>
+        <div className='text-center'>
+          <h2 className='text-2xl font-bold text-blue-900'>
+            Injury Timeframe Analysis
+          </h2>
+          <p className='text-sm text-slate-500'>
+            Data from {yearRange[0]} to {yearRange[1]} • Total Count:{' '}
+            {totalInjuriesInView}
+          </p>
+        </div>
+        <div
+          className={`grid grid-cols-1 ${
+            isSideBySide ? 'lg:grid-cols-2' : 'lg:grid-cols-1'
+          } gap-8 mt-4`}
+        >
           <div>
-            <label className='block text-sm font-medium text-slate-600 mb-2'>
-              Select Year Range
-            </label>
-            <YearRangeSlider
-              yearRange={yearRange}
-              minYear={minYear}
-              maxYear={maxYear}
-              onChange={setYearRange}
+            <h3 className='text-lg font-semibold text-center mb-2'>
+              Total Injuries by Timeframe
+            </h3>
+            <DataChart
+              data={chartData}
+              stacked={true}
+              yAxisLabel='Number of Injuries'
+              customOrder={TIMEFRAME_BINS}
+              onFilterChange={handleFilterChange}
+              showTotal={true}
             />
           </div>
-        }
-      >
-        <DataChart
-          data={chartData}
-          stacked={true}
-          yAxisLabel='Number of Injuries'
-          customOrder={TIMEFRAME_BINS}
-        />
-      </ChartLayout>
+          <div>
+            <h3 className='text-lg font-semibold text-center mb-2'>
+              Percentage of Injuries by Timeframe
+            </h3>
+            <DataChart
+              data={chartData}
+              stacked={true}
+              isPercentChart={true}
+              customOrder={TIMEFRAME_BINS}
+              onFilterChange={handleFilterChange}
+              showTotal={false}
+            />
+          </div>
+        </div>
+        <ChartAttribution />
+      </div>
     </div>
   )
 }
-
-export default InjuryTimeframeChart

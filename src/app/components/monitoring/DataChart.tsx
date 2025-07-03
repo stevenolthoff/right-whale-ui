@@ -12,12 +12,13 @@ import {
 } from 'recharts'
 
 interface DataChartProps {
-  data: any[]
+  data: Record<string, unknown>[]
   stacked?: boolean
   yAxisLabel?: string
   onFilterChange?: (hiddenSeries: Set<string>) => void
   showTotal?: boolean
   customOrder?: string[]
+  isPercentChart?: boolean
 }
 
 export const DataChart: React.FC<DataChartProps> = ({
@@ -27,6 +28,7 @@ export const DataChart: React.FC<DataChartProps> = ({
   onFilterChange,
   showTotal = true,
   customOrder,
+  isPercentChart = false,
 }) => {
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
   const [showResetButton, setShowResetButton] = useState(false)
@@ -47,11 +49,11 @@ export const DataChart: React.FC<DataChartProps> = ({
   const totalCount = data.reduce((sum, yearData) => {
     const yearTotal = Object.entries(yearData)
       .filter(([key]) => key !== 'year' && !hiddenSeries.has(key))
-      .reduce((yearSum, [_, count]) => yearSum + (count as number), 0)
+      .reduce((yearSum, [, count]) => yearSum + (count as number), 0)
     return sum + yearTotal
   }, 0)
 
-  const handleLegendClick = (entry: any, index: number) => {
+  const handleLegendClick = (entry: { dataKey?: string | number }) => {
     const seriesName = entry.dataKey?.toString()
     if (!seriesName) return
 
@@ -67,7 +69,7 @@ export const DataChart: React.FC<DataChartProps> = ({
     })
   }
 
-  const handleBarClick = (data: any, index: number) => {
+  const handleBarClick = (data: unknown, index: number) => {
     const seriesName = sortedKeys[index]
     if (seriesName) {
       setHiddenSeries((prev) => {
@@ -88,9 +90,13 @@ export const DataChart: React.FC<DataChartProps> = ({
     setHiddenSeries(new Set())
   }
 
+  const percentTickFormatter = (tick: number) => `${Math.round(tick * 100)}%`
+  const percentTooltipFormatter = (value: number) =>
+    `${(value * 100).toFixed(1)}%`
+
   return (
     <div className='space-y-4'>
-      {showTotal && (
+      {showTotal && !isPercentChart && (
         <div className='text-center'>
           <p className='text-sm text-gray-600'>
             Total Count: <span className='text-blue-700'>{totalCount}</span>
@@ -102,6 +108,7 @@ export const DataChart: React.FC<DataChartProps> = ({
           <ResponsiveContainer width='100%' height='100%'>
             <BarChart
               data={data}
+              stackOffset={isPercentChart ? 'expand' : undefined}
               margin={{
                 top: 20,
                 right: 30,
@@ -125,13 +132,25 @@ export const DataChart: React.FC<DataChartProps> = ({
               />
               <YAxis
                 label={{
-                  value: yAxisLabel,
+                  value: isPercentChart ? 'Percentage of Injuries' : yAxisLabel,
                   angle: -90,
                   position: 'insideLeft',
                   offset: 5,
                 }}
+                tickFormatter={
+                  isPercentChart ? percentTickFormatter : undefined
+                }
               />
-              <Tooltip />
+              <Tooltip
+                formatter={
+                  isPercentChart
+                    ? (value: number, name: string) => [
+                        percentTooltipFormatter(value),
+                        name,
+                      ]
+                    : undefined
+                }
+              />
               {isMultiSeries && (
                 <Legend
                   onClick={handleLegendClick}
