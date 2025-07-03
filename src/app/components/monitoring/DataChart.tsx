@@ -150,6 +150,12 @@ export const DataChart: React.FC<DataChartProps> = ({
                       ]
                     : undefined
                 }
+                itemSorter={(itemA, itemB) => {
+                  return (
+                    sortedKeys.indexOf(itemB?.name || '') -
+                    sortedKeys.indexOf(itemA?.name || '')
+                  )
+                }}
               />
               {isMultiSeries && (
                 <Legend

@@ -170,7 +170,7 @@ export default function InjuryTimeframePage() {
               isPercentChart={true}
               customOrder={TIMEFRAME_BINS}
               onFilterChange={handleFilterChange}
-              showTotal={false}
+              showTotal={true}
             />
           </div>
         </div>
