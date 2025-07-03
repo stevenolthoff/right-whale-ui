@@ -139,11 +139,10 @@ export default function PublicChartsLayout({
             <li>
               Severe: Injuries that were greater than ~8 cm in depth and/or are
               known to extend into bone or muscle. This also includes cases of
-              significant muscle. This also includes cases of significant
-              deformity or discoloration of fluke or flipper, for example a
-              twisted fluke caused by torquing by rope/gear. A discolored
-              appendage can indicate circulation impairment even in cases in
-              which the entanglement itself is not visible
+              significant deformity or discoloration of fluke or flipper, for
+              example a twisted fluke caused by torquing by rope/gear. A
+              discolored appendage can indicate circulation impairment even in
+              cases in which the entanglement itself is not visible
             </li>
           </ul>
           <br />
@@ -181,18 +180,16 @@ export default function PublicChartsLayout({
       title: 'Vessel Strike',
       description: (
         <>
-          Detected vessel strike events by type and severity known, catalogued
-          whales only. Vessel strike types can include propeller cuts (Prop),
-          blunt force trauma (Blunt), large open wounds (Gash), and others such
-          as skeg wounds (Other). can be detected with attached gear (i.e. Gear)
-          or by wounds only and no attached gear (i.e. No Gear). Severity is an
-          assessment of the resulting vessel strike injury and is classified as
-          Superficial (&lt;2cm penetrating depth), Shallow (2-8cm penetrating
-          depth), or Deep (&gt; 8cm penetrating depth). Because Blunt cases are
-          almost exclusively detected post-mortality, the severity for those
-          cases is listed as Blunt. For reasons outlined below, data here
-          represent a minimum of entanglement events and are likely an
-          underestimate. <br />
+          Detected vessel strike events by type and severity for known,
+          catalogued whales only. Vessel strike types can include propeller cuts
+          (Prop), blunt force trauma (Blunt), large open wounds (Gash), and
+          others such as skeg wounds (Other). Severity is an assessment of the
+          resulting vessel strike injury and is classified as Superficial
+          (&lt;2cm penetrating depth), Shallow (2-8cm penetrating depth), or
+          Deep (&gt; 8cm penetrating depth). Because Blunt cases are almost
+          exclusively detected post-mortem, the severity for those cases is
+          listed as Blunt. For reasons outlined below, data here represent a
+          minimum of entanglement events and are likely an underestimate. <br />
           <br />
           <ol className='list-decimal list-inside'>
             <li>
