@@ -91,8 +91,6 @@ export const DataChart: React.FC<DataChartProps> = ({
   }
 
   const percentTickFormatter = (tick: number) => `${Math.round(tick * 100)}%`
-  const percentTooltipFormatter = (value: number) =>
-    `${(value * 100).toFixed(1)}%`
 
   return (
     <div className='space-y-4'>
@@ -142,14 +140,22 @@ export const DataChart: React.FC<DataChartProps> = ({
                 }
               />
               <Tooltip
-                formatter={
-                  isPercentChart
-                    ? (value: number, name: string) => [
-                        percentTooltipFormatter(value),
-                        name,
-                      ]
-                    : undefined
-                }
+                formatter={(value: number, name: string, props: any) => {
+                  if (isPercentChart) {
+                    // The `props.payload` contains the data for the current x-axis point (the year's data)
+                    const total = Object.entries(props.payload)
+                      .filter(([key]) => key !== 'year')
+                      .reduce((sum, [, val]) => sum + (val as number), 0)
+
+                    if (total === 0) {
+                      return [`0.0%`, name]
+                    }
+                    const percentage = (value / total) * 100
+                    return [`${percentage.toFixed(1)}%`, name]
+                  }
+                  // Default formatter for non-percentage charts
+                  return [value, name]
+                }}
                 itemSorter={(itemA, itemB) => {
                   return (
                     sortedKeys.indexOf(itemB?.name || '') -
