@@ -27,6 +27,7 @@ export default function Footer({ onOpenPopup }: FooterProps) {
             <h3 className='text-[#2B4380] font-bold text-lg'>Quick Links</h3>
             <ul className='space-y-2'>
               {[
+                { text: 'Population Data', url: '/public-charts/population' },
                 {
                   text: 'Mortality Data',
                   url: '/public-charts/mortality-total',
