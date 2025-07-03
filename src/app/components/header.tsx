@@ -90,7 +90,7 @@ export default function Header() {
           >
             Explore
           </Link>
-          {isAuthenticated && (
+          {/* {isAuthenticated && (
             <Link
               href='/whale'
               className={`${
@@ -101,7 +101,7 @@ export default function Header() {
             >
               Whale
             </Link>
-          )}
+          )} */}
           {isAuthenticated && canAccessMonitoring() && (
             <Link
               href='/monitoring/overview'
@@ -270,7 +270,7 @@ export default function Header() {
               >
                 Resources
               </Link>
-              {isAuthenticated && (
+              {/* {isAuthenticated && (
                 <Link
                   href='/whale'
                   className={`block px-4 py-3 rounded-lg font-semibold transition-colors ${
@@ -282,7 +282,7 @@ export default function Header() {
                 >
                   Whale
                 </Link>
-              )}
+              )} */}
             </nav>
           </div>
         </div>
