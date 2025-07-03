@@ -144,7 +144,10 @@ export const DataChart: React.FC<DataChartProps> = ({
                   if (isPercentChart) {
                     // The `props.payload` contains the data for the current x-axis point (the year's data)
                     const total = Object.entries(props.payload)
-                      .filter(([key]) => key !== 'year')
+                      // The only change is adding `!hiddenSeries.has(key)` to the filter
+                      .filter(
+                        ([key]) => key !== 'year' && !hiddenSeries.has(key)
+                      )
                       .reduce((sum, [, val]) => sum + (val as number), 0)
 
                     if (total === 0) {
