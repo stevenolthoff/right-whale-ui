@@ -34,6 +34,7 @@ interface InjuryCase {
   MortalityFieldID: string | null
   Necropsy: string
   LastAssessedDate: string | null
+  MonitorRemoveDate: string | null
   Cow: boolean
 }
 

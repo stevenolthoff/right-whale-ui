@@ -84,6 +84,17 @@ const CaseDetailsContent: React.FC<CaseDetailsContentProps> = ({
           })
         : 'N/A',
     },
+    {
+      label: 'Date Made Inactive',
+      value: caseData.MonitorRemoveDate
+        ? new Date(caseData.MonitorRemoveDate).toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            timeZone: 'UTC',
+          })
+        : 'N/A',
+    },
   ]
 
   return (
