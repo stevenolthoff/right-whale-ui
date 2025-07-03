@@ -17,8 +17,6 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   ChevronUpDownIcon,
-  GlobeAltIcon,
-  EyeIcon,
 } from '@heroicons/react/20/solid'
 import { TableFilters } from './TableFilters'
 import { useFilteredData } from '@/app/hooks/useFilteredData'
@@ -68,31 +66,14 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
           if (!egNo) return null
 
           return (
-            <div className='flex items-center gap-2'>
-              <span className='text-gray-900'>{egNo}</span>
-              <div className='flex gap-1'>
-                <a
-                  href={`https://rwcatalog.neaq.org/#/whales/${egNo}`}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='flex items-center gap-1 px-2 py-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-blue-600 transition-colors cursor-pointer'
-                  title='View on External Site'
-                  aria-label='View on External Site'
-                >
-                  <GlobeAltIcon className='h-3.5 w-3.5' />
-                  <span className='text-xs font-medium'>Ext</span>
-                </a>
-                <a
-                  href={`/whale?egno=${egNo}`}
-                  className='flex items-center gap-1 px-2 py-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-blue-600 transition-colors cursor-pointer'
-                  title='View Details'
-                  aria-label='View Details'
-                >
-                  <EyeIcon className='h-3.5 w-3.5' />
-                  <span className='text-xs font-medium'>View</span>
-                </a>
-              </div>
-            </div>
+            <a
+              href={`https://rwcatalog.neaq.org/#/whales/${egNo}`}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+            >
+              {egNo}
+            </a>
           )
         },
       }),
