@@ -96,7 +96,7 @@ export const DataChart: React.FC<DataChartProps> = ({
 
   return (
     <div className='space-y-4'>
-      {showTotal && !isPercentChart && (
+      {showTotal && (
         <div className='text-center'>
           <p className='text-sm text-gray-600'>
             Total Count: <span className='text-blue-700'>{totalCount}</span>

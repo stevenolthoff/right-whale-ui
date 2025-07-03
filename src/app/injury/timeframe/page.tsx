@@ -70,10 +70,18 @@ export default function InjuryTimeframePage() {
     for (let year = yearRange[0]; year <= yearRange[1]; year++) {
       const initialBins: Record<string, number> = {}
       TIMEFRAME_BINS.forEach((b) => (initialBins[b] = 0))
-      formattedData.push({
+      const row: Record<string, number> & { year: number } = {
         year,
         ...(yearData.get(year) || initialBins),
-      })
+      }
+      // Only include years where the total is > 0
+      const total = TIMEFRAME_BINS.reduce(
+        (sum, bin) => sum + (row[bin] || 0),
+        0
+      )
+      if (total > 0) {
+        formattedData.push(row)
+      }
     }
 
     return formattedData.sort((a, b) => a.year - b.year)
