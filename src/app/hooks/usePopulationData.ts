@@ -2,9 +2,7 @@
 import { useState, useEffect } from 'react'
 import Papa from 'papaparse'
 import { PopulationData, ParsedPopulationData } from '../types/population'
-
-const CSV_URL =
-  'https://docs.google.com/spreadsheets/d/1YixxdFnB_mr4rUBmIyK_M5wMzqT2RJ8S/export?format=csv&id=1YixxdFnB_mr4rUBmIyK_M5wMzqT2RJ8S&gid=486004420'
+import { RW_CSV_URL_CONFIG } from '../config'
 
 export const usePopulationData = () => {
   const [data, setData] = useState<ParsedPopulationData[]>([])
@@ -14,7 +12,7 @@ export const usePopulationData = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(CSV_URL)
+        const response = await fetch(RW_CSV_URL_CONFIG.POPULATION_DATA_CSV_URL)
         const csvText = await response.text()
 
         Papa.parse(csvText, {

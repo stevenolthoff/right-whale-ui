@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { User } from '../types/auth'
 import axios from 'axios'
+import { RW_BACKEND_URL_CONFIG } from '../config'
 
 interface AuthState {
   token: string
@@ -48,7 +49,7 @@ export const useAuthStore = create<AuthState>()(
         console.log('Fetching user data...')
         try {
           const { data } = await axios.get<User>(
-            'https://stage-rwanthro-backend.srv.axds.co/u/api/v1/me/',
+            RW_BACKEND_URL_CONFIG.ME_URL,
             {
               headers: {
                 Authorization: `token ${get().token}`,
@@ -78,7 +79,7 @@ export const useAuthStore = create<AuthState>()(
         console.log('Checking permissions...')
         try {
           const { data } = await axios.get<User>(
-            'https://stage-rwanthro-backend.srv.axds.co/u/api/v1/me/',
+            RW_BACKEND_URL_CONFIG.ME_URL,
             {
               headers: {
                 Authorization: `token ${get().token}`,

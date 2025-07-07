@@ -2,8 +2,7 @@
 import { useState, useEffect, SetStateAction } from 'react'
 import Papa from 'papaparse'
 import { InjuryCase, ParsedInjuryCase } from '../types/injury'
-
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/125C1nTkZx8Jyug0k0oeLpXYPEfRNAdVc/export?format=csv&id=125C1nTkZx8Jyug0k0oeLpXYPEfRNAdVc&gid=548338316'
+import { RW_CSV_URL_CONFIG } from '../config'
 
 export const useInjuryData = () => {
   const [data, setData] = useState<ParsedInjuryCase[]>([])
@@ -13,9 +12,9 @@ export const useInjuryData = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(CSV_URL)
+        const response = await fetch(RW_CSV_URL_CONFIG.INJURY_DATA_CSV_URL)
         const csvText = await response.text()
-        
+
         Papa.parse(csvText, {
           header: true,
           skipEmptyLines: true,
@@ -52,9 +51,9 @@ export const useInjuryData = () => {
     fetchData()
   }, [])
 
-  return { 
-    data, 
-    loading, 
+  return {
+    data,
+    loading,
     error,
     // Utility functions for data analysis
     getCountByYear: () => {
@@ -72,4 +71,4 @@ export const useInjuryData = () => {
       return counts
     }
   }
-} 
+}

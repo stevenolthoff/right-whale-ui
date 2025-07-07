@@ -5,10 +5,23 @@ stages:
   - clean
   - deploy
 
-build_image:
+build_image_staging:
   stage: build
+  environment:
+    name: staging
+  except:
+    - main
   script:
-  - docker build -f Dockerfile -t $CI_PROJECT_NAME:$CI_PIPELINE_ID .
+  - docker build --build-arg "NEXT_PUBLIC_RWANTHRO_BACKEND_BASE_URL=$NEXT_PUBLIC_RWANTHRO_BACKEND_BASE_URL" -f Dockerfile -t $CI_PROJECT_NAME:$CI_PIPELINE_ID .
+
+build_image_production:
+  stage: build
+  environment:
+    name: production
+  only:
+    - main
+  script:
+  - docker build --build-arg "NEXT_PUBLIC_RWANTHRO_BACKEND_BASE_URL=$NEXT_PUBLIC_RWANTHRO_BACKEND_BASE_URL" -f Dockerfile -t $CI_PROJECT_NAME:$CI_PIPELINE_ID .
 
 # test:
 #   stage: test

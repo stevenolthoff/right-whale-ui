@@ -8,6 +8,7 @@ import InjurySummaryTable from '@/app/components/whale/InjurySummaryTable'
 import { WhaleInjuryTable } from '../components/whale/InjurySummaryTable'
 import { WhaleInjury } from '../types/whaleInjury'
 import { ColumnDef, SortingState } from '@tanstack/react-table'
+import { RW_BACKEND_URL_CONFIG, url_join } from '../config'
 
 interface WhaleData {
   EGNo: string
@@ -49,7 +50,10 @@ export default function WhalePage() {
         }
 
         const res = await fetch(
-          `https://stage-rwanthro-backend.srv.axds.co/anthro/api/v1/monitoring_cases/?EGNo=${egno}`,
+          url_join(
+            RW_BACKEND_URL_CONFIG.BASE_URL,
+            `/anthro/api/v1/monitoring_cases/?EGNo=${egno}`
+          ),
           { headers }
         )
         const data = await res.json()
@@ -553,7 +557,10 @@ function EntanglementTable({ egno }: { egno: string }) {
         const headers: HeadersInit = { accept: 'application/json' }
         if (token) headers['Authorization'] = `token ${token}`
         const res = await fetch(
-          `https://stage-rwanthro-backend.srv.axds.co/anthro/api/v1/whale_injuries/?EGNo=${egno}`,
+          url_join(
+            RW_BACKEND_URL_CONFIG.BASE_URL,
+            `/anthro/api/v1/whale_injuries/?EGNo=${egno}`
+          ),
           { headers }
         )
         const json = await res.json()
@@ -684,7 +691,10 @@ function VesselStrikeTable({ egno }: { egno: string }) {
         const headers: HeadersInit = { accept: 'application/json' }
         if (token) headers['Authorization'] = `token ${token}`
         const res = await fetch(
-          `https://stage-rwanthro-backend.srv.axds.co/anthro/api/v1/whale_injuries/?EGNo=${egno}`,
+          url_join(
+            RW_BACKEND_URL_CONFIG.BASE_URL,
+            `/anthro/api/v1/whale_injuries/?EGNo=${egno}`
+          ),
           { headers }
         )
         const json = await res.json()

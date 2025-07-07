@@ -22,6 +22,7 @@ import {
 } from '@tanstack/react-table'
 import { Button } from '@/app/components/ui/button'
 import { ArrowUpDown } from 'lucide-react'
+import { RW_BACKEND_URL_CONFIG, url_join } from '@/app/config'
 
 export const columns: ColumnDef<WhaleInjury>[] = [
   {
@@ -223,7 +224,10 @@ const InjurySummaryTable = ({ egno }: InjurySummaryTableProps) => {
         }
 
         const res = await fetch(
-          `https://stage-rwanthro-backend.srv.axds.co/anthro/api/v1/whale_injuries/?EGNo=${egno}`,
+          url_join(
+            RW_BACKEND_URL_CONFIG.BASE_URL,
+            `/anthro/api/v1/whale_injuries/?EGNo=${egno}`
+          ),
           { headers }
         )
         const data = await res.json()

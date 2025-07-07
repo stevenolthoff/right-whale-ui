@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { InjuryCase } from '../types/monitoring'
 import { useAuthStore } from '../store/auth'
+import { RW_BACKEND_URL_CONFIG, url_join } from '../config'
 
 export const useMonitoringData = () => {
   const [results, setResults] = useState<InjuryCase[]>([])
@@ -14,7 +15,10 @@ export const useMonitoringData = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          'https://stage-rwanthro-backend.srv.axds.co/anthro/api/v1/monitoring_cases/?page_size=9999999',
+          url_join(
+            RW_BACKEND_URL_CONFIG.BASE_URL,
+            `/anthro/api/v1/monitoring_cases/?page_size=9999999`
+          ),
           {
             headers: {
               accept: 'application/json',

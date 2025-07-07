@@ -3,6 +3,7 @@ import { InjuryCase } from '../../types/monitoring'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import axios from 'axios'
 import { useAuthStore } from '@/app/store/auth'
+import { RW_BACKEND_URL_CONFIG, url_join } from '@/app/config'
 
 interface AssessmentPagination {
   next: string | null
@@ -506,7 +507,10 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
     setIsLoading(true)
     try {
       const response = await axios.get<AssessmentResponse>(
-        `https://stage-rwanthro-backend.srv.axds.co/anthro/api/v1/monitoring_assessments/?Case__CaseId=${caseData.CaseId}&page=${page}&page_size=25`,
+        url_join(
+          RW_BACKEND_URL_CONFIG.BASE_URL,
+          `/anthro/api/v1/monitoring_assessments/?Case__CaseId=${caseData.CaseId}&page=${page}&page_size=25`
+        ),
         {
           headers: {
             accept: 'application/json',
@@ -544,7 +548,10 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
     setIsLoadingComments(true)
     try {
       const response = await axios.get<CaseCommentResponse>(
-        `https://stage-rwanthro-backend.srv.axds.co/anthro/api/v1/monitoring_cases/${caseData.CaseId}/`,
+        url_join(
+            RW_BACKEND_URL_CONFIG.BASE_URL,
+            `/anthro/api/v1/monitoring_cases/${caseData.CaseId}/`
+        ),
         {
           headers: {
             accept: 'application/json',

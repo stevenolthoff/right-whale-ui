@@ -3,9 +3,12 @@ import { useState, useEffect, useCallback } from 'react'
 import axios from 'axios'
 import { WhaleInjuryResponse, InjuryTimeframeData } from '../types/whaleInjury'
 import { useAuthStore } from '../store/auth'
+import { RW_BACKEND_URL_CONFIG, url_join } from '../config'
 
-const API_BASE_URL =
-  'https://stage-rwanthro-backend.srv.axds.co/anthro/api/v1/whale_injuries/?page_size=500'
+const API_BASE_URL = url_join(
+  RW_BACKEND_URL_CONFIG.BASE_URL,
+  `/anthro/api/v1/whale_injuries/?page_size=500`
+);
 
 export const usePaginatedWhaleInjuryData = () => {
   const [data, setData] = useState<InjuryTimeframeData[]>([])

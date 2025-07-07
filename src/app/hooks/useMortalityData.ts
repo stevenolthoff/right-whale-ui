@@ -2,8 +2,7 @@
 import { useState, useEffect, SetStateAction } from 'react'
 import Papa from 'papaparse'
 import { MortalityCase, ParsedMortalityCase } from '../types/mortality'
-
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/1woycECMnrGEivOZUuC_9Ab1OzYI6S04l/export?format=csv&id=1woycECMnrGEivOZUuC_9Ab1OzYI6S04l&gid=2036674639'
+import { RW_CSV_URL_CONFIG } from '../config'
 
 export const useMortalityData = () => {
   const [data, setData] = useState<ParsedMortalityCase[]>([])
@@ -13,9 +12,9 @@ export const useMortalityData = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(CSV_URL)
+        const response = await fetch(RW_CSV_URL_CONFIG.MORTALITY_DATA_CSV_URL)
         const csvText = await response.text()
-        
+
         Papa.parse(csvText, {
           header: true,
           skipEmptyLines: true,
@@ -27,7 +26,7 @@ export const useMortalityData = () => {
                 const year = parseInt(row.SightingYear)
                 const month = parseInt(row.SightingMonth) || 1
                 const day = parseInt(row.SightingDay) || 1
-                
+
                 // Create date object (null if invalid date)
                 let date: Date | null = null
                 try {
@@ -67,9 +66,9 @@ export const useMortalityData = () => {
     fetchData()
   }, [])
 
-  return { 
-    data, 
-    loading, 
+  return {
+    data,
+    loading,
     error,
     // Utility functions for data analysis
     getCountByYear: () => {
@@ -94,4 +93,4 @@ export const useMortalityData = () => {
       return counts
     }
   }
-} 
+}
