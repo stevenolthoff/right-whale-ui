@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import './resources.css'
+import { RW_WORDPRESS_URL_CONFIG, url_join } from '../config'
 
 interface WordPressPost {
   id: number
@@ -20,7 +21,10 @@ export default function Resources() {
     const fetchData = async () => {
       try {
         const res = await fetch(
-          'https://right-whale.sites.axds.co/wp-json/wp/v2/pages?slug=resources'
+          url_join(
+            RW_WORDPRESS_URL_CONFIG.RW_WORDPRESS_BASE_URL,
+            '/wp-json/wp/v2/pages?slug=resources'
+          )
         )
         const json = await res.json()
         setPosts(json)
@@ -69,7 +73,12 @@ export default function Resources() {
         <link
           rel='stylesheet'
           type='text/css'
-          href='https://right-whale.sites.axds.co/wp-includes/css/dist/block-library/style.min.css?ver=6.6.1'
+          href={
+            url_join(
+              RW_WORDPRESS_URL_CONFIG.RW_WORDPRESS_BASE_URL,
+              '/wp-includes/css/dist/block-library/style.min.css?ver=6.6.1'
+            )
+          }
         />
 
         {/* Content Section */}

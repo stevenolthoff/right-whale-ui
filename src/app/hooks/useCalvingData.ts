@@ -2,8 +2,7 @@
 import { useState, useEffect, SetStateAction } from 'react'
 import Papa from 'papaparse'
 import { CalvingCase, ParsedCalvingCase } from '../types/calving'
-
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/1sE6phYmbohrKgVNUcYop0iaKQmQSuP0i/export?format=csv&id=1sE6phYmbohrKgVNUcYop0iaKQmQSuP0i&gid=1645236033'
+import { RW_CSV_URL_CONFIG } from '../config'
 
 export const useCalvingData = () => {
   const [data, setData] = useState<ParsedCalvingCase[]>([])
@@ -13,9 +12,9 @@ export const useCalvingData = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(CSV_URL)
+        const response = await fetch(RW_CSV_URL_CONFIG.CALVING_DATA_CSV_URL)
         const csvText = await response.text()
-        
+
         Papa.parse(csvText, {
           header: true,
           skipEmptyLines: true,
@@ -46,9 +45,9 @@ export const useCalvingData = () => {
     fetchData()
   }, [])
 
-  return { 
-    data, 
-    loading, 
+  return {
+    data,
+    loading,
     error,
     // Utility function for data analysis
     getCountByYear: () => {
@@ -59,4 +58,4 @@ export const useCalvingData = () => {
       return counts
     }
   }
-} 
+}

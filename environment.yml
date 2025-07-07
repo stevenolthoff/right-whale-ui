@@ -1,0 +1,6 @@
+name: right-whale-ui
+channels:
+  - conda-forge
+dependencies:
+  - nodejs>=20.0,<21.0
+  - pnpm

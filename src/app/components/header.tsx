@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { redirect, usePathname } from 'next/navigation'
 import { useAuthStore } from '../store/auth'
 import { Waves } from 'lucide-react'
+import { RW_BACKEND_URL_CONFIG } from '../config'
 
 export default function Header() {
   const pathname = usePathname()
@@ -139,7 +140,7 @@ export default function Header() {
           {isAuthenticated && canAccessAdmin() && (
             <Link
               target='_blank'
-              href='https://stage-rwanthro-backend.srv.axds.co/admin/'
+              href={ RW_BACKEND_URL_CONFIG.ADMIN_URL }
               className={`${
                 topPath === 'admin'
                   ? 'text-blue-600 after:w-full'
@@ -157,12 +158,7 @@ export default function Header() {
               if (isAuthenticated) {
                 clearToken()
               } else {
-                const host = globalThis.location.hostname
-                const redirectUrl =
-                  host === 'localhost'
-                    ? 'http://localhost:44208/u/accounts/amazon-cognito/login/?process='
-                    : 'https://stage-rwanthro-backend.srv.axds.co/u/accounts/amazon-cognito/login/?process='
-                redirect(redirectUrl)
+                redirect(RW_BACKEND_URL_CONFIG.COGNITO_REDIRECT_URL)
               }
             }}
             className='whitespace-nowrap px-4 py-2 text-sm rounded-lg font-semibold text-white bg-blue-600 transition-all duration-300 hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5'
