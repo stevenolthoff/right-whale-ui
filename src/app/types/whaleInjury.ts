@@ -78,6 +78,7 @@ export interface WhaleInjury {
 export interface InjuryTimeframeData {
   DetectionDate: string
   InjuryTimeFrame: number | null
+  InjuryTypeDescription: string
 }
 
 export interface WhaleInjuryResponse {
