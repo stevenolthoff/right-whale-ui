@@ -19,6 +19,8 @@ interface DataChartProps {
   showTotal?: boolean
   customOrder?: string[]
   isPercentChart?: boolean
+  hiddenSeries?: Set<string>
+  onHiddenSeriesChange?: (hiddenSeries: Set<string>) => void
 }
 
 export const DataChart: React.FC<DataChartProps> = ({
@@ -29,14 +31,35 @@ export const DataChart: React.FC<DataChartProps> = ({
   showTotal = true,
   customOrder,
   isPercentChart = false,
+  hiddenSeries: controlledHiddenSeries,
+  onHiddenSeriesChange,
 }) => {
-  const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
+  const [internalHiddenSeries, setInternalHiddenSeries] = useState<Set<string>>(
+    new Set()
+  )
   const [showResetButton, setShowResetButton] = useState(false)
+
+  const isControlled =
+    controlledHiddenSeries !== undefined && onHiddenSeriesChange !== undefined
+
+  const hiddenSeries = isControlled
+    ? controlledHiddenSeries!
+    : internalHiddenSeries
+
+  const setHiddenSeries = (newSeries: Set<string>) => {
+    if (isControlled) {
+      onHiddenSeriesChange!(newSeries)
+    } else {
+      setInternalHiddenSeries(newSeries)
+    }
+  }
 
   useEffect(() => {
     setShowResetButton(hiddenSeries.size > 0)
-    onFilterChange?.(hiddenSeries)
-  }, [hiddenSeries, onFilterChange])
+    if (!isControlled) {
+      onFilterChange?.(hiddenSeries)
+    }
+  }, [hiddenSeries, onFilterChange, isControlled])
 
   // Get all series names (excluding 'year')
   const keys = Object.keys(data[0] || {}).filter((key) => key !== 'year')
@@ -53,36 +76,32 @@ export const DataChart: React.FC<DataChartProps> = ({
     return sum + yearTotal
   }, 0)
 
-  const handleLegendClick = (entry: { dataKey?: string | number }) => {
+  const handleLegendClick = (entry: any) => {
     const seriesName = entry.dataKey?.toString()
     if (!seriesName) return
 
-    setHiddenSeries((prev) => {
-      const newHidden = new Set(prev)
-      if (newHidden.has(seriesName)) {
-        newHidden.delete(seriesName)
-      } else {
-        keys.forEach((name) => newHidden.add(name))
-        newHidden.delete(seriesName)
-      }
-      return newHidden
-    })
+    const newHidden = new Set(hiddenSeries)
+    if (newHidden.has(seriesName)) {
+      newHidden.delete(seriesName)
+    } else {
+      keys.forEach((name) => newHidden.add(name))
+      newHidden.delete(seriesName)
+    }
+    setHiddenSeries(newHidden)
   }
 
   const handleBarClick = (data: unknown, index: number) => {
     const seriesName = sortedKeys[index]
     if (seriesName) {
-      setHiddenSeries((prev) => {
-        const newHidden = new Set(prev)
-        if (newHidden.has(seriesName)) {
-          newHidden.delete(seriesName)
-        } else {
-          // Hide all except the clicked one
-          keys.forEach((name) => newHidden.add(name))
-          newHidden.delete(seriesName)
-        }
-        return newHidden
-      })
+      const newHidden = new Set(hiddenSeries)
+      if (newHidden.has(seriesName)) {
+        newHidden.delete(seriesName)
+      } else {
+        // Hide all except the clicked one
+        keys.forEach((name) => newHidden.add(name))
+        newHidden.delete(seriesName)
+      }
+      setHiddenSeries(newHidden)
     }
   }
 
@@ -159,7 +178,7 @@ export const DataChart: React.FC<DataChartProps> = ({
                   // Default formatter for non-percentage charts
                   return [value, name]
                 }}
-                itemSorter={(itemA, itemB) => {
+                itemSorter={(itemA: any, itemB: any) => {
                   return (
                     sortedKeys.indexOf(itemB?.name || '') -
                     sortedKeys.indexOf(itemA?.name || '')
