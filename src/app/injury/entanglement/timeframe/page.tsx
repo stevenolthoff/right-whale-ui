@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useState, useMemo, useCallback } from 'react'
+import React, { useRef, useState, useMemo } from 'react'
 import { usePaginatedWhaleInjuryData } from '@/app/hooks/usePaginatedWhaleInjuryData'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { DataChart } from '@/app/components/monitoring/DataChart'
@@ -37,6 +37,7 @@ const TIMEFRAME_BINS = [
 export default function EntanglementTimeframePage() {
   const chartRef = useRef<HTMLDivElement>(null)
   const { data: allData, loading, error } = usePaginatedWhaleInjuryData()
+  const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
 
   const entanglementData = useMemo(() => {
     if (!allData) return []
@@ -97,10 +98,6 @@ export default function EntanglementTimeframePage() {
 
     return formattedData.sort((a, b) => a.year - b.year)
   }, [entanglementData, yearRange])
-
-  const handleFilterChange = useCallback(() => {
-    // Filter changes are handled by the DataChart component internally
-  }, [])
 
   const totalEntanglementsInView = useMemo(() => {
     return chartData.reduce(
@@ -175,8 +172,9 @@ export default function EntanglementTimeframePage() {
               stacked={true}
               yAxisLabel='Number of Entanglements'
               customOrder={TIMEFRAME_BINS}
-              onFilterChange={handleFilterChange}
               showTotal={true}
+              hiddenSeries={hiddenSeries}
+              onHiddenSeriesChange={setHiddenSeries}
             />
           </div>
           <div>
@@ -188,8 +186,9 @@ export default function EntanglementTimeframePage() {
               stacked={true}
               isPercentChart={true}
               customOrder={TIMEFRAME_BINS}
-              onFilterChange={handleFilterChange}
               showTotal={true}
+              hiddenSeries={hiddenSeries}
+              onHiddenSeriesChange={setHiddenSeries}
             />
           </div>
         </div>
