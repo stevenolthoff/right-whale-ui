@@ -89,6 +89,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       title: 'Injury Timeframe',
       description: 'View injury timeframe by year.',
     },
+    '/injury/entanglement/timeframe': {
+      title: 'Entanglement Timeframe',
+      description: 'View entanglement-related injuries by timeframe.',
+    },
+    '/injury/vessel-strike/timeframe': {
+      title: 'Vessel Strike Timeframe',
+      description: 'View vessel strike incidents by timeframe.',
+    },
   }
 
   const categories = [
@@ -119,6 +127,24 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {
           href: '/injury/timeframe',
           label: 'Injury Timeframe',
+        },
+      ],
+    },
+    {
+      title: 'ENTANGLEMENT',
+      links: [
+        {
+          href: '/injury/entanglement/timeframe',
+          label: 'Timeframe',
+        },
+      ],
+    },
+    {
+      title: 'VESSEL STRIKES',
+      links: [
+        {
+          href: '/injury/vessel-strike/timeframe',
+          label: 'Timeframe',
         },
       ],
     },
