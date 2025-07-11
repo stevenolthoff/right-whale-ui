@@ -89,6 +89,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       title: 'Entanglement Timeframe',
       description: 'View entanglement-related injuries by timeframe.',
     },
+    '/injury/entanglement/type-and-severity': {
+      title: 'Entanglement Type and Severity',
+      description: 'View entanglement-related injuries by type and severity.',
+    },
     '/injury/vessel-strike/timeframe': {
       title: 'Vessel Strike Timeframe',
       description: 'View vessel strike incidents by timeframe.',
@@ -128,6 +132,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {
           href: '/injury/entanglement/timeframe',
           label: 'Timeframe',
+        },
+        {
+          href: '/injury/entanglement/type-and-severity',
+          label: 'Type and Severity',
         },
       ],
     },
