@@ -8,7 +8,7 @@ import { useYearRange } from '@/app/hooks/useYearRange'
 import { ChartLayout } from '@/app/components/charts/ChartLayout'
 import { WhaleInjury } from '@/app/types/whaleInjury'
 
-const GEAR_BINS_ORDER = ['Gear Retrieved', 'Gear Not Retrieved', 'No Gear']
+const GEAR_BINS_ORDER = ['No Gear', 'Gear Not Retrieved', 'Gear Retrieved']
 
 const getGearBin = (item: WhaleInjury) => {
   if (item.InjuryAccountDescription === 'Gear') {
