@@ -14,6 +14,7 @@ import {
 interface DataChartProps {
   data: Record<string, unknown>[]
   stacked?: boolean
+  stackId?: string
   yAxisLabel?: string
   onFilterChange?: (hiddenSeries: Set<string>) => void
   showTotal?: boolean
@@ -26,6 +27,7 @@ interface DataChartProps {
 export const DataChart: React.FC<DataChartProps> = ({
   data,
   stacked = false,
+  stackId = 'stack',
   yAxisLabel = 'Number of Mortalities',
   onFilterChange,
   showTotal = true,
@@ -200,7 +202,7 @@ export const DataChart: React.FC<DataChartProps> = ({
                 <Bar
                   key={key}
                   dataKey={key}
-                  stackId={stacked ? 'stack' : undefined}
+                  stackId={stacked ? stackId : undefined}
                   fill={COLORS[index % COLORS.length]}
                   name={key}
                   hide={hiddenSeries.has(key)}

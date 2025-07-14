@@ -176,6 +176,7 @@ export default function EntanglementTypeAndSeverity() {
             </div>
             <DataChart
               data={typeChartData}
+              stackId='type'
               stacked={true}
               yAxisLabel='Entanglements'
               onFilterChange={(filters) => handleFilterChange('type', filters)}
@@ -188,6 +189,7 @@ export default function EntanglementTypeAndSeverity() {
             </div>
             <DataChart
               data={severityChartData}
+              stackId='severity'
               stacked={true}
               yAxisLabel='Entanglements'
               onFilterChange={(filters) =>

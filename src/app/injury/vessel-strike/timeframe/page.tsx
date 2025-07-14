@@ -169,6 +169,7 @@ export default function VesselStrikeTimeframePage() {
             </h3>
             <DataChart
               data={chartData}
+              stackId='total'
               stacked={true}
               yAxisLabel='Number of Vessel Strikes'
               customOrder={TIMEFRAME_BINS}
@@ -183,6 +184,7 @@ export default function VesselStrikeTimeframePage() {
             </h3>
             <DataChart
               data={chartData}
+              stackId='percentage'
               stacked={true}
               isPercentChart={true}
               customOrder={TIMEFRAME_BINS}

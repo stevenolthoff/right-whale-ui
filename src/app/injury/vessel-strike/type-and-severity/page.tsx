@@ -196,6 +196,7 @@ export default function VesselStrikeTypeAndSeverity() {
             </div>
             <DataChart
               data={typeChartData}
+              stackId='type'
               stacked={true}
               yAxisLabel='Vessel Strikes'
               onFilterChange={(filters) => handleFilterChange('type', filters)}
@@ -209,6 +210,7 @@ export default function VesselStrikeTypeAndSeverity() {
             </div>
             <DataChart
               data={severityChartData}
+              stackId='severity'
               stacked={true}
               yAxisLabel='Vessel Strikes'
               onFilterChange={(filters) =>

@@ -142,6 +142,7 @@ export default function EntanglementByAgePage() {
             </h3>
             <DataChart
               data={chartData}
+              stackId='total'
               stacked={true}
               yAxisLabel='Number of Entanglements'
               customOrder={AGE_CLASS_ORDER}
@@ -156,6 +157,7 @@ export default function EntanglementByAgePage() {
             </h3>
             <DataChart
               data={chartData}
+              stackId='percentage'
               stacked={true}
               isPercentChart={true}
               customOrder={AGE_CLASS_ORDER}
