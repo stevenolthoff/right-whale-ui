@@ -216,6 +216,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       ),
     },
+    '/injury/entanglement/rope': {
+      title: 'Entanglement by Rope Diameter & Age',
+      description: (
+        <div className='space-y-4'>
+          <p>
+            Entanglement events for North Atlantic right whales by age group,
+            categorized by the diameter of the rope involved in the
+            entanglement.
+          </p>
+        </div>
+      ),
+    },
     '/injury/vessel-strike/timeframe': {
       title: 'Vessel Strike Timeframe',
       description: (
@@ -365,6 +377,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {
           href: '/injury/entanglement/gear',
           label: 'Gear Retrieved',
+        },
+        {
+          href: '/injury/entanglement/rope',
+          label: 'Rope Diameter by Age',
         },
       ],
     },
