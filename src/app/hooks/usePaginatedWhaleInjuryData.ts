@@ -43,6 +43,7 @@ export const usePaginatedWhaleInjuryData = () => {
             DetectionDate: item.DetectionDate,
             InjuryTimeFrame: item.InjuryTimeFrame,
             InjuryTypeDescription: item.InjuryTypeDescription,
+            InjuryAgeClass: item.InjuryAgeClass,
           })
         )
 
