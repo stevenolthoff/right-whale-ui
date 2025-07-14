@@ -36,6 +36,29 @@ const Sidebar = ({ categories }: SidebarProps) => {
     }
   }, [isOpen])
 
+  // Add keyboard shortcut listener
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement
+      // Ignore if user is typing in an input/textarea/select
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) {
+        return
+      }
+      // Toggle sidebar with the backtick key
+      if (event.key === '`') {
+        event.preventDefault()
+        setIsOpen((prevIsOpen) => !prevIsOpen)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    // Cleanup listener on component unmount
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, []) // Empty dependency array ensures this runs only once
+
   // Don't render the sidebar until we know its correct state from localStorage.
   // This prevents the flicker from the server-rendered default to the client-side state.
   if (isOpen === null) {
