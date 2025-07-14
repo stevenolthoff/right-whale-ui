@@ -14,6 +14,7 @@ import {
 interface DataChartProps {
   data: Record<string, unknown>[]
   stacked?: boolean
+  stackId?: string
   yAxisLabel?: string
   onFilterChange?: (hiddenSeries: Set<string>) => void
   showTotal?: boolean
@@ -21,11 +22,17 @@ interface DataChartProps {
   isPercentChart?: boolean
   hiddenSeries?: Set<string>
   onHiddenSeriesChange?: (hiddenSeries: Set<string>) => void
+  xAxisDataKey?: string
+  xAxisLabel?: string
+  xAxisInterval?: number | 'preserveStartEnd'
+  xAxisTickAngle?: number
+  xAxisTextAnchor?: 'start' | 'middle' | 'end'
 }
 
 export const DataChart: React.FC<DataChartProps> = ({
   data,
   stacked = false,
+  stackId = 'stack',
   yAxisLabel = 'Number of Mortalities',
   onFilterChange,
   showTotal = true,
@@ -33,6 +40,11 @@ export const DataChart: React.FC<DataChartProps> = ({
   isPercentChart = false,
   hiddenSeries: controlledHiddenSeries,
   onHiddenSeriesChange,
+  xAxisDataKey = 'year',
+  xAxisLabel,
+  xAxisInterval = 4,
+  xAxisTickAngle = -45,
+  xAxisTextAnchor = 'end',
 }) => {
   const [internalHiddenSeries, setInternalHiddenSeries] = useState<Set<string>>(
     new Set()
@@ -61,22 +73,22 @@ export const DataChart: React.FC<DataChartProps> = ({
     }
   }, [hiddenSeries, onFilterChange, isControlled])
 
-  // Get all series names (excluding 'year')
-  const keys = Object.keys(data[0] || {}).filter((key) => key !== 'year')
+  // Get all series names (excluding x-axis key)
+  const keys = Object.keys(data[0] || {}).filter((key) => key !== xAxisDataKey)
   const sortedKeys = customOrder
     ? keys.sort((a, b) => customOrder.indexOf(a) - customOrder.indexOf(b))
     : keys
   const isMultiSeries = sortedKeys.length > 1
 
   // Calculate total from visible series
-  const totalCount = data.reduce((sum, yearData) => {
-    const yearTotal = Object.entries(yearData)
-      .filter(([key]) => key !== 'year' && !hiddenSeries.has(key))
-      .reduce((yearSum, [, count]) => yearSum + (count as number), 0)
-    return sum + yearTotal
+  const totalCount = data.reduce((sum, rowData) => {
+    const rowTotal = Object.entries(rowData)
+      .filter(([key]) => key !== xAxisDataKey && !hiddenSeries.has(key))
+      .reduce((rowSum, [, count]) => rowSum + (count as number), 0)
+    return sum + rowTotal
   }, 0)
 
-  const handleLegendClick = (entry: any) => {
+  const handleLegendClick = (entry: { dataKey?: string }) => {
     const seriesName = entry.dataKey?.toString()
     if (!seriesName) return
 
@@ -135,15 +147,18 @@ export const DataChart: React.FC<DataChartProps> = ({
             >
               <CartesianGrid strokeDasharray='3 3' />
               <XAxis
-                dataKey='year'
+                dataKey={xAxisDataKey}
                 label={{
-                  value: 'Year',
+                  value:
+                    xAxisLabel ||
+                    xAxisDataKey.charAt(0).toUpperCase() +
+                      xAxisDataKey.slice(1),
                   position: 'insideBottom',
                   offset: -15,
                 }}
-                interval={4}
-                angle={-45}
-                textAnchor='end'
+                interval={xAxisInterval}
+                angle={xAxisTickAngle}
+                textAnchor={xAxisTextAnchor}
                 height={60}
                 tickMargin={10}
               />
@@ -162,10 +177,11 @@ export const DataChart: React.FC<DataChartProps> = ({
                 formatter={(value: number, name: string, props: any) => {
                   if (isPercentChart) {
                     // The `props.payload` contains the data for the current x-axis point (the year's data)
-                    const total = Object.entries(props.payload)
+                    const total = Object.entries(props.payload || {})
                       // The only change is adding `!hiddenSeries.has(key)` to the filter
                       .filter(
-                        ([key]) => key !== 'year' && !hiddenSeries.has(key)
+                        ([key]) =>
+                          key !== xAxisDataKey && !hiddenSeries.has(key)
                       )
                       .reduce((sum, [, val]) => sum + (val as number), 0)
 
@@ -178,16 +194,12 @@ export const DataChart: React.FC<DataChartProps> = ({
                   // Default formatter for non-percentage charts
                   return [value, name]
                 }}
-                itemSorter={(itemA: any, itemB: any) => {
-                  return (
-                    sortedKeys.indexOf(itemB?.name || '') -
-                    sortedKeys.indexOf(itemA?.name || '')
-                  )
-                }}
               />
               {isMultiSeries && (
                 <Legend
-                  onClick={handleLegendClick}
+                  onClick={(entry) =>
+                    handleLegendClick({ dataKey: entry.dataKey?.toString() })
+                  }
                   wrapperStyle={{
                     cursor: 'pointer',
                     paddingTop: '20px',
@@ -200,7 +212,7 @@ export const DataChart: React.FC<DataChartProps> = ({
                 <Bar
                   key={key}
                   dataKey={key}
-                  stackId={stacked ? 'stack' : undefined}
+                  stackId={stacked ? stackId : undefined}
                   fill={COLORS[index % COLORS.length]}
                   name={key}
                   hide={hiddenSeries.has(key)}

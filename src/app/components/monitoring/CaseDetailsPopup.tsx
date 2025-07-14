@@ -227,10 +227,7 @@ const WhaleInfoContent: React.FC<WhaleInfoContentProps> = ({ caseData }) => {
           </div>
         ))}
       </div>
-      <div className='text-sm text-gray-500 italic mt-2 px-1'>
-        Note: Reproductive female status information is not currently available
-        in the data.
-      </div>
+
     </div>
   )
 }

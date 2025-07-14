@@ -278,7 +278,7 @@ export default function MortalityByCauseAndCountry() {
                     key={cause}
                     dataKey={cause}
                     name={cause}
-                    stackId='stack'
+                    stackId={country}
                     fill={COLORS[index % COLORS.length]}
                     hide={hiddenSeries.has(cause)}
                     onClick={(data) =>
