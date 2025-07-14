@@ -105,6 +105,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       title: 'Vessel Strike Type and Severity',
       description: 'View vessel strike incidents by type and severity.',
     },
+    '/injury/vessel-strike/age': {
+      title: 'Vessel Strike by Age Class',
+      description: 'View vessel strike incidents by age class.',
+    },
   }
 
   const categories = [
@@ -161,6 +165,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {
           href: '/injury/vessel-strike/type-and-severity',
           label: 'Type and Severity',
+        },
+        {
+          href: '/injury/vessel-strike/age',
+          label: 'Age Class',
         },
       ],
     },
