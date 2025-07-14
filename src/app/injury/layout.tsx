@@ -313,6 +313,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       ),
     },
+    '/injury/vessel-strike/forensics': {
+      title: 'Vessel Strike Forensics',
+      description:
+        'Vessel strike forensics for North Atlantic right whale vessel strike cases. Forensic analyses are not possible for all vessel strike cases.',
+    },
   }
 
   const categories = [
@@ -377,6 +382,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {
           href: '/injury/vessel-strike/age',
           label: 'Age Class',
+        },
+        {
+          href: '/injury/vessel-strike/forensics',
+          label: 'Forensics',
         },
       ],
     },
