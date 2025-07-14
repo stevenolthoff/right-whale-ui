@@ -1,6 +1,6 @@
 'use client'
 import React, { useRef, useState, useMemo, useCallback } from 'react'
-import { useWhaleInjuryApiData } from '@/app/hooks/useWhaleInjuryApiData'
+import { useWhaleInjuryDataStore } from '@/app/stores/useWhaleInjuryDataStore'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { useYearRange } from '@/app/hooks/useYearRange'
 import { DataChart } from '@/app/components/monitoring/DataChart'
@@ -11,7 +11,7 @@ import ChartAttribution from '@/app/components/charts/ChartAttribution'
 
 export default function EntanglementTypeAndSeverity() {
   const chartRef = useRef<HTMLDivElement>(null)
-  const { data, loading, error } = useWhaleInjuryApiData()
+  const { data, loading, error } = useWhaleInjuryDataStore()
   const [isSideBySide, setIsSideBySide] = useState(true)
   const [typeFilters, setTypeFilters] = useState<Set<string>>(new Set())
   const [severityFilters, setSeverityFilters] = useState<Set<string>>(new Set())
@@ -23,7 +23,11 @@ export default function EntanglementTypeAndSeverity() {
     )
   }, [data])
 
-  const yearRangeProps = useYearRange(loading ? null : entanglementData, undefined, 1980)
+  const yearRangeProps = useYearRange(
+    loading ? null : entanglementData,
+    undefined,
+    1980
+  )
 
   const typeChartData = React.useMemo(() => {
     const filteredData = entanglementData.filter((item) => {
@@ -87,10 +91,7 @@ export default function EntanglementTypeAndSeverity() {
     filteredData.forEach((item) => {
       const year = new Date(item.DetectionDate).getFullYear()
       if (!yearData.has(year)) {
-        yearData.set(
-          year,
-          Object.fromEntries(severities.map((s) => [s, 0]))
-        )
+        yearData.set(year, Object.fromEntries(severities.map((s) => [s, 0])))
       }
       yearData.get(year)![item.InjurySeverityDescription]++
     })

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useRef, useMemo } from 'react'
-import { useWhaleInjuryApiData } from '@/app/hooks/useWhaleInjuryApiData'
+import { useWhaleInjuryDataStore } from '@/app/stores/useWhaleInjuryDataStore'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { DataChart } from '@/app/components/monitoring/DataChart'
 import { useYearRange } from '@/app/hooks/useYearRange'
@@ -22,7 +22,7 @@ const getGearBin = (item: WhaleInjury) => {
 
 export default function EntanglementByGearPage() {
   const chartRef = useRef<HTMLDivElement>(null)
-  const { data: allData, loading, error } = useWhaleInjuryApiData()
+  const { data: allData, loading, error } = useWhaleInjuryDataStore()
 
   const entanglementData = useMemo(() => {
     if (!allData) return []

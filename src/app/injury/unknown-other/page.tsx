@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useRef, useMemo } from 'react'
-import { useWhaleInjuryApiData } from '@/app/hooks/useWhaleInjuryApiData'
+import { useWhaleInjuryDataStore } from '@/app/stores/useWhaleInjuryDataStore'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { DataChart } from '@/app/components/monitoring/DataChart'
 import { useYearRange } from '@/app/hooks/useYearRange'
@@ -10,7 +10,7 @@ import { WhaleInjury } from '@/app/types/whaleInjury'
 
 export default function UnknownOtherInjuriesPage() {
   const chartRef = useRef<HTMLDivElement>(null)
-  const { data: allData, loading, error } = useWhaleInjuryApiData()
+  const { data: allData, loading, error } = useWhaleInjuryDataStore()
 
   // Filter for injuries that are NOT Entanglement or Vessel Strike
   const unknownOtherData = useMemo(() => {

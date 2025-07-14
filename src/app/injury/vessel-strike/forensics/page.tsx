@@ -1,6 +1,6 @@
 'use client'
 import React, { useRef, useState, useMemo, useCallback } from 'react'
-import { useWhaleInjuryApiData } from '@/app/hooks/useWhaleInjuryApiData'
+import { useWhaleInjuryDataStore } from '@/app/stores/useWhaleInjuryDataStore'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { useYearRange } from '@/app/hooks/useYearRange'
 import { DataChart } from '@/app/components/monitoring/DataChart'
@@ -12,7 +12,13 @@ import { WhaleInjury } from '@/app/types/whaleInjury'
 
 // Constants for bin orders
 const FORENSICS_ORDER = ['Yes', 'No']
-const VESSEL_SIZE_ORDER = ['< 40 ft', '40 to 65 ft', '> 65 ft', 'Other', 'Unknown']
+const VESSEL_SIZE_ORDER = [
+  '< 40 ft',
+  '40 to 65 ft',
+  '> 65 ft',
+  'Other',
+  'Unknown',
+]
 
 // Helper function to get forensics bin
 const getForensicsBin = (item: WhaleInjury): string => {
@@ -23,21 +29,26 @@ const getForensicsBin = (item: WhaleInjury): string => {
 
 // Helper function for vessel size bin
 const getVesselSizeBin = (item: WhaleInjury): string => {
-    const desc = item.VesselSizeDescription;
-    if (!desc) return 'Unknown';
-    if (desc.includes('< 40')) return '< 40 ft';
-    if (desc.includes('40 to 65') || desc.includes('40 - >65')) return '40 to 65 ft';
-    if (desc.includes('> 65')) return '> 65 ft';
-    if (desc.toLowerCase() === 'other') return 'Other';
-    return 'Unknown';
+  const desc = item.VesselSizeDescription
+  if (!desc) return 'Unknown'
+  if (desc.includes('< 40')) return '< 40 ft'
+  if (desc.includes('40 to 65') || desc.includes('40 - >65'))
+    return '40 to 65 ft'
+  if (desc.includes('> 65')) return '> 65 ft'
+  if (desc.toLowerCase() === 'other') return 'Other'
+  return 'Unknown'
 }
 
 export default function VesselStrikeForensicsPage() {
   const chartRef = useRef<HTMLDivElement>(null)
-  const { data, loading, error } = useWhaleInjuryApiData()
+  const { data, loading, error } = useWhaleInjuryDataStore()
   const [isSideBySide, setIsSideBySide] = useState(true)
-  const [forensicsFilters, setForensicsFilters] = useState<Set<string>>(new Set())
-  const [vesselSizeFilters, setVesselSizeFilters] = useState<Set<string>>(new Set())
+  const [forensicsFilters, setForensicsFilters] = useState<Set<string>>(
+    new Set()
+  )
+  const [vesselSizeFilters, setVesselSizeFilters] = useState<Set<string>>(
+    new Set()
+  )
 
   const vesselStrikeData = useMemo(() => {
     if (!data) return []
@@ -46,7 +57,11 @@ export default function VesselStrikeForensicsPage() {
     )
   }, [data])
 
-  const yearRangeProps = useYearRange(loading ? null : vesselStrikeData, undefined, 1980)
+  const yearRangeProps = useYearRange(
+    loading ? null : vesselStrikeData,
+    undefined,
+    1980
+  )
 
   const forensicsChartData = React.useMemo(() => {
     const filteredData = vesselStrikeData.filter((item) => {
@@ -68,7 +83,10 @@ export default function VesselStrikeForensicsPage() {
       if (forensicsBin === 'Unknown') return
 
       if (!yearData.has(year)) {
-        yearData.set(year, Object.fromEntries(FORENSICS_ORDER.map((t) => [t, 0])))
+        yearData.set(
+          year,
+          Object.fromEntries(FORENSICS_ORDER.map((t) => [t, 0]))
+        )
       }
       yearData.get(year)![forensicsBin]++
     })
@@ -81,7 +99,8 @@ export default function VesselStrikeForensicsPage() {
     ) {
       formattedData.push({
         year,
-        ...(yearData.get(year) || Object.fromEntries(FORENSICS_ORDER.map((t) => [t, 0]))),
+        ...(yearData.get(year) ||
+          Object.fromEntries(FORENSICS_ORDER.map((t) => [t, 0]))),
       })
     }
 
@@ -96,8 +115,7 @@ export default function VesselStrikeForensicsPage() {
         year >= yearRangeProps.yearRange[0] &&
         year <= yearRangeProps.yearRange[1]
       const passesForensicsFilter =
-        forensicsFilters.size === 0 ||
-        !forensicsFilters.has(forensicsBin)
+        forensicsFilters.size === 0 || !forensicsFilters.has(forensicsBin)
       return matchesYear && passesForensicsFilter
     })
 
@@ -108,7 +126,10 @@ export default function VesselStrikeForensicsPage() {
       const vesselSizeBin = getVesselSizeBin(item)
 
       if (!yearData.has(year)) {
-        yearData.set(year, Object.fromEntries(VESSEL_SIZE_ORDER.map((s) => [s, 0])))
+        yearData.set(
+          year,
+          Object.fromEntries(VESSEL_SIZE_ORDER.map((s) => [s, 0]))
+        )
       }
       yearData.get(year)![vesselSizeBin]++
     })
@@ -197,7 +218,9 @@ export default function VesselStrikeForensicsPage() {
               stackId='forensics'
               stacked={true}
               yAxisLabel='Vessel Strikes'
-              onFilterChange={(filters) => handleFilterChange('forensics', filters)}
+              onFilterChange={(filters) =>
+                handleFilterChange('forensics', filters)
+              }
               customOrder={FORENSICS_ORDER}
             />
           </div>
@@ -211,7 +234,9 @@ export default function VesselStrikeForensicsPage() {
               stackId='vesselSize'
               stacked={true}
               yAxisLabel='Vessel Strikes'
-              onFilterChange={(filters) => handleFilterChange('vesselSize', filters)}
+              onFilterChange={(filters) =>
+                handleFilterChange('vesselSize', filters)
+              }
               customOrder={VESSEL_SIZE_ORDER}
             />
           </div>

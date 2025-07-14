@@ -1,18 +1,13 @@
 'use client'
 
 import React, { useRef, useMemo } from 'react'
-import { useWhaleInjuryApiData } from '@/app/hooks/useWhaleInjuryApiData'
+import { useWhaleInjuryDataStore } from '@/app/stores/useWhaleInjuryDataStore'
 import { DataChart } from '@/app/components/monitoring/DataChart'
 import { ChartLayout } from '@/app/components/charts/ChartLayout'
 import { WhaleInjury } from '@/app/types/whaleInjury'
 
 const AGE_GROUPS_ORDER = ['0-2yr', '3-5yr', '6-8yr', '9+yr', 'Unknown']
-const ROPE_DIAMETER_ORDER = [
-  '<7/16", 11mm',
-  '> 1/2", 12mm',
-  'Other',
-  'Unknown',
-]
+const ROPE_DIAMETER_ORDER = ['<7/16", 11mm', '> 1/2", 12mm', 'Other', 'Unknown']
 
 const getAgeGroup = (ageStr: string | null): string => {
   if (ageStr === null || ageStr === undefined) return 'Unknown'
@@ -62,7 +57,7 @@ const getRopeDiameterGroup = (
 
 export default function EntanglementByRopeAndAgePage() {
   const chartRef = useRef<HTMLDivElement>(null)
-  const { data: allData, loading, error } = useWhaleInjuryApiData()
+  const { data: allData, loading, error } = useWhaleInjuryDataStore()
 
   const entanglementData = useMemo(() => {
     if (!allData) return []
@@ -104,8 +99,7 @@ export default function EntanglementByRopeAndAgePage() {
       (sum, item) =>
         sum +
         Object.values(item).reduce(
-          (acc, val) =>
-            typeof val === 'number' ? acc + val : acc,
+          (acc, val) => (typeof val === 'number' ? acc + val : acc),
           0
         ),
       0

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useRef, useState, useMemo } from 'react'
-import { usePaginatedWhaleInjuryData } from '@/app/hooks/usePaginatedWhaleInjuryData'
+import { useWhaleInjuryDataStore } from '@/app/stores/useWhaleInjuryDataStore'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { DataChart } from '@/app/components/monitoring/DataChart'
 import { useYearRange } from '@/app/hooks/useYearRange'
@@ -36,7 +36,7 @@ const TIMEFRAME_BINS = [
 
 export default function VesselStrikeTimeframePage() {
   const chartRef = useRef<HTMLDivElement>(null)
-  const { data: allData, loading, error } = usePaginatedWhaleInjuryData()
+  const { data: allData, loading, error } = useWhaleInjuryDataStore()
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
 
   const vesselStrikeData = useMemo(() => {

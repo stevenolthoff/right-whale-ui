@@ -1,6 +1,6 @@
 'use client'
 import React, { useRef, useState, useMemo, useCallback } from 'react'
-import { useWhaleInjuryApiData } from '@/app/hooks/useWhaleInjuryApiData'
+import { useWhaleInjuryDataStore } from '@/app/stores/useWhaleInjuryDataStore'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { useYearRange } from '@/app/hooks/useYearRange'
 import { DataChart } from '@/app/components/monitoring/DataChart'
@@ -20,12 +20,10 @@ const SEVERITY_ORDER = [
 
 export default function VesselStrikeTypeAndSeverity() {
   const chartRef = useRef<HTMLDivElement>(null)
-  const { data, loading, error } = useWhaleInjuryApiData()
+  const { data, loading, error } = useWhaleInjuryDataStore()
   const [isSideBySide, setIsSideBySide] = useState(true)
   const [typeFilters, setTypeFilters] = useState<Set<string>>(new Set())
-  const [severityFilters, setSeverityFilters] = useState<Set<string>>(
-    new Set()
-  )
+  const [severityFilters, setSeverityFilters] = useState<Set<string>>(new Set())
 
   const vesselStrikeData = useMemo(() => {
     if (!data) return []
@@ -34,7 +32,11 @@ export default function VesselStrikeTypeAndSeverity() {
     )
   }, [data])
 
-  const yearRangeProps = useYearRange(loading ? null : vesselStrikeData, undefined, 1980)
+  const yearRangeProps = useYearRange(
+    loading ? null : vesselStrikeData,
+    undefined,
+    1980
+  )
 
   const typeChartData = React.useMemo(() => {
     const filteredData = vesselStrikeData.filter((item) => {

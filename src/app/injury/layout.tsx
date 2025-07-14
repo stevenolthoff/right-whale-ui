@@ -1,10 +1,20 @@
 'use client'
-import React from 'react'
+import React, { useEffect } from 'react'
 import Sidebar from '../components/monitoring/Sidebar'
 import { usePathname } from 'next/navigation'
+import { useWhaleInjuryDataStore } from '../stores/useWhaleInjuryDataStore'
+import { useAuthStore } from '../store/auth'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const { token } = useAuthStore()
+  const fetchData = useWhaleInjuryDataStore((state) => state.fetchData)
+
+  useEffect(() => {
+    if (token) {
+      fetchData(token)
+    }
+  }, [token, fetchData])
   const text: Record<
     string,
     { title: string; description: string | React.ReactNode }
