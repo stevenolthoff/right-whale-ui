@@ -330,6 +330,28 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       description:
         'Vessel strike forensics for North Atlantic right whale vessel strike cases. Forensic analyses are not possible for all vessel strike cases.',
     },
+    '/injury/unknown-other': {
+      title: 'Unknown/Other Injuries',
+      description: (
+        <div className='space-y-4'>
+          <p>
+            Detected injury cases for North Atlantic right whales of unknown or
+            other (i.e. not entanglement or vessel strike) origin. Cases
+            captured here represent injuries that have the perceived potential
+            to impact health and/or survival and do not reflect every documented
+            injury/scar detected on right whales. Additionally, since
+            assessments for these injury types began in 2013 under the right
+            whale monitoring work, injuries of unknown/other origin prior to
+            2013 are not captured here. Whales listed as &ldquo;Poor Body
+            Condition&rdquo; and &ldquo;Dependent Calf&rdquo; are cases specific
+            to the ongoing North Atlantic right whale Unusual Mortality Event
+            (UME) which began in 2017. Broader population wide information on
+            right whale health over time is accessible through the Visual Health
+            Assessment Database via a NARWC data access request.
+          </p>
+        </div>
+      ),
+    },
   }
 
   const categories = [
@@ -356,6 +378,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {
           href: '/injury/vessel-strike',
           label: 'Vessel Strikes',
+        },
+        {
+          href: '/injury/unknown-other',
+          label: 'Unknown/Other',
         },
       ],
     },
