@@ -363,10 +363,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       title: 'ENTANGLEMENT',
       links: [
         {
-          href: '/injury/entanglement/timeframe',
-          label: 'Timeframe',
-        },
-        {
           href: '/injury/entanglement/type-and-severity',
           label: 'Type and Severity',
         },
@@ -375,22 +371,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           label: 'Age Class',
         },
         {
+          href: '/injury/entanglement/timeframe',
+          label: 'Injury Timeframe',
+        },
+        {
           href: '/injury/entanglement/gear',
           label: 'Gear Retrieved',
         },
         {
           href: '/injury/entanglement/rope',
-          label: 'Rope Diameter by Age',
+          label: 'Rope Diameter by Age Group',
         },
       ],
     },
     {
       title: 'VESSEL STRIKES',
       links: [
-        {
-          href: '/injury/vessel-strike/timeframe',
-          label: 'Timeframe',
-        },
         {
           href: '/injury/vessel-strike/type-and-severity',
           label: 'Type and Severity',
@@ -400,8 +396,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           label: 'Age Class',
         },
         {
+          href: '/injury/vessel-strike/timeframe',
+          label: 'Injury Timeframe',
+        },
+        {
           href: '/injury/vessel-strike/forensics',
-          label: 'Forensics',
+          label: 'Vessel Strike Forensics',
         },
       ],
     },
