@@ -104,28 +104,35 @@ const Sidebar = ({ categories }: SidebarProps) => {
 
       {/* Desktop toggle button */}
       {!isOpen && (
-        <button
-          className='hidden md:flex fixed top-[85px] left-4 z-[90] 
-            p-2 hover:bg-gray-100 rounded-lg 
-            transition-all duration-200 items-center justify-center
-            text-gray-500 hover:text-gray-700'
-          onClick={() => setIsOpen(true)}
-          aria-label='Open sidebar'
-        >
-          <svg
-            className='w-5 h-5 transform rotate-180'
-            fill='none'
-            stroke='currentColor'
-            viewBox='0 0 24 24'
+        <div className='group hidden md:flex fixed top-[85px] left-4 z-[90] items-center'>
+          <button
+            className='p-2 bg-white/50 hover:bg-gray-100 rounded-lg 
+              transition-all duration-200 items-center justify-center
+              text-gray-500 hover:text-gray-700'
+            onClick={() => setIsOpen(true)}
+            aria-label='Open sidebar'
           >
-            <path
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              strokeWidth={2}
-              d='M15 19l-7-7 7-7'
-            />
-          </svg>
-        </button>
+            <svg
+              className='w-5 h-5 transform rotate-180'
+              fill='none'
+              stroke='currentColor'
+              viewBox='0 0 24 24'
+            >
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth={2}
+                d='M15 19l-7-7 7-7'
+              />
+            </svg>
+          </button>
+          <span className='absolute left-full ml-2 px-2 py-1 bg-gray-700 text-white text-xs font-semibold rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap'>
+            Toggle with{' '}
+            <kbd className='font-sans text-xs font-bold bg-gray-500 rounded-sm px-1.5 py-0.5'>
+              `
+            </kbd>
+          </span>
+        </div>
       )}
 
       {/* Sidebar */}
@@ -152,28 +159,35 @@ const Sidebar = ({ categories }: SidebarProps) => {
         <div className='space-y-8'>
           {/* Desktop close button */}
           {isOpen && (
-            <button
-              className='hidden md:flex absolute right-4 top-4 
-                p-2 hover:bg-gray-100 rounded-lg 
-                transition-colors duration-200 items-center justify-center
-                text-gray-500 hover:text-gray-700'
-              onClick={() => setIsOpen(false)}
-              aria-label='Close sidebar'
-            >
-              <svg
-                className='w-5 h-5'
-                fill='none'
-                stroke='currentColor'
-                viewBox='0 0 24 24'
+            <div className='group hidden md:flex absolute right-4 top-4 items-center'>
+              <span className='absolute top-1/2 -translate-y-1/2 right-full mr-2 px-2 py-1 bg-gray-700 text-white text-xs font-semibold rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap'>
+                Toggle with{' '}
+                <kbd className='font-sans text-xs font-bold bg-gray-500 rounded-sm px-1.5 py-0.5'>
+                  `
+                </kbd>
+              </span>
+              <button
+                className='p-2 hover:bg-gray-100 rounded-lg 
+                  transition-colors duration-200 items-center justify-center
+                  text-gray-500 hover:text-gray-700'
+                onClick={() => setIsOpen(false)}
+                aria-label='Close sidebar'
               >
-                <path
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                  strokeWidth={2}
-                  d='M15 19l-7-7 7-7'
-                />
-              </svg>
-            </button>
+                <svg
+                  className='w-5 h-5'
+                  fill='none'
+                  stroke='currentColor'
+                  viewBox='0 0 24 24'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M15 19l-7-7 7-7'
+                  />
+                </svg>
+              </button>
+            </div>
           )}
 
           {/* Categories and links */}
