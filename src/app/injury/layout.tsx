@@ -379,10 +379,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           href: '/injury/vessel-strike',
           label: 'Vessel Strikes',
         },
-        {
-          href: '/injury/unknown-other',
-          label: 'Unknown/Other',
-        },
       ],
     },
     {
@@ -428,6 +424,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {
           href: '/injury/vessel-strike/forensics',
           label: 'Vessel Strike Forensics',
+        },
+      ],
+    },
+    {
+      title: 'UNKNOWN/OTHER INJURIES',
+      links: [
+        {
+          href: '/injury/unknown-other',
+          label: 'Unknown/Other Injuries',
         },
       ],
     },
