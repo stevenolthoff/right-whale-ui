@@ -9,37 +9,54 @@ import { ErrorMessage } from '@/app/components/ui/ErrorMessage'
 import { ExportChart } from '@/app/components/monitoring/ExportChart'
 import ChartAttribution from '@/app/components/charts/ChartAttribution'
 
-export default function EntanglementTypeAndSeverity() {
+const STRIKE_TYPE_ORDER = ['Blunt', 'Gash', 'Prop Cut(s)']
+const SEVERITY_ORDER = [
+  'Blunt',
+  'Deep',
+  'Shallow',
+  'Superficial',
+  'Unknown/Inconclusive',
+]
+
+export default function VesselStrikeTypeAndSeverity() {
   const chartRef = useRef<HTMLDivElement>(null)
   const { data, loading, error } = useWhaleInjuryApiData()
   const [isSideBySide, setIsSideBySide] = useState(true)
   const [typeFilters, setTypeFilters] = useState<Set<string>>(new Set())
-  const [severityFilters, setSeverityFilters] = useState<Set<string>>(new Set())
+  const [severityFilters, setSeverityFilters] = useState<Set<string>>(
+    new Set()
+  )
 
-  const entanglementData = useMemo(() => {
+  const vesselStrikeData = useMemo(() => {
     if (!data) return []
     return data.filter((item) =>
-      item.InjuryTypeDescription?.includes('Entanglement')
+      item.InjuryTypeDescription?.includes('Vessel Strike')
     )
   }, [data])
 
-  const yearRangeProps = useYearRange(loading ? null : entanglementData, undefined, 1980)
+  const yearRangeProps = useYearRange(loading ? null : vesselStrikeData, undefined, 1980)
 
   const typeChartData = React.useMemo(() => {
-    const filteredData = entanglementData.filter((item) => {
+    const filteredData = vesselStrikeData.filter((item) => {
       const year = new Date(item.DetectionDate).getFullYear()
-      const matchesYear =
+      return (
         year >= yearRangeProps.yearRange[0] &&
-        year <= yearRangeProps.yearRange[1]
-      const passesSeverityFilter =
-        severityFilters.size === 0 ||
-        !severityFilters.has(item.InjurySeverityDescription)
-      return matchesYear && passesSeverityFilter
+        year <= yearRangeProps.yearRange[1] &&
+        (severityFilters.size === 0 ||
+          !severityFilters.has(item.InjurySeverityDescription))
+      )
     })
 
     const types = Array.from(
       new Set(filteredData.map((item) => item.InjuryAccountDescription))
-    ).sort()
+    ).sort((a, b) => {
+      const aIndex = STRIKE_TYPE_ORDER.indexOf(a)
+      const bIndex = STRIKE_TYPE_ORDER.indexOf(b)
+      if (aIndex === -1 && bIndex === -1) return a.localeCompare(b)
+      if (aIndex === -1) return 1
+      if (bIndex === -1) return -1
+      return aIndex - bIndex
+    })
 
     const yearData = new Map<number, Record<string, number>>()
 
@@ -64,33 +81,36 @@ export default function EntanglementTypeAndSeverity() {
     }
 
     return formattedData.sort((a, b) => a.year - b.year)
-  }, [entanglementData, yearRangeProps.yearRange, severityFilters])
+  }, [vesselStrikeData, yearRangeProps.yearRange, severityFilters])
 
   const severityChartData = React.useMemo(() => {
-    const filteredData = entanglementData.filter((item) => {
+    const filteredData = vesselStrikeData.filter((item) => {
       const year = new Date(item.DetectionDate).getFullYear()
-      const matchesYear =
+      return (
         year >= yearRangeProps.yearRange[0] &&
-        year <= yearRangeProps.yearRange[1]
-      const passesTypeFilter =
-        typeFilters.size === 0 ||
-        !typeFilters.has(item.InjuryAccountDescription)
-      return matchesYear && passesTypeFilter
+        year <= yearRangeProps.yearRange[1] &&
+        (typeFilters.size === 0 ||
+          !typeFilters.has(item.InjuryAccountDescription))
+      )
     })
 
     const severities = Array.from(
       new Set(filteredData.map((item) => item.InjurySeverityDescription))
-    ).sort()
+    ).sort((a, b) => {
+      const aIndex = SEVERITY_ORDER.indexOf(a)
+      const bIndex = SEVERITY_ORDER.indexOf(b)
+      if (aIndex === -1 && bIndex === -1) return a.localeCompare(b)
+      if (aIndex === -1) return 1
+      if (bIndex === -1) return -1
+      return aIndex - bIndex
+    })
 
     const yearData = new Map<number, Record<string, number>>()
 
     filteredData.forEach((item) => {
       const year = new Date(item.DetectionDate).getFullYear()
       if (!yearData.has(year)) {
-        yearData.set(
-          year,
-          Object.fromEntries(severities.map((s) => [s, 0]))
-        )
+        yearData.set(year, Object.fromEntries(severities.map((s) => [s, 0])))
       }
       yearData.get(year)![item.InjurySeverityDescription]++
     })
@@ -109,7 +129,7 @@ export default function EntanglementTypeAndSeverity() {
     }
 
     return formattedData.sort((a, b) => a.year - b.year)
-  }, [entanglementData, yearRangeProps.yearRange, typeFilters])
+  }, [vesselStrikeData, yearRangeProps.yearRange, typeFilters])
 
   const handleFilterChange = useCallback(
     (chartType: 'type' | 'severity', filters: Set<string>) => {
@@ -149,8 +169,8 @@ export default function EntanglementTypeAndSeverity() {
         </div>
         <ExportChart
           chartRef={chartRef}
-          filename={`entanglement-analysis-${yearRangeProps.yearRange[0]}-${yearRangeProps.yearRange[1]}.png`}
-          title='Right Whale Entanglement Analysis'
+          filename={`vessel-strike-analysis-${yearRangeProps.yearRange[0]}-${yearRangeProps.yearRange[1]}.png`}
+          title='Right Whale Vessel Strike Analysis'
           caption={`Data from ${yearRangeProps.yearRange[0]} to ${yearRangeProps.yearRange[1]}`}
         />
       </div>
@@ -158,7 +178,7 @@ export default function EntanglementTypeAndSeverity() {
       <div ref={chartRef} className='w-full'>
         <div className='text-center'>
           <h2 className='text-xl font-semibold mb-1'>
-            Right Whale Entanglement Analysis
+            Right Whale Vessel Strike Analysis
           </h2>
           <p className='text-sm text-gray-600'>
             Data from {yearRangeProps.yearRange[0]} to{' '}
@@ -172,13 +192,14 @@ export default function EntanglementTypeAndSeverity() {
         >
           <div className='h-[600px]'>
             <div className='text-center mb-4'>
-              <h3 className='text-lg font-semibold'>Entanglement Types</h3>
+              <h3 className='text-lg font-semibold'>Vessel Strike Types</h3>
             </div>
             <DataChart
               data={typeChartData}
               stacked={true}
-              yAxisLabel='Entanglements'
+              yAxisLabel='Vessel Strikes'
               onFilterChange={(filters) => handleFilterChange('type', filters)}
+              customOrder={STRIKE_TYPE_ORDER}
             />
           </div>
 
@@ -189,11 +210,11 @@ export default function EntanglementTypeAndSeverity() {
             <DataChart
               data={severityChartData}
               stacked={true}
-              yAxisLabel='Entanglements'
+              yAxisLabel='Vessel Strikes'
               onFilterChange={(filters) =>
                 handleFilterChange('severity', filters)
               }
-              customOrder={['Severe', 'Moderate', 'Minor']}
+              customOrder={SEVERITY_ORDER}
             />
           </div>
         </div>

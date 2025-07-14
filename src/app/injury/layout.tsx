@@ -97,6 +97,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       title: 'Vessel Strike Timeframe',
       description: 'View vessel strike incidents by timeframe.',
     },
+    '/injury/vessel-strike/type-and-severity': {
+      title: 'Vessel Strike Type and Severity',
+      description: 'View vessel strike incidents by type and severity.',
+    },
   }
 
   const categories = [
@@ -145,6 +149,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {
           href: '/injury/vessel-strike/timeframe',
           label: 'Timeframe',
+        },
+        {
+          href: '/injury/vessel-strike/type-and-severity',
+          label: 'Type and Severity',
         },
       ],
     },
