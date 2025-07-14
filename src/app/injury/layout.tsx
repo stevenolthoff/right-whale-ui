@@ -75,7 +75,30 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     },
     '/injury/injury-type': {
       title: 'Total Annual Injuries',
-      description: 'View injury types categorized by year.',
+      description: (
+        <div className='space-y-4'>
+          <p>
+            Injury cases displayed here represent documented injuries to right
+            whales to date, including entanglements, vessel strikes, and
+            significant injuries of unknown or other (i.e. not entanglement or
+            vessel strike) origin. Injuries are represented for both cataloged
+            and unknown ID right whales. Additional narrative and analyses to
+            entanglement and vessel strike injuries can be found in case studies
+            and gear reports linked in the resources section of this site.
+            Unknown/Other injuries captured here represent those that have the
+            perceived potential to impact health and/or survival and do not
+            reflect every documented injury/scar detected on right whales.
+            Additionally, since assessments for these injury types began in 2013
+            under the right whale monitoring work, injuries of unknown origin
+            prior to 2013 are not captured here. Whales listed as “Poor Body
+            Condition” and “Dependent Calf” are cases specific to the ongoing
+            North Atlantic right whale Unusual Mortality Event (UME) which began
+            in 2017. Broader population wide information on right whale health
+            over time is accessible through the Visual Health Assessment
+            Database via a NARWC data access request.
+          </p>
+        </div>
+      ),
     },
     '/injury/entanglement': {
       title: 'Entanglement',
@@ -87,27 +110,194 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     },
     '/injury/entanglement/timeframe': {
       title: 'Entanglement Timeframe',
-      description: 'View entanglement-related injuries by timeframe.',
+      description: (
+        <div className='space-y-4'>
+          <p>
+            Detected entanglement events for North Atlantic right whales by
+            timeframe of injury acquisition and year. Timeframe is calculated as
+            days between the pre-injury sighting and the initial injury
+            detection sighting. Whales for which there is no pre-injury
+            detection sighting (i.e. unknown ID whale, whale’s first sighting is
+            with injury) do not have calculated timeframes.
+          </p>
+          <div>
+            <span className='font-semibold'>
+              Timeframes are defined as follows:
+            </span>
+            <ul className='mt-2 ml-6 list-disc space-y-1'>
+              <li>
+                <span className='font-mono'>&lt;3m</span> (
+                <span className='font-mono'>&lt;90 days</span>)
+              </li>
+              <li>
+                <span className='font-mono'>3-6m</span> (
+                <span className='font-mono'>90-180 days</span>)
+              </li>
+              <li>
+                <span className='font-mono'>6m – 1 yr</span> (
+                <span className='font-mono'>181-365 days</span>)
+              </li>
+              <li>
+                <span className='font-mono'>1yr-2yr</span> (
+                <span className='font-mono'>366-730 days</span>)
+              </li>
+              <li>
+                <span className='font-mono'>2yr-3yr</span> (
+                <span className='font-mono'>731-1,095 days</span>)
+              </li>
+              <li>
+                <span className='font-mono'>3+yr</span> (
+                <span className='font-mono'>&gt;1,095 days</span>)
+              </li>
+              <li>
+                <span className='font-mono'>Unknown</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      ),
     },
     '/injury/entanglement/type-and-severity': {
       title: 'Entanglement Type and Severity',
-      description: 'View entanglement-related injuries by type and severity.',
+      description: (
+        <div className='space-y-4'>
+          <p>
+            Detected entanglement events for North Atlantic right whales by type
+            and severity for both known (cataloged) and unknown ID whales.
+            Entanglements can be detected with attached gear (i.e. Gear) or by
+            wounds only and no attached gear (i.e. No Gear). Severity is an
+            assessment of the resulting entanglement injury and is classified as
+            Minor, Moderate, or Severe.
+          </p>
+        </div>
+      ),
     },
     '/injury/entanglement/age': {
       title: 'Entanglement by Age Class',
-      description: 'View entanglement-related injuries by age class.',
+      description: (
+        <div className='space-y-4'>
+          <p>
+            Detected entanglement events for North Atlantic right whales by age
+            class and year. Age class for right whales with known birth years
+            are as follows:
+          </p>
+          <ul className='ml-4 list-disc'>
+            <li>
+              <strong>Calf (C)</strong> = &lt;1yr
+            </li>
+            <li>
+              <strong>Juvenile (J)</strong> = 1-8yrs
+            </li>
+            <li>
+              <strong>Adult (A)</strong> = 9+ yrs
+            </li>
+          </ul>
+          <p>
+            Whales of unknown birth year are considered{' '}
+            <strong>Unknown (U)</strong> age class until their 9th year of
+            sighting at which point they are classified as Adults. Whales that
+            are unknown ID and are not cataloged are classified as Unknown age
+            class.
+          </p>
+        </div>
+      ),
     },
     '/injury/vessel-strike/timeframe': {
       title: 'Vessel Strike Timeframe',
-      description: 'View vessel strike incidents by timeframe.',
+      description: (
+        <div className='space-y-4'>
+          <p>
+            Detected vessel strike events for North Atlantic right whales by
+            timeframe of injury acquisition and year. Timeframe is calculated as
+            days between the pre-injury sighting and the initial injury
+            detection sighting. Whales for which there is no pre-injury
+            detection sighting (i.e. unknown ID whale, whale’s first sighting is
+            with injury) do not have calculated timeframes.
+          </p>
+          <div>
+            <span className='font-semibold'>
+              Timeframes are defined as follows:
+            </span>
+            <ul className='mt-2 ml-6 list-disc space-y-1'>
+              <li>
+                <span className='font-mono'>&lt;3m</span> (
+                <span className='font-mono'>&lt;90 days</span>)
+              </li>
+              <li>
+                <span className='font-mono'>3-6m</span> (
+                <span className='font-mono'>90-180 days</span>)
+              </li>
+              <li>
+                <span className='font-mono'>6m – 1 yr</span> (
+                <span className='font-mono'>181-365 days</span>)
+              </li>
+              <li>
+                <span className='font-mono'>1yr-2yr</span> (
+                <span className='font-mono'>366-730 days</span>)
+              </li>
+              <li>
+                <span className='font-mono'>2yr-3yr</span> (
+                <span className='font-mono'>731-1,095 days</span>)
+              </li>
+              <li>
+                <span className='font-mono'>3+yr</span> (
+                <span className='font-mono'>&gt;1,095 days</span>)
+              </li>
+              <li>
+                <span className='font-mono'>Unknown</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      ),
     },
     '/injury/vessel-strike/type-and-severity': {
       title: 'Vessel Strike Type and Severity',
-      description: 'View vessel strike incidents by type and severity.',
+      description: (
+        <div className='space-y-4'>
+          <p>
+            Detected vessel strike events by type and severity for both known
+            (catalogued) and unknown ID North Atlantic right whales. Vessel
+            strike types can include propeller cuts (Prop), blunt force trauma
+            (Blunt), large open wounds (Gash), and others such as skeg wounds
+            (Other). Severity is an assessment of the resulting vessel strike
+            injury and is classified as Superficial (&lt;2cm penetrating depth),
+            Shallow (2-8cm penetrating depth), or Deep (&gt; 8cm penetrating
+            depth). Because Blunt cases are almost exclusively detected
+            post-mortem, the severity for those cases is listed as Blunt.
+          </p>
+        </div>
+      ),
     },
     '/injury/vessel-strike/age': {
       title: 'Vessel Strike by Age Class',
-      description: 'View vessel strike incidents by age class.',
+      description: (
+        <div className='space-y-4'>
+          <p>
+            Detected vessel strike events for North Atlantic right whales by age
+            class and year. Age class for right whales with known birth years
+            are as follows:
+          </p>
+          <ul className='ml-4 list-disc'>
+            <li>
+              <strong>Calf (C)</strong> = &lt;1yr
+            </li>
+            <li>
+              <strong>Juvenile (J)</strong> = 1-8yrs
+            </li>
+            <li>
+              <strong>Adult (A)</strong> = 9+ yrs
+            </li>
+          </ul>
+          <p>
+            Whales of unknown birth year are considered{' '}
+            <strong>Unknown (U)</strong> age class until their 9th year of
+            sighting at which point they are classified as Adults. Whales that
+            are unknown ID and are not cataloged are classified as Unknown age
+            class.
+          </p>
+        </div>
+      ),
     },
   }
 
@@ -122,7 +312,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       ],
     },
     {
-      title: 'INJURY',
+      title: 'ALL INJURIES',
       links: [
         {
           href: '/injury/injury-type',
