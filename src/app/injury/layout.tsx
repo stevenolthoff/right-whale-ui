@@ -371,14 +371,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           href: '/injury/injury-type',
           label: 'Total Annual Injuries',
         },
-        {
-          href: '/injury/entanglement',
-          label: 'Entanglement',
-        },
-        {
-          href: '/injury/vessel-strike',
-          label: 'Vessel Strikes',
-        },
+        // {
+        //   href: '/injury/entanglement',
+        //   label: 'Entanglement',
+        // },
+        // {
+        //   href: '/injury/vessel-strike',
+        //   label: 'Vessel Strikes',
+        // },
       ],
     },
     {
