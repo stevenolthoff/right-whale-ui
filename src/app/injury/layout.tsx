@@ -202,6 +202,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       ),
     },
+    '/injury/entanglement/gear': {
+      title: 'Entanglement Gear Retrieved',
+      description: (
+        <div className='space-y-4'>
+          <p>
+            Gear retrieval status for North Atlantic right whale entanglement
+            cases. Entanglements can be detected with attached gear (i.e. Gear)
+            or by wounds only and no attached gear (i.e. No Gear). Gear
+            retrieval status is listed for those cases with attached gear. Cases
+            for which there was no gear attached are flagged as such.
+          </p>
+        </div>
+      ),
+    },
     '/injury/vessel-strike/timeframe': {
       title: 'Vessel Strike Timeframe',
       description: (
@@ -342,6 +356,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {
           href: '/injury/entanglement/age',
           label: 'Age Class',
+        },
+        {
+          href: '/injury/entanglement/gear',
+          label: 'Gear Retrieved',
         },
       ],
     },
