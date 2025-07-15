@@ -1,12 +1,27 @@
 'use client'
 
-import React, { useRef, useMemo } from 'react'
+import React, { useRef, useMemo, useEffect, useState } from 'react'
 import { useWhaleInjuryDataStore } from '@/app/stores/useWhaleInjuryDataStore'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { DataChart } from '@/app/components/monitoring/DataChart'
 import { useYearRange } from '@/app/hooks/useYearRange'
 import { ChartLayout } from '@/app/components/charts/ChartLayout'
 import { WhaleInjury } from '@/app/types/whaleInjury'
+import { InjuryTable } from '@/app/components/injury/InjuryTable'
+import { InjuryTableFilters } from '@/app/components/injury/InjuryTableFilters'
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  createColumnHelper,
+  Row,
+  SortingState,
+  ColumnFiltersState,
+} from '@tanstack/react-table'
+
+const columnHelper = createColumnHelper<WhaleInjury>()
 
 const GEAR_BINS_ORDER = ['No Gear', 'Gear Not Retrieved', 'Gear Retrieved']
 
@@ -88,38 +103,109 @@ export default function EntanglementByGearPage() {
     )
   }, [chartData])
 
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor('EGNo', { header: 'EG No' }),
+      columnHelper.accessor('InjuryTypeDescription', {
+        header: 'Injury Type',
+        filterFn: 'arrIncludesSome',
+      }),
+      columnHelper.accessor('InjurySeverityDescription', {
+        header: 'Severity',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('DetectionDate', {
+        header: 'Detection Year',
+        cell: (info) => new Date(info.getValue()).getFullYear(),
+        filterFn: (
+          row: Row<WhaleInjury>,
+          columnId: string,
+          value: [number, number]
+        ) => {
+          if (!value) return true
+          const year = new Date(row.getValue(columnId)).getFullYear()
+          const [min, max] = value
+          return year >= min && year <= max
+        },
+      }),
+      columnHelper.accessor('InjuryAgeClass', {
+        header: 'Age Class',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('GenderDescription', {
+        header: 'Sex',
+        filterFn: 'equalsString',
+      }),
+    ],
+    []
+  )
+
+  const table = useReactTable({
+    data: entanglementData || [],
+    columns,
+    state: { sorting, columnFilters },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: { pageSize: 10 },
+    },
+    autoResetPageIndex: false,
+  })
+
+  useEffect(() => {
+    table.getColumn('DetectionDate')?.setFilterValue(yearRange)
+  }, [yearRange, table])
+
   return (
-    <ChartLayout
-      title='Entanglement by Gear Status'
-      chartRef={chartRef}
-      exportFilename={`entanglement-gear-status-${yearRange[0]}-${yearRange[1]}.png`}
-      yearRange={yearRange}
-      totalCount={totalEntanglementsInView}
-      loading={loading}
-      error={error || undefined}
-      description='Data represents entanglement cases of North Atlantic Right Whales, categorized by presence of fishing gear and whether it was retrieved.'
-      controls={
-        <>
-          <label className='block text-sm font-medium text-slate-600 mb-2'>
-            Select Year Range
-          </label>
-          <YearRangeSlider
-            yearRange={yearRange}
-            minYear={minYear}
-            maxYear={maxYear}
-            onChange={setYearRange}
-          />
-        </>
-      }
-    >
-      <DataChart
-        data={chartData}
-        stackId='gear'
-        stacked={true}
-        yAxisLabel='Number of Entanglements'
-        customOrder={GEAR_BINS_ORDER}
-        showTotal={false}
+    <div className='space-y-6'>
+      <ChartLayout
+        title='Entanglement by Gear Status'
+        chartRef={chartRef}
+        exportFilename={`entanglement-gear-status-${yearRange[0]}-${yearRange[1]}.png`}
+        yearRange={yearRange}
+        totalCount={totalEntanglementsInView}
+        loading={loading}
+        error={error || undefined}
+        description='Data represents entanglement cases of North Atlantic Right Whales, categorized by presence of fishing gear and whether it was retrieved.'
+        controls={
+          <>
+            <label className='block text-sm font-medium text-slate-600 mb-2'>
+              Select Year Range
+            </label>
+            <YearRangeSlider
+              yearRange={yearRange}
+              minYear={minYear}
+              maxYear={maxYear}
+              onChange={setYearRange}
+            />
+          </>
+        }
+      >
+        <DataChart
+          data={chartData}
+          stackId='gear'
+          stacked={true}
+          yAxisLabel='Number of Entanglements'
+          customOrder={GEAR_BINS_ORDER}
+          showTotal={false}
+        />
+      </ChartLayout>
+      <InjuryTableFilters
+        table={table}
+        data={entanglementData || []}
+        yearRange={yearRange}
+        setYearRange={setYearRange}
+        minYear={minYear}
+        maxYear={maxYear}
       />
-    </ChartLayout>
+      <InjuryTable table={table} />
+    </div>
   )
 } 

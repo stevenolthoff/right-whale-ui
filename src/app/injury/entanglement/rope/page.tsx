@@ -1,10 +1,26 @@
 'use client'
 
-import React, { useRef, useMemo } from 'react'
+import React, { useRef, useMemo, useEffect, useState } from 'react'
 import { useWhaleInjuryDataStore } from '@/app/stores/useWhaleInjuryDataStore'
 import { DataChart } from '@/app/components/monitoring/DataChart'
 import { ChartLayout } from '@/app/components/charts/ChartLayout'
 import { WhaleInjury } from '@/app/types/whaleInjury'
+import { InjuryTable } from '@/app/components/injury/InjuryTable'
+import { InjuryTableFilters } from '@/app/components/injury/InjuryTableFilters'
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  createColumnHelper,
+  Row,
+  SortingState,
+  ColumnFiltersState,
+} from '@tanstack/react-table'
+import { useYearRange } from '@/app/hooks/useYearRange'
+
+const columnHelper = createColumnHelper<WhaleInjury>()
 
 const AGE_GROUPS_ORDER = ['0-2yr', '3-5yr', '6-8yr', '9+yr', 'Unknown']
 const ROPE_DIAMETER_ORDER = ['<7/16", 11mm', '> 1/2", 12mm', 'Other', 'Unknown']
@@ -66,6 +82,12 @@ export default function EntanglementByRopeAndAgePage() {
     )
   }, [allData])
 
+  const { yearRange, setYearRange, minYear, maxYear } = useYearRange(
+    entanglementData,
+    undefined,
+    1980
+  )
+
   const chartData = useMemo(() => {
     if (!entanglementData.length) return []
 
@@ -106,28 +128,99 @@ export default function EntanglementByRopeAndAgePage() {
     )
   }, [chartData])
 
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor('EGNo', { header: 'EG No' }),
+      columnHelper.accessor('InjuryTypeDescription', {
+        header: 'Injury Type',
+        filterFn: 'arrIncludesSome',
+      }),
+      columnHelper.accessor('InjurySeverityDescription', {
+        header: 'Severity',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('DetectionDate', {
+        header: 'Detection Year',
+        cell: (info) => new Date(info.getValue()).getFullYear(),
+        filterFn: (
+          row: Row<WhaleInjury>,
+          columnId: string,
+          value: [number, number]
+        ) => {
+          if (!value) return true
+          const year = new Date(row.getValue(columnId)).getFullYear()
+          const [min, max] = value
+          return year >= min && year <= max
+        },
+      }),
+      columnHelper.accessor('InjuryAgeClass', {
+        header: 'Age Class',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('GenderDescription', {
+        header: 'Sex',
+        filterFn: 'equalsString',
+      }),
+    ],
+    []
+  )
+
+  const table = useReactTable({
+    data: entanglementData || [],
+    columns,
+    state: { sorting, columnFilters },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: { pageSize: 10 },
+    },
+    autoResetPageIndex: false,
+  })
+
+  useEffect(() => {
+    table.getColumn('DetectionDate')?.setFilterValue(yearRange)
+  }, [yearRange, table])
+
   return (
-    <ChartLayout
-      title='Entanglement by Rope Diameter and Age Group'
-      chartRef={chartRef}
-      exportFilename='entanglement-rope-by-age.png'
-      totalCount={totalEntanglements}
-      loading={loading}
-      error={error || undefined}
-      description='Data represents entanglement cases of North Atlantic Right Whales, categorized by rope diameter and the age of the whale at the time of injury.'
-    >
-      <DataChart
-        data={chartData}
-        xAxisDataKey='ageGroup'
-        xAxisLabel='Age Group'
-        xAxisInterval={0}
-        xAxisTickAngle={0}
-        xAxisTextAnchor='middle'
-        stacked={true}
-        yAxisLabel='Number of Entanglements'
-        customOrder={ROPE_DIAMETER_ORDER}
-        showTotal={false}
+    <div className='space-y-6'>
+      <ChartLayout
+        title='Entanglement by Rope Diameter and Age Group'
+        chartRef={chartRef}
+        exportFilename='entanglement-rope-by-age.png'
+        totalCount={totalEntanglements}
+        loading={loading}
+        error={error || undefined}
+        description='Data represents entanglement cases of North Atlantic Right Whales, categorized by rope diameter and the age of the whale at the time of injury.'
+      >
+        <DataChart
+          data={chartData}
+          xAxisDataKey='ageGroup'
+          xAxisLabel='Age Group'
+          xAxisInterval={0}
+          xAxisTickAngle={0}
+          xAxisTextAnchor='middle'
+          stacked={true}
+          yAxisLabel='Number of Entanglements'
+          customOrder={ROPE_DIAMETER_ORDER}
+          showTotal={false}
+        />
+      </ChartLayout>
+      <InjuryTableFilters
+        table={table}
+        data={entanglementData || []}
+        yearRange={yearRange}
+        setYearRange={setYearRange}
+        minYear={minYear}
+        maxYear={maxYear}
       />
-    </ChartLayout>
+      <InjuryTable table={table} />
+    </div>
   )
 }

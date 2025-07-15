@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useState, useMemo } from 'react'
+import React, { useRef, useState, useMemo, useEffect } from 'react'
 import { useWhaleInjuryDataStore } from '@/app/stores/useWhaleInjuryDataStore'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { DataChart } from '@/app/components/monitoring/DataChart'
@@ -9,6 +9,22 @@ import { Loader } from '@/app/components/ui/Loader'
 import { ErrorMessage } from '@/app/components/ui/ErrorMessage'
 import ChartAttribution from '@/app/components/charts/ChartAttribution'
 import { ExportChart } from '@/app/components/monitoring/ExportChart'
+import { InjuryTable } from '@/app/components/injury/InjuryTable'
+import { InjuryTableFilters } from '@/app/components/injury/InjuryTableFilters'
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  createColumnHelper,
+  Row,
+  SortingState,
+  ColumnFiltersState,
+} from '@tanstack/react-table'
+import { WhaleInjury } from '@/app/types/whaleInjury'
+
+const columnHelper = createColumnHelper<WhaleInjury>()
 
 // Helper function to categorize the injury timeframe into bins
 const getTimeframeBin = (days: number | null): string => {
@@ -112,6 +128,66 @@ export default function VesselStrikeTimeframePage() {
     )
   }, [chartData])
 
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor('EGNo', { header: 'EG No' }),
+      columnHelper.accessor('InjuryTypeDescription', {
+        header: 'Injury Type',
+        filterFn: 'arrIncludesSome',
+      }),
+      columnHelper.accessor('InjurySeverityDescription', {
+        header: 'Severity',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('DetectionDate', {
+        header: 'Detection Year',
+        cell: (info) => new Date(info.getValue()).getFullYear(),
+        filterFn: (
+          row: Row<WhaleInjury>,
+          columnId: string,
+          value: [number, number]
+        ) => {
+          if (!value) return true
+          const year = new Date(row.getValue(columnId)).getFullYear()
+          const [min, max] = value
+          return year >= min && year <= max
+        },
+      }),
+      columnHelper.accessor('InjuryAgeClass', {
+        header: 'Age Class',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('GenderDescription', {
+        header: 'Sex',
+        filterFn: 'equalsString',
+      }),
+    ],
+    []
+  )
+
+  const table = useReactTable({
+    data: vesselStrikeData || [],
+    columns,
+    state: { sorting, columnFilters },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: { pageSize: 10 },
+    },
+    autoResetPageIndex: false,
+  })
+
+  useEffect(() => {
+    table.getColumn('DetectionDate')?.setFilterValue(yearRange)
+  }, [yearRange, table])
+
   if (loading) return <Loader />
   if (error) return <ErrorMessage error={error} />
 
@@ -195,6 +271,19 @@ export default function VesselStrikeTimeframePage() {
           </div>
         </div>
         <ChartAttribution />
+      </div>
+      <div className='mt-8'>
+        <InjuryTableFilters
+          table={table}
+          data={vesselStrikeData || []}
+          yearRange={yearRange}
+          setYearRange={setYearRange}
+          minYear={minYear}
+          maxYear={maxYear}
+        />
+        <div className='mt-4'>
+          <InjuryTable table={table} />
+        </div>
       </div>
     </div>
   )

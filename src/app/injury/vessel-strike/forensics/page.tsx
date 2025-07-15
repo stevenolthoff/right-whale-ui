@@ -1,5 +1,5 @@
 'use client'
-import React, { useRef, useState, useMemo, useCallback } from 'react'
+import React, { useRef, useState, useMemo, useCallback, useEffect } from 'react'
 import { useWhaleInjuryDataStore } from '@/app/stores/useWhaleInjuryDataStore'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { useYearRange } from '@/app/hooks/useYearRange'
@@ -9,6 +9,21 @@ import { ErrorMessage } from '@/app/components/ui/ErrorMessage'
 import { ExportChart } from '@/app/components/monitoring/ExportChart'
 import ChartAttribution from '@/app/components/charts/ChartAttribution'
 import { WhaleInjury } from '@/app/types/whaleInjury'
+import { InjuryTable } from '@/app/components/injury/InjuryTable'
+import { InjuryTableFilters } from '@/app/components/injury/InjuryTableFilters'
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  createColumnHelper,
+  Row,
+  SortingState,
+  ColumnFiltersState,
+} from '@tanstack/react-table'
+
+const columnHelper = createColumnHelper<WhaleInjury>()
 
 // Constants for bin orders
 const FORENSICS_ORDER = ['Yes', 'No']
@@ -161,6 +176,66 @@ export default function VesselStrikeForensicsPage() {
     []
   )
 
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor('EGNo', { header: 'EG No' }),
+      columnHelper.accessor('InjuryTypeDescription', {
+        header: 'Injury Type',
+        filterFn: 'arrIncludesSome',
+      }),
+      columnHelper.accessor('InjurySeverityDescription', {
+        header: 'Severity',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('DetectionDate', {
+        header: 'Detection Year',
+        cell: (info) => new Date(info.getValue()).getFullYear(),
+        filterFn: (
+          row: Row<WhaleInjury>,
+          columnId: string,
+          value: [number, number]
+        ) => {
+          if (!value) return true
+          const year = new Date(row.getValue(columnId)).getFullYear()
+          const [min, max] = value
+          return year >= min && year <= max
+        },
+      }),
+      columnHelper.accessor('InjuryAgeClass', {
+        header: 'Age Class',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('GenderDescription', {
+        header: 'Sex',
+        filterFn: 'equalsString',
+      }),
+    ],
+    []
+  )
+
+  const table = useReactTable({
+    data: vesselStrikeData || [],
+    columns,
+    state: { sorting, columnFilters },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: { pageSize: 10 },
+    },
+    autoResetPageIndex: false,
+  })
+
+  useEffect(() => {
+    table.getColumn('DetectionDate')?.setFilterValue(yearRangeProps.yearRange)
+  }, [yearRangeProps.yearRange, table])
+
   if (loading) return <Loader />
   if (error) return <ErrorMessage error={error} />
 
@@ -242,6 +317,19 @@ export default function VesselStrikeForensicsPage() {
           </div>
         </div>
         <ChartAttribution />
+      </div>
+      <div className='mt-8'>
+        <InjuryTableFilters
+          table={table}
+          data={vesselStrikeData || []}
+          yearRange={yearRangeProps.yearRange}
+          setYearRange={yearRangeProps.setYearRange}
+          minYear={yearRangeProps.minYear}
+          maxYear={yearRangeProps.maxYear}
+        />
+        <div className='mt-4'>
+          <InjuryTable table={table} />
+        </div>
       </div>
     </div>
   )

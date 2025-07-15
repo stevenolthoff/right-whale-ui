@@ -1,12 +1,27 @@
 'use client'
 
-import React, { useRef, useMemo } from 'react'
+import React, { useRef, useMemo, useEffect, useState } from 'react'
 import { useWhaleInjuryDataStore } from '@/app/stores/useWhaleInjuryDataStore'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { DataChart } from '@/app/components/monitoring/DataChart'
 import { useYearRange } from '@/app/hooks/useYearRange'
 import { ChartLayout } from '@/app/components/charts/ChartLayout'
 import { WhaleInjury } from '@/app/types/whaleInjury'
+import { InjuryTable } from '@/app/components/injury/InjuryTable'
+import { InjuryTableFilters } from '@/app/components/injury/InjuryTableFilters'
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  createColumnHelper,
+  Row,
+  SortingState,
+  ColumnFiltersState,
+} from '@tanstack/react-table'
+
+const columnHelper = createColumnHelper<WhaleInjury>()
 
 export default function UnknownOtherInjuriesPage() {
   const chartRef = useRef<HTMLDivElement>(null)
@@ -58,35 +73,106 @@ export default function UnknownOtherInjuriesPage() {
     return chartData.reduce((sum, item) => sum + item.count, 0)
   }, [chartData])
 
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor('EGNo', { header: 'EG No' }),
+      columnHelper.accessor('InjuryTypeDescription', {
+        header: 'Injury Type',
+        filterFn: 'arrIncludesSome',
+      }),
+      columnHelper.accessor('InjurySeverityDescription', {
+        header: 'Severity',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('DetectionDate', {
+        header: 'Detection Year',
+        cell: (info) => new Date(info.getValue()).getFullYear(),
+        filterFn: (
+          row: Row<WhaleInjury>,
+          columnId: string,
+          value: [number, number]
+        ) => {
+          if (!value) return true
+          const year = new Date(row.getValue(columnId)).getFullYear()
+          const [min, max] = value
+          return year >= min && year <= max
+        },
+      }),
+      columnHelper.accessor('InjuryAgeClass', {
+        header: 'Age Class',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('GenderDescription', {
+        header: 'Sex',
+        filterFn: 'equalsString',
+      }),
+    ],
+    []
+  )
+
+  const table = useReactTable({
+    data: unknownOtherData || [],
+    columns,
+    state: { sorting, columnFilters },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: { pageSize: 10 },
+    },
+    autoResetPageIndex: false,
+  })
+
+  useEffect(() => {
+    table.getColumn('DetectionDate')?.setFilterValue(yearRange)
+  }, [yearRange, table])
+
   return (
-    <ChartLayout
-      title='Unknown/Other Injuries'
-      chartRef={chartRef}
-      exportFilename={`unknown-other-injuries-${yearRange[0]}-${yearRange[1]}.png`}
-      yearRange={yearRange}
-      totalCount={totalInjuriesInView}
-      loading={loading}
-      error={error || undefined}
-      description='Data represents injuries from unknown or other causes (not classified as Entanglement or Vessel Strike).'
-      controls={
-        <>
-          <label className='block text-sm font-medium text-slate-600 mb-2'>
-            Select Year Range
-          </label>
-          <YearRangeSlider
-            yearRange={yearRange}
-            minYear={minYear}
-            maxYear={maxYear}
-            onChange={setYearRange}
-          />
-        </>
-      }
-    >
-      <DataChart
-        data={chartData}
-        stacked={false}
-        yAxisLabel='Number of Injuries'
+    <div className='space-y-6'>
+      <ChartLayout
+        title='Unknown/Other Injuries'
+        chartRef={chartRef}
+        exportFilename={`unknown-other-injuries-${yearRange[0]}-${yearRange[1]}.png`}
+        yearRange={yearRange}
+        totalCount={totalInjuriesInView}
+        loading={loading}
+        error={error || undefined}
+        description='Data represents injuries from unknown or other causes (not classified as Entanglement or Vessel Strike).'
+        controls={
+          <>
+            <label className='block text-sm font-medium text-slate-600 mb-2'>
+              Select Year Range
+            </label>
+            <YearRangeSlider
+              yearRange={yearRange}
+              minYear={minYear}
+              maxYear={maxYear}
+              onChange={setYearRange}
+            />
+          </>
+        }
+      >
+        <DataChart
+          data={chartData}
+          stacked={false}
+          yAxisLabel='Number of Injuries'
+        />
+      </ChartLayout>
+      <InjuryTableFilters
+        table={table}
+        data={unknownOtherData || []}
+        yearRange={yearRange}
+        setYearRange={setYearRange}
+        minYear={minYear}
+        maxYear={maxYear}
       />
-    </ChartLayout>
+      <InjuryTable table={table} />
+    </div>
   )
 } 
