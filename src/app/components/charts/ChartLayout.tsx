@@ -56,7 +56,7 @@ export function ChartLayout({
 
       {/* Chart Section */}
       <div ref={chartRef} className='bg-white rounded-lg'>
-        <div className='text-center space-y-2 mb-8'>
+        <div className='text-center space-y-2 mb-4'>
           <h2 className='text-2xl font-bold text-blue-900'>{title}</h2>
           <div className='flex flex-col md:flex-row items-center justify-center gap-3 text-slate-500'>
             {subtitle && <p className='text-sm'>{subtitle}</p>}
@@ -81,10 +81,10 @@ export function ChartLayout({
         </div>
 
         {/* Chart Container */}
-        <div className='h-[600px] mt-4'>{children}</div>
+        <div className='h-[600px] mt-2'>{children}</div>
 
         {/* Legend or Additional Info */}
-        <div className='mt-6 pt-6 border-t border-slate-100 text-center'>
+        <div className='mt-4 pt-4 border-t border-slate-100 text-center'>
           <div className='text-sm text-slate-500'>
             {description}
             {description && <br />}
