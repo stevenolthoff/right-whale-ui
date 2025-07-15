@@ -16,7 +16,6 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   createColumnHelper,
-  Row,
   SortingState,
   ColumnFiltersState,
 } from '@tanstack/react-table'
@@ -108,10 +107,17 @@ export default function EntanglementByGearPage() {
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor('EGNo', { header: 'EG No' }),
+      columnHelper.accessor('EGNo', {
+        header: 'EG No',
+        filterFn: 'includesString',
+      }),
       columnHelper.accessor('InjuryTypeDescription', {
         header: 'Injury Type',
         filterFn: 'arrIncludesSome',
+      }),
+      columnHelper.accessor('InjuryAccountDescription', {
+        header: 'Injury Account',
+        filterFn: 'equalsString',
       }),
       columnHelper.accessor('InjurySeverityDescription', {
         header: 'Severity',
@@ -120,15 +126,22 @@ export default function EntanglementByGearPage() {
       columnHelper.accessor('DetectionDate', {
         header: 'Detection Year',
         cell: (info) => new Date(info.getValue()).getFullYear(),
-        filterFn: (
-          row: Row<WhaleInjury>,
-          columnId: string,
-          value: [number, number]
-        ) => {
+        filterFn: (row, id, value) => {
           if (!value) return true
-          const year = new Date(row.getValue(columnId)).getFullYear()
-          const [min, max] = value
+          const year = new Date(row.getValue(id)).getFullYear()
+          const [min, max] = value as [number, number]
           return year >= min && year <= max
+        },
+      }),
+      columnHelper.accessor('InjuryAge', {
+        header: 'Age',
+        filterFn: (row, id, value) => {
+          if (!value) return true
+          const ageValue = row.getValue(id) as string | null
+          const age = ageValue ? parseInt(ageValue, 10) : null
+          if (age === null || isNaN(age)) return false
+          const [min, max] = value as [number, number]
+          return age >= min && age <= max
         },
       }),
       columnHelper.accessor('InjuryAgeClass', {
@@ -137,6 +150,107 @@ export default function EntanglementByGearPage() {
       }),
       columnHelper.accessor('GenderDescription', {
         header: 'Sex',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('Cow', {
+        header: 'Reproductive Female',
+        cell: (info) => (info.getValue() ? 'Yes' : 'No'),
+        filterFn: (row, id, value) => {
+          const rowValue = row.getValue(id) ? 'Yes' : 'No'
+          return rowValue === value
+        },
+      }),
+      columnHelper.accessor('UnusualMortalityEventDescription', {
+        header: 'UME Status',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('CountryOriginDescription', {
+        header: 'Injury Country Origin',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('GearOriginDescription', {
+        header: 'Gear Origin',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('GearComplexityDescription', {
+        header: 'Gear Complexity',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('ConstrictingWrap', {
+        header: 'Constricting Wrap',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
+      }),
+      columnHelper.accessor('Disentangled', {
+        header: 'Disentangled',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
+      }),
+      columnHelper.accessor('GearRetrieved', {
+        header: 'Gear Retrieved',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
+      }),
+      columnHelper.accessor('InjuryTimeFrame', {
+        header: 'Timeframe (days)',
+        filterFn: (row, id, value) => {
+          if (!value) return true
+          const timeframe = row.getValue(id) as number | null
+          if (timeframe === null || timeframe === undefined) return false
+          const [min, max] = value as [number, number]
+          return timeframe >= min && timeframe <= max
+        },
+      }),
+      columnHelper.accessor('LastSightedAliveDate', {
+        header: 'Last Sighted Alive Year',
+        cell: (info) =>
+          info.getValue() ? new Date(info.getValue()).getFullYear() : 'N/A',
+        filterFn: (row, id, value) => {
+          if (!value) return true
+          const dateVal = row.getValue(id) as string | null
+          if (!dateVal) return false
+          const year = new Date(dateVal).getFullYear()
+          const [min, max] = value as [number, number]
+          return year >= min && year <= max
+        },
+      }),
+      columnHelper.accessor('IsDead', {
+        header: 'Is Dead from Injury',
+        cell: (info) => (info.getValue() ? 'Yes' : 'No'),
+        filterFn: (row, id, value) => {
+          const rowValue = row.getValue(id) ? 'Yes' : 'No'
+          return rowValue === value
+        },
+      }),
+      columnHelper.accessor('DeathCauseDescription', {
+        header: 'Cause of Death',
         filterFn: 'equalsString',
       }),
     ],
