@@ -21,6 +21,11 @@ export default function Header() {
   const [isHeaderVisible, setIsHeaderVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
 
+  // Check for production environment
+  const isProduction =
+    process.env.NEXT_PUBLIC_RWANTHRO_BACKEND_BASE_URL &&
+    !process.env.NEXT_PUBLIC_RWANTHRO_BACKEND_BASE_URL.includes('stage')
+
   // Add scroll effect
   useEffect(() => {
     const handleScroll = () => {
@@ -140,7 +145,7 @@ export default function Header() {
           {isAuthenticated && canAccessAdmin() && (
             <Link
               target='_blank'
-              href={ RW_BACKEND_URL_CONFIG.ADMIN_URL }
+              href={RW_BACKEND_URL_CONFIG.ADMIN_URL}
               className={`${
                 topPath === 'admin'
                   ? 'text-blue-600 after:w-full'
@@ -153,18 +158,20 @@ export default function Header() {
         </nav>
 
         <div className='flex items-center gap-3 ml-auto'>
-          <button
-            onClick={() => {
-              if (isAuthenticated) {
-                clearToken()
-              } else {
-                redirect(RW_BACKEND_URL_CONFIG.COGNITO_REDIRECT_URL)
-              }
-            }}
-            className='whitespace-nowrap px-4 py-2 text-sm rounded-lg font-semibold text-white bg-blue-600 transition-all duration-300 hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5'
-          >
-            {isAuthenticated ? 'Sign Out' : 'Login'}
-          </button>
+          {(!isProduction || isAuthenticated) && (
+            <button
+              onClick={() => {
+                if (isAuthenticated) {
+                  clearToken()
+                } else {
+                  redirect(RW_BACKEND_URL_CONFIG.COGNITO_REDIRECT_URL)
+                }
+              }}
+              className='whitespace-nowrap px-4 py-2 text-sm rounded-lg font-semibold text-white bg-blue-600 transition-all duration-300 hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5'
+            >
+              {isAuthenticated ? 'Sign Out' : 'Login'}
+            </button>
+          )}
 
           {/* Mobile Menu Button */}
           <button
