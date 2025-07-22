@@ -113,17 +113,17 @@ export default function PublicChartsLayout({
     '/public-charts/injury-total': {
       title: 'Injury Total',
       description:
-        'North Atlantic right whale anthropogenic injuries detected by year for known, catalogued whales only. These data include anthropogenic injuries only and do not include those for which a source could not be identified. Additionally, data captured here are for catalogued right whales only. Injured whales that could not be identified are not included in these data. As such, data reported here represent an underestimate of true levels of injuries to right whales. These data are assessed on an annual basis once all sighting and photographic information have been received. As such, there is generally a two-year lag in data visualization.',
+        'North Atlantic right whale anthropogenic injuries detected by year for both known (catalogued) and unknown ID. These data include anthropogenic injuries only and do not include those injuries for which a source could not be identified. These data are assessed on an annual basis once all sighting and photographic information have been received. As such, there is generally a two-year lag in data visualization.',
     },
     '/public-charts/entanglement': {
       title: 'Entanglement',
       description: (
         <>
-          Detected entanglement events by type and severity for known,
-          catalogued whales only. Entanglements can be detected with attached
-          gear (i.e. Gear) or by wounds only and no attached gear (i.e. No
-          Gear). Severity is an assessment of the resulting entanglement injury
-          and is classified as Minor, Moderate, or Severe.
+          Detected entanglement events by type and severity for both known
+          (catalogued) and unknown ID. Entanglements can be detected with
+          attached gear (i.e. Gear) or by wounds only and no attached gear (i.e.
+          No Gear). Severity is an assessment of the resulting entanglement
+          injury and is classified as Minor, Moderate, or Severe.
           <br />
           <br />
           <ul className='list-disc list-inside'>
@@ -180,9 +180,9 @@ export default function PublicChartsLayout({
       title: 'Vessel Strike',
       description: (
         <>
-          Detected vessel strike events by type and severity for known,
-          catalogued whales only. Vessel strike types can include propeller cuts
-          (Prop), blunt force trauma (Blunt), large open wounds (Gash), and
+          Detected vessel strike events by type and severity for both known
+          (catalogued) and unknown ID. Vessel strike types can include propeller
+          cuts (Prop), blunt force trauma (Blunt), large open wounds (Gash), and
           others such as skeg wounds (Other). Severity is an assessment of the
           resulting vessel strike injury and is classified as Superficial
           (&lt;2cm penetrating depth), Shallow (2-8cm penetrating depth), or
@@ -192,13 +192,9 @@ export default function PublicChartsLayout({
           minimum of entanglement events and are likely an underestimate. <br />
           <br />
           <ol className='list-decimal list-inside'>
+            <li>Vessel strike injuries must be detected to be counted.</li>
             <li>
-              Unidentified whales with detected vessel strike injuries are not
-              included here.
-            </li>
-            <li>
-              Vessel strike injuries must be detected to be counted. Poor
-              quality, distant, and partial images of a whale as well as
+              Poor quality, distant, and partial images of a whale as well as
               undetected mortalities of a whale may preclude the detection of an
               injury.
             </li>

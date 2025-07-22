@@ -9,9 +9,16 @@ export default function Overview() {
         <p className='text-lg'>
           Beginning in 2013, The New England Aquarium initiated an effort to
           collaborate with survey teams to identify, report, and monitor
-          sightings of injured right whales in near real time. This effort
-          supports the National Marine Fisheries Service's revised process for
-          distinguishing serious from non-serious injuries in large whales.
+          sightings of injured right whales in near real time. Initially
+          developed to support the National Marine Fisheries Service&apos;s
+          revised process for distinguishing serious from non-serious injuries
+          in large whales, these efforts also support the ongoing North Atlantic
+          right whale Unusual Mortality Event (UME) that was initiated in 2017.
+          Additionally, because annual assessments of anthropogenic scars on
+          right whales only capture entanglement and vessel strike injuries for
+          known, cataloged right whales, these monitoring efforts have been
+          expanded to include anthropogenic injuries as well as significant
+          injuries of unknown origin for uncatalogued, unknown right whales.
         </p>
 
         <p className='text-lg'>
@@ -19,7 +26,7 @@ export default function Overview() {
           including:
         </p>
         <ul className='text-lg list-disc pl-8 mb-4'>
-          <li>Whale identification</li>
+          <li>Whale identification (if known)</li>
           <li>Injury type and severity</li>
           <li>Visual health assessment</li>
           <li>General case comments</li>
