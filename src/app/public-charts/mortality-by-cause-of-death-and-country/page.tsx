@@ -110,19 +110,16 @@ export default function MortalityByCauseAndCountry() {
     return result
   }, [data, yearRangeProps.yearRange])
 
-  const getTotalMortalities = useMemo(
-    () => (chartData: any[]) => {
-      const result = chartData.reduce(
+  const getTotalMortalities = useCallback(
+    (chartData: any[], hiddenSeries: Set<string>) => {
+      return chartData.reduce(
         (sum, item) =>
           sum +
-          Object.values(item).reduce(
-            (a: number, b: unknown) => (typeof b === 'number' ? a + b : a),
-            0
-          ) -
-          item.year,
+          Object.entries(item)
+            .filter(([key]) => key !== 'year' && !hiddenSeries.has(key))
+            .reduce((rowSum, [, value]) => rowSum + (value as number), 0),
         0
       )
-      return result
     },
     []
   )
@@ -221,7 +218,7 @@ export default function MortalityByCauseAndCountry() {
             yearRange[1]
           }.png`}
           yearRange={yearRange}
-          totalCount={getTotalMortalities(chartData.data)}
+          totalCount={getTotalMortalities(chartData.data, hiddenSeries)}
           loading={loading}
           error={error}
           description={`Data represents confirmed mortalities of North Atlantic Right Whales in ${country} by cause of death. Click on legend items or bars to focus on specific categories.`}
