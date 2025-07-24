@@ -113,14 +113,14 @@ export default function PublicChartsLayout({
     '/public-charts/injury-total': {
       title: 'Injury Total',
       description:
-        'North Atlantic right whale anthropogenic injuries detected by year for both known (catalogued) and unknown ID. These data include anthropogenic injuries only and do not include those injuries for which a source could not be identified. These data are assessed on an annual basis once all sighting and photographic information have been received. As such, there is generally a two-year lag in data visualization.',
+        'North Atlantic right whale anthropogenic injuries detected by year for both known (catalogued) and unknown ID whales. These data include anthropogenic injuries only and do not include those injuries for which a source could not be identified. These data are assessed on an annual basis once all sighting and photographic information have been received. As such, there is generally a two-year lag in data visualization.',
     },
     '/public-charts/entanglement': {
       title: 'Entanglement',
       description: (
         <>
           Detected entanglement events by type and severity for both known
-          (catalogued) and unknown ID. Entanglements can be detected with
+          (catalogued) and unknown ID whales. Entanglements can be detected with
           attached gear (i.e. Gear) or by wounds only and no attached gear (i.e.
           No Gear). Severity is an assessment of the resulting entanglement
           injury and is classified as Minor, Moderate, or Severe.
@@ -181,15 +181,16 @@ export default function PublicChartsLayout({
       description: (
         <>
           Detected vessel strike events by type and severity for both known
-          (catalogued) and unknown ID. Vessel strike types can include propeller
-          cuts (Prop), blunt force trauma (Blunt), large open wounds (Gash), and
-          others such as skeg wounds (Other). Severity is an assessment of the
-          resulting vessel strike injury and is classified as Superficial
-          (&lt;2cm penetrating depth), Shallow (2-8cm penetrating depth), or
-          Deep (&gt; 8cm penetrating depth). Because Blunt cases are almost
-          exclusively detected post-mortem, the severity for those cases is
-          listed as Blunt. For reasons outlined below, data here represent a
-          minimum of entanglement events and are likely an underestimate. <br />
+          (catalogued) and unknown ID whales. Vessel strike types can include
+          propeller cuts (Prop), blunt force trauma (Blunt), large open wounds
+          (Gash), and others such as skeg wounds (Other). Severity is an
+          assessment of the resulting vessel strike injury and is classified as
+          Superficial (&lt;2cm penetrating depth), Shallow (2-8cm penetrating
+          depth), or Deep (&gt; 8cm penetrating depth). Because Blunt cases are
+          almost exclusively detected post-mortem, the severity for those cases
+          is listed as Blunt. For reasons outlined below, data here represent a
+          minimum of vessel strike events and are likely an underestimate.{' '}
+          <br />
           <br />
           <ol className='list-decimal list-inside'>
             <li>Vessel strike injuries must be detected to be counted.</li>
