@@ -9,6 +9,7 @@ interface InjuryTableProps {
 }
 
 export const InjuryTable: React.FC<InjuryTableProps> = ({ table }) => {
+
   const getSortIcon = (isSorted: false | 'asc' | 'desc') => {
     if (!isSorted) return <ChevronUpDownIcon className='w-4 h-4 ml-1 inline' />
     if (isSorted === 'asc') return <ChevronUpIcon className='w-4 h-4 ml-1 inline' />

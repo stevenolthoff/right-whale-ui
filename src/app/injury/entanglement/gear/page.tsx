@@ -9,6 +9,7 @@ import { ChartLayout } from '@/app/components/charts/ChartLayout'
 import { WhaleInjury } from '@/app/types/whaleInjury'
 import { InjuryTable } from '@/app/components/injury/InjuryTable'
 import { InjuryTableFilters } from '@/app/components/injury/InjuryTableFilters'
+import { InjuryDownloadButton } from '@/app/components/injury/InjuryDownloadButton'
 import {
   useReactTable,
   getCoreRowModel,
@@ -19,6 +20,8 @@ import {
   SortingState,
   ColumnFiltersState,
 } from '@tanstack/react-table'
+
+import InjuryDetailsPopup from '@/app/components/injury/InjuryDetailsPopup'
 
 const columnHelper = createColumnHelper<WhaleInjury>()
 
@@ -105,15 +108,39 @@ export default function EntanglementByGearPage() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
+  const [selectedInjury, setSelectedInjury] = useState<WhaleInjury | null>(null)
+
   const columns = useMemo(
     () => [
+      columnHelper.accessor('CaseId', {
+        header: 'Case ID',
+        cell: (info) => (
+          <button
+            onClick={() => setSelectedInjury(info.row.original)}
+            className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+          >
+            {info.getValue()}
+          </button>
+        ),
+      }),
       columnHelper.accessor('EGNo', {
         header: 'EG No',
+        cell: (info) => {
+          const egNo = info.getValue()
+          if (!egNo) return null
+
+          return (
+            <a
+              href={`https://rwcatalog.neaq.org/#/whales/${egNo}`}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+            >
+              {egNo}
+            </a>
+          )
+        },
         filterFn: 'includesString',
-      }),
-      columnHelper.accessor('InjuryTypeDescription', {
-        header: 'Injury Type',
-        filterFn: 'arrIncludesSome',
       }),
       columnHelper.accessor('InjuryAccountDescription', {
         header: 'Injury Account',
@@ -311,15 +338,29 @@ export default function EntanglementByGearPage() {
           showTotal={false}
         />
       </ChartLayout>
-      <InjuryTableFilters
-        table={table}
-        data={entanglementData || []}
-        yearRange={yearRange}
-        setYearRange={setYearRange}
-        minYear={minYear}
-        maxYear={maxYear}
+      <div className='mt-8'>
+        <InjuryDownloadButton
+          table={table}
+          filename={`entanglement-by-gear-data-${yearRange[0]}-${yearRange[1]}.csv`}
+        />
+        <InjuryTableFilters
+          table={table}
+          data={entanglementData || []}
+          yearRange={yearRange}
+          setYearRange={setYearRange}
+          minYear={minYear}
+          maxYear={maxYear}
+        />
+        <div className='mt-4'>
+          <InjuryTable table={table} />
+        </div>
+      </div>
+      <InjuryDetailsPopup
+        injuryData={selectedInjury}
+        isOpen={selectedInjury !== null}
+        onClose={() => setSelectedInjury(null)}
+        context='entanglement'
       />
-      <InjuryTable table={table} />
     </div>
   )
 } 

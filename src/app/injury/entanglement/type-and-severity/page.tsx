@@ -10,6 +10,7 @@ import { ExportChart } from '@/app/components/monitoring/ExportChart'
 import ChartAttribution from '@/app/components/charts/ChartAttribution'
 import { InjuryTable } from '@/app/components/injury/InjuryTable'
 import { InjuryTableFilters } from '@/app/components/injury/InjuryTableFilters'
+import { InjuryDownloadButton } from '@/app/components/injury/InjuryDownloadButton'
 import {
   useReactTable,
   getCoreRowModel,
@@ -21,6 +22,8 @@ import {
   ColumnFiltersState,
 } from '@tanstack/react-table'
 import { WhaleInjury } from '@/app/types/whaleInjury'
+
+import InjuryDetailsPopup from '@/app/components/injury/InjuryDetailsPopup'
 
 const columnHelper = createColumnHelper<WhaleInjury>()
 
@@ -141,15 +144,39 @@ export default function EntanglementTypeAndSeverity() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
+  const [selectedInjury, setSelectedInjury] = useState<WhaleInjury | null>(null)
+
   const columns = useMemo(
     () => [
+      columnHelper.accessor('CaseId', {
+        header: 'Case ID',
+        cell: (info) => (
+          <button
+            onClick={() => setSelectedInjury(info.row.original)}
+            className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+          >
+            {info.getValue()}
+          </button>
+        ),
+      }),
       columnHelper.accessor('EGNo', {
         header: 'EG No',
+        cell: (info) => {
+          const egNo = info.getValue()
+          if (!egNo) return null
+
+          return (
+            <a
+              href={`https://rwcatalog.neaq.org/#/whales/${egNo}`}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+            >
+              {egNo}
+            </a>
+          )
+        },
         filterFn: 'includesString',
-      }),
-      columnHelper.accessor('InjuryTypeDescription', {
-        header: 'Injury Type',
-        filterFn: 'arrIncludesSome',
       }),
       columnHelper.accessor('InjuryAccountDescription', {
         header: 'Injury Account',
@@ -393,6 +420,10 @@ export default function EntanglementTypeAndSeverity() {
         <ChartAttribution />
       </div>
       <div className='mt-8'>
+        <InjuryDownloadButton
+          table={table}
+          filename={`entanglement-by-type-severity-data-${yearRangeProps.yearRange[0]}-${yearRangeProps.yearRange[1]}.csv`}
+        />
         <InjuryTableFilters
           table={table}
           data={entanglementData || []}
@@ -405,6 +436,12 @@ export default function EntanglementTypeAndSeverity() {
           <InjuryTable table={table} />
         </div>
       </div>
+      <InjuryDetailsPopup
+        injuryData={selectedInjury}
+        isOpen={selectedInjury !== null}
+        onClose={() => setSelectedInjury(null)}
+        context='entanglement'
+      />
     </div>
   )
 } 

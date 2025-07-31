@@ -23,28 +23,49 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       title: 'Introduction to the Data',
       description: (
         <div className='space-y-4'>
-          <h2 className='text-xl font-semibold text-gray-800 mb-4'>
-            Data Sources and Methodology
-          </h2>
           <p className='text-lg text-gray-700 leading-relaxed'>
             The ability to monitor North Atlantic right whale anthropogenic
-            injuries and their impacts is entirely dependent on the North
-            Atlantic Right Whale Consortium Identification Database (Catalog),
-            curated by the Anderson Cabot Center for Ocean Life at the New
-            England Aquarium and supported by decades of dedication by field
-            survey teams, researchers, and managers throughout the range of this
-            species.
+            injuries and their impacts is entirely dependent on the{' '}
+            <a
+              href='http://www.narwc.org'
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-blue-600 hover:text-blue-800 underline'
+            >
+              North Atlantic Right Whale Consortium
+            </a>{' '}
+            Identification Database (Catalog), curated by the Kraus Marine
+            Mammal Conservation Program in the{' '}
+            <a
+              href='https://www.neaq.org/conservation-and-research/anderson-cabot-center-for-ocean-life/'
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-blue-600 hover:text-blue-800 underline'
+            >
+              Anderson Cabot Center for Ocean Life
+            </a>{' '}
+            at the{' '}
+            <a
+              href='http://www.neaq.org'
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-blue-600 hover:text-blue-800 underline'
+            >
+              New England Aquarium
+            </a>{' '}
+            and supported by decades of dedication by field survey teams,
+            researchers, and managers throughout the range of this species.
           </p>
           <p className='text-lg text-gray-700 leading-relaxed'>
-            Since 1998, the New England Aquarium has carried out annual
-            assessments of entanglement and vessel strike injuries to North
-            Atlantic right whales. These assessments are comprehensive and
+            Since 1998, researchers at the New England Aquarium have carried out
+            annual assessments of entanglement and vessel strike injuries to
+            North Atlantic right whales. These assessments are comprehensive and
             include visual inspection of imagery from all sightings of known
             right whales to detect and evaluate indicators of injury presence
             and characteristics, as well as an evaluation of ancillary data
-            associated with these injuries (e.g. gear and vessel forensics,
-            injury response information, injury outcome, etc). These annual
-            assessments are completed once all right whale data have been
+            associated with these injuries (e.g. fishing gear and vessel
+            forensics, event response information, whale outcome, etc). These
+            annual assessments are completed once all right whale data have been
             received and processed for a given year and as such, there is
             generally a two-year lag in these assessments. Additionally, these
             injury assessments are completed only for cataloged individuals and
@@ -53,32 +74,63 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </p>
           <p className='text-lg text-gray-700 leading-relaxed'>
             In addition to annual assessment of entanglements and vessel strikes
-            described above, the New England Aquarium initiated efforts in 2013
-            to collaborate with survey teams to identify, report, and monitor
-            sightings of injured right whales in near real-time. These efforts
-            include assessments of all sighted right whales, both cataloged and
-            not, for entanglement and vessel strike injuries, as well as
-            injuries of unknown origin with the potential to impact right whale
-            health and survival. These data are updated upon receipt of new
-            and/or additional imagery and injury related information.
-            Additionally, historical sightings of injured non-cataloged right
-            whales not captured elsewhere are included in these monitoring
-            efforts.
+            described above, researchers at the New England Aquarium initiated
+            efforts in 2013 to collaborate with survey teams to identify,
+            report, and monitor sightings of injured right whales in near
+            real-time. These efforts include assessments of all sighted right
+            whales, both cataloged and not, for entanglement and vessel strike
+            injuries, as well as injuries of unknown origin with the potential
+            to impact right whale health and survival. These data are updated
+            upon receipt of new and/or additional imagery and injury related
+            information. Additionally, historical sightings of injured
+            non-cataloged right whales not captured elsewhere are included in
+            these monitoring efforts.
           </p>
           <p className='text-lg text-gray-700 leading-relaxed'>
             North Atlantic right whale injury data accessible here represent a
             combination of annual entanglement and vessel strike injury
             assessments and near real-time monitoring efforts and are meant to
             provide comprehensive injury information and context to the state of
-            human impacts on the species. Information presented here represents
-            the best available data at the time of visualization and may update
-            as more information becomes available.
+            human impacts on the species. For reasons outlined below, data here
+            represent a minimum of injury events and are likely underestimates.
+          </p>
+          <ul className='text-lg text-gray-700 leading-relaxed space-y-2 ml-6 list-disc'>
+            <li>Injuries must be detected to be counted.</li>
+            <li>
+              Poor quality, distant, and partial images of a whale as well as
+              undetected mortalities of a whale may preclude the detection of an
+              injury.
+            </li>
+            <li>
+              There is generally a 2 year delay in the annual assessment data
+              and therefore injury data displayed in visualizations and tables
+              for the last two completed calendar years and forward should be
+              considered a minimum number and underestimate of total injuries.
+            </li>
+          </ul>
+          <p className='text-lg text-gray-700 leading-relaxed'>
+            Information presented in these injury page visualizations and data
+            represents the best available data at the time of visualization and
+            may be updated as more information becomes available.
           </p>
           <p className='text-lg text-gray-700 leading-relaxed'>
             Because systematic surveys for North Atlantic right whales began in
             the early 1980s, graphs presented on this site default to a 1980
             start year. Users can select prior years using the sliding year
             range bar if desired.
+          </p>
+          <p className='text-lg text-gray-700 leading-relaxed'>
+            Data and visualizations available here may not be used or shared
+            without an approved data access request from the{' '}
+            <a
+              href='http://www.narwc.org'
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-blue-600 hover:text-blue-800 underline'
+            >
+              North Atlantic Right Whale Consortium
+            </a>
+            .
           </p>
         </div>
       ),
@@ -174,10 +226,45 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <p>
             Detected entanglement events for North Atlantic right whales by type
             and severity for both known (cataloged) and unknown ID whales.
-            Entanglements can be detected with attached gear (i.e. Gear) or by
-            wounds only and no attached gear (i.e. No Gear). Severity is an
-            assessment of the resulting entanglement injury and is classified as
-            Minor, Moderate, or Severe.
+            Entanglements can be detected with attached gear (i.e.{' '}
+            <span className='font-mono'>Gear</span>) or by wounds only and no
+            attached gear (i.e. <span className='font-mono'>No Gear</span>).
+            Severity is an assessment of the resulting entanglement injury and
+            is classified as <strong>Minor</strong>, <strong>Moderate</strong>,
+            or <strong>Severe</strong>:
+          </p>
+          <ul className='ml-6 list-disc space-y-1'>
+            <li>
+              <strong>Minor:</strong> Injuries or scars in the skin that were
+              less than ~2cm in width and did not appear to penetrate into the
+              blubber.
+            </li>
+            <li>
+              <strong>Moderate:</strong> Injuries or scars that were greater
+              than ~2cm in width, and/or between 2 and ~8cm in depth. This would
+              include injuries that extend into the blubber (hypodermis layer).
+            </li>
+            <li>
+              <strong>Severe:</strong> Injuries that were greater than ~8cm in
+              depth and/or are known to extend into bone or muscle. This also
+              includes cases of significant deformity or discoloration of fluke
+              or flipper, for example a twisted fluke caused by torquing by
+              rope/gear. A discolored appendage can indicate circulation
+              impairment even in cases in which the entanglement itself is not
+              visible.
+            </li>
+          </ul>
+          <p>
+            See{' '}
+            <a
+              href='https://conbio.onlinelibrary.wiley.com/doi/full/10.1111/cobi.12590'
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-blue-600 hover:text-blue-800 underline'
+            >
+              Knowlton et al 2016
+            </a>{' '}
+            for additional information.
           </p>
         </div>
       ),
@@ -231,9 +318,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       description: (
         <div className='space-y-4'>
           <p>
-            Entanglement events for North Atlantic right whales by age group,
-            categorized by the diameter of the rope involved in the
-            entanglement.
+            Rope diameters of attached gear for North Atlantic right whale
+            entanglement cases by age of whale. Not all entangled whales have
+            attached gear and not all attached gear is retrieved off of
+            entangled whales. Cases with multiple rope types have each
+            represented in the graph. Case details can be viewed via the
+            interactive data table to see specific information related to rope
+            diameter for each.
           </p>
         </div>
       ),

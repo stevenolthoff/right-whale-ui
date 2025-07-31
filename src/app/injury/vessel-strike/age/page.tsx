@@ -11,6 +11,7 @@ import ChartAttribution from '@/app/components/charts/ChartAttribution'
 import { ExportChart } from '@/app/components/monitoring/ExportChart'
 import { InjuryTable } from '@/app/components/injury/InjuryTable'
 import { InjuryTableFilters } from '@/app/components/injury/InjuryTableFilters'
+import { InjuryDownloadButton } from '@/app/components/injury/InjuryDownloadButton'
 import {
   useReactTable,
   getCoreRowModel,
@@ -23,10 +24,27 @@ import {
 } from '@tanstack/react-table'
 import { WhaleInjury } from '@/app/types/whaleInjury'
 
+import InjuryDetailsPopup from '@/app/components/injury/InjuryDetailsPopup'
+
 const columnHelper = createColumnHelper<WhaleInjury>()
 
 // Constant for bin order in the chart, bottom to top
 const AGE_CLASS_ORDER = ['C', 'J', 'A', 'Unknown']
+
+const mapAgeClassToAbbreviation = (ageClass: string | null): string => {
+  if (!ageClass) return 'Unknown'
+  const trimmedAgeClass = ageClass.trim().toLowerCase()
+  switch (trimmedAgeClass) {
+    case 'calf':
+      return 'C'
+    case 'juvenile':
+      return 'J'
+    case 'adult':
+      return 'A'
+    default:
+      return 'Unknown'
+  }
+}
 
 export default function VesselStrikeByAgePage() {
   const chartRef = useRef<HTMLDivElement>(null)
@@ -59,10 +77,7 @@ export default function VesselStrikeByAgePage() {
 
     yearFilteredData.forEach((item) => {
       const year = new Date(item.DetectionDate).getFullYear()
-      let ageClass = item.InjuryAgeClass || 'Unknown'
-      if (!AGE_CLASS_ORDER.includes(ageClass)) {
-        ageClass = 'Unknown'
-      }
+      const ageClass = mapAgeClassToAbbreviation(item.InjuryAgeClass)
 
       if (!yearData.has(year)) {
         const initialBins: Record<string, number> = {}
@@ -91,27 +106,53 @@ export default function VesselStrikeByAgePage() {
     return chartData.reduce(
       (sum, item) =>
         sum +
-        Object.values(item).reduce(
-          (acc: number, val) => (typeof val === 'number' ? acc + val : acc),
-          0
-        ) -
-        item.year,
+        Object.entries(item)
+          .filter(([key]) => key !== 'year' && !hiddenSeries.has(key))
+          .reduce(
+            (rowSum, [, value]) =>
+              rowSum + (typeof value === 'number' ? value : 0),
+            0
+          ),
       0
     )
-  }, [chartData])
+  }, [chartData, hiddenSeries])
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
+  const [selectedInjury, setSelectedInjury] = useState<WhaleInjury | null>(null)
+
   const columns = useMemo(
     () => [
+      columnHelper.accessor('CaseId', {
+        header: 'Case ID',
+        cell: (info) => (
+          <button
+            onClick={() => setSelectedInjury(info.row.original)}
+            className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+          >
+            {info.getValue()}
+          </button>
+        ),
+      }),
       columnHelper.accessor('EGNo', {
         header: 'EG No',
+        cell: (info) => {
+          const egNo = info.getValue()
+          if (!egNo) return null
+
+          return (
+            <a
+              href={`https://rwcatalog.neaq.org/#/whales/${egNo}`}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+            >
+              {egNo}
+            </a>
+          )
+        },
         filterFn: 'includesString',
-      }),
-      columnHelper.accessor('InjuryTypeDescription', {
-        header: 'Injury Type',
-        filterFn: 'arrIncludesSome',
       }),
       columnHelper.accessor('InjuryAccountDescription', {
         header: 'Injury Account',
@@ -165,56 +206,6 @@ export default function VesselStrikeByAgePage() {
       columnHelper.accessor('CountryOriginDescription', {
         header: 'Injury Country Origin',
         filterFn: 'equalsString',
-      }),
-      columnHelper.accessor('GearOriginDescription', {
-        header: 'Gear Origin',
-        filterFn: 'equalsString',
-      }),
-      columnHelper.accessor('GearComplexityDescription', {
-        header: 'Gear Complexity',
-        filterFn: 'equalsString',
-      }),
-      columnHelper.accessor('ConstrictingWrap', {
-        header: 'Constricting Wrap',
-        cell: (info) =>
-          info.getValue() === 'Y'
-            ? 'Yes'
-            : info.getValue() === 'N'
-            ? 'No'
-            : 'Unknown',
-        filterFn: (row, id, value) => {
-          const val = row.getValue(id)
-          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
-          return strVal === value
-        },
-      }),
-      columnHelper.accessor('Disentangled', {
-        header: 'Disentangled',
-        cell: (info) =>
-          info.getValue() === 'Y'
-            ? 'Yes'
-            : info.getValue() === 'N'
-            ? 'No'
-            : 'Unknown',
-        filterFn: (row, id, value) => {
-          const val = row.getValue(id)
-          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
-          return strVal === value
-        },
-      }),
-      columnHelper.accessor('GearRetrieved', {
-        header: 'Gear Retrieved',
-        cell: (info) =>
-          info.getValue() === 'Y'
-            ? 'Yes'
-            : info.getValue() === 'N'
-            ? 'No'
-            : 'Unknown',
-        filterFn: (row, id, value) => {
-          const val = row.getValue(id)
-          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
-          return strVal === value
-        },
       }),
       columnHelper.accessor('InjuryTimeFrame', {
         header: 'Timeframe (days)',
@@ -360,6 +351,10 @@ export default function VesselStrikeByAgePage() {
         <ChartAttribution />
       </div>
       <div className='mt-8'>
+        <InjuryDownloadButton
+          table={table}
+          filename={`vessel-strike-by-age-data-${yearRange[0]}-${yearRange[1]}.csv`}
+        />
         <InjuryTableFilters
           table={table}
           data={vesselStrikeData || []}
@@ -372,6 +367,12 @@ export default function VesselStrikeByAgePage() {
           <InjuryTable table={table} />
         </div>
       </div>
+      <InjuryDetailsPopup
+        injuryData={selectedInjury}
+        isOpen={selectedInjury !== null}
+        onClose={() => setSelectedInjury(null)}
+        context='vessel-strike'
+      />
     </div>
   )
 } 
