@@ -190,6 +190,11 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = React.useState(true)
 
+  const existingColumnIds = React.useMemo(
+    () => new Set(table.getAllColumns().map((c) => c.id)),
+    [table]
+  )
+
   const filterOptions = React.useMemo(() => {
     const options: Record<string, Set<string>> = {
       InjuryTypeDescription: new Set(),
@@ -318,8 +323,10 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
       {isExpanded && (
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
           {filtersConfig.map(({ id, label, type, isMulti }) => {
-            const column = table.getColumn(id)
-            if (!column) return null
+            if (!existingColumnIds.has(id)) {
+              return null
+            }
+            const column = table.getColumn(id)!
             return (
               <div key={id}>
                 <label className='text-xs font-medium text-gray-500 uppercase'>

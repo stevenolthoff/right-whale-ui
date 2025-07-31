@@ -1,7 +1,7 @@
 export interface WhaleInjury {
   RecordId: string
   RecordTypeCode: string
-  InjuryId: number
+  InjuryId: number | null
   EGNo: string
   CaseId: number | null
   BatchId: number

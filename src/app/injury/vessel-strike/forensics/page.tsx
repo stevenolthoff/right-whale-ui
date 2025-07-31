@@ -11,6 +11,7 @@ import ChartAttribution from '@/app/components/charts/ChartAttribution'
 import { WhaleInjury } from '@/app/types/whaleInjury'
 import { InjuryTable } from '@/app/components/injury/InjuryTable'
 import { InjuryTableFilters } from '@/app/components/injury/InjuryTableFilters'
+import { InjuryDownloadButton } from '@/app/components/injury/InjuryDownloadButton'
 import {
   useReactTable,
   getCoreRowModel,
@@ -21,6 +22,8 @@ import {
   SortingState,
   ColumnFiltersState,
 } from '@tanstack/react-table'
+
+import InjuryDetailsPopup from '@/app/components/injury/InjuryDetailsPopup'
 
 const columnHelper = createColumnHelper<WhaleInjury>()
 
@@ -178,15 +181,39 @@ export default function VesselStrikeForensicsPage() {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
+  const [selectedInjury, setSelectedInjury] = useState<WhaleInjury | null>(null)
+
   const columns = useMemo(
     () => [
+      columnHelper.accessor('CaseId', {
+        header: 'Case ID',
+        cell: (info) => (
+          <button
+            onClick={() => setSelectedInjury(info.row.original)}
+            className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+          >
+            {info.getValue()}
+          </button>
+        ),
+      }),
       columnHelper.accessor('EGNo', {
         header: 'EG No',
+        cell: (info) => {
+          const egNo = info.getValue()
+          if (!egNo) return null
+
+          return (
+            <a
+              href={`https://rwcatalog.neaq.org/#/whales/${egNo}`}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+            >
+              {egNo}
+            </a>
+          )
+        },
         filterFn: 'includesString',
-      }),
-      columnHelper.accessor('InjuryTypeDescription', {
-        header: 'Injury Type',
-        filterFn: 'arrIncludesSome',
       }),
       columnHelper.accessor('InjuryAccountDescription', {
         header: 'Injury Account',
@@ -240,56 +267,6 @@ export default function VesselStrikeForensicsPage() {
       columnHelper.accessor('CountryOriginDescription', {
         header: 'Injury Country Origin',
         filterFn: 'equalsString',
-      }),
-      columnHelper.accessor('GearOriginDescription', {
-        header: 'Gear Origin',
-        filterFn: 'equalsString',
-      }),
-      columnHelper.accessor('GearComplexityDescription', {
-        header: 'Gear Complexity',
-        filterFn: 'equalsString',
-      }),
-      columnHelper.accessor('ConstrictingWrap', {
-        header: 'Constricting Wrap',
-        cell: (info) =>
-          info.getValue() === 'Y'
-            ? 'Yes'
-            : info.getValue() === 'N'
-            ? 'No'
-            : 'Unknown',
-        filterFn: (row, id, value) => {
-          const val = row.getValue(id)
-          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
-          return strVal === value
-        },
-      }),
-      columnHelper.accessor('Disentangled', {
-        header: 'Disentangled',
-        cell: (info) =>
-          info.getValue() === 'Y'
-            ? 'Yes'
-            : info.getValue() === 'N'
-            ? 'No'
-            : 'Unknown',
-        filterFn: (row, id, value) => {
-          const val = row.getValue(id)
-          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
-          return strVal === value
-        },
-      }),
-      columnHelper.accessor('GearRetrieved', {
-        header: 'Gear Retrieved',
-        cell: (info) =>
-          info.getValue() === 'Y'
-            ? 'Yes'
-            : info.getValue() === 'N'
-            ? 'No'
-            : 'Unknown',
-        filterFn: (row, id, value) => {
-          const val = row.getValue(id)
-          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
-          return strVal === value
-        },
       }),
       columnHelper.accessor('InjuryTimeFrame', {
         header: 'Timeframe (days)',
@@ -433,6 +410,10 @@ export default function VesselStrikeForensicsPage() {
         <ChartAttribution />
       </div>
       <div className='mt-8'>
+        <InjuryDownloadButton
+          table={table}
+          filename={`vessel-strike-forensics-data-${yearRangeProps.yearRange[0]}-${yearRangeProps.yearRange[1]}.csv`}
+        />
         <InjuryTableFilters
           table={table}
           data={vesselStrikeData || []}
@@ -445,6 +426,12 @@ export default function VesselStrikeForensicsPage() {
           <InjuryTable table={table} />
         </div>
       </div>
+      <InjuryDetailsPopup
+        injuryData={selectedInjury}
+        isOpen={selectedInjury !== null}
+        onClose={() => setSelectedInjury(null)}
+        context='vessel-strike'
+      />
     </div>
   )
 } 

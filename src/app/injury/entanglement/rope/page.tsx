@@ -7,6 +7,7 @@ import { ChartLayout } from '@/app/components/charts/ChartLayout'
 import { WhaleInjury } from '@/app/types/whaleInjury'
 import { InjuryTable } from '@/app/components/injury/InjuryTable'
 import { InjuryTableFilters } from '@/app/components/injury/InjuryTableFilters'
+import { InjuryDownloadButton } from '@/app/components/injury/InjuryDownloadButton'
 import {
   useReactTable,
   getCoreRowModel,
@@ -19,20 +20,35 @@ import {
 } from '@tanstack/react-table'
 import { useYearRange } from '@/app/hooks/useYearRange'
 
+import InjuryDetailsPopup from '@/app/components/injury/InjuryDetailsPopup'
+
 const columnHelper = createColumnHelper<WhaleInjury>()
 
 const AGE_GROUPS_ORDER = ['0-2yr', '3-5yr', '6-8yr', '9+yr', 'Unknown']
 const ROPE_DIAMETER_ORDER = ['<7/16", 11mm', '> 1/2", 12mm', 'Other', 'Unknown']
 
-const getAgeGroup = (ageStr: string | null): string => {
-  if (ageStr === null || ageStr === undefined) return 'Unknown'
-  const age = parseInt(ageStr, 10)
-  if (isNaN(age)) return 'Unknown'
+const getAgeGroup = (
+  ageStr: string | null,
+  ageClassStr: string | null
+): string => {
+  if (ageStr !== null && ageStr !== undefined) {
+    const age = parseInt(ageStr.trim(), 10)
+    if (!isNaN(age)) {
+      if (age <= 2) return '0-2yr'
+      if (age <= 5) return '3-5yr'
+      if (age <= 8) return '6-8yr'
+      if (age >= 9) return '9+yr'
+    }
+  }
 
-  if (age <= 2) return '0-2yr'
-  if (age <= 5) return '3-5yr'
-  if (age <= 8) return '6-8yr'
-  if (age >= 9) return '9+yr'
+  if (ageClassStr) {
+    const trimmedAgeClass = ageClassStr.trim().toLowerCase()
+    if (trimmedAgeClass === 'adult' || trimmedAgeClass === 'a') {
+      return '9+yr'
+    } else if (trimmedAgeClass === 'calf' || trimmedAgeClass === 'c') {
+      return '0-2yr'
+    }
+  }
 
   return 'Unknown'
 }
@@ -57,14 +73,15 @@ const getRopeDiameterGroup = (
   if (!diameters || diameters.length === 0) {
     return 'Unknown'
   }
-  const desc = diameters[0].RopeDiameterDescription
+  const desc = (diameters[0].RopeDiameterDescription || '').trim()
+
   if (smallRopeValues.includes(desc)) {
     return '<7/16", 11mm'
   }
   if (largeRopeValues.includes(desc)) {
     return '> 1/2", 12mm'
   }
-  if (desc && desc.trim() !== '') {
+  if (desc !== '') {
     return 'Other'
   }
   return 'Unknown'
@@ -73,11 +90,14 @@ const getRopeDiameterGroup = (
 export default function EntanglementByRopeAndAgePage() {
   const chartRef = useRef<HTMLDivElement>(null)
   const { data: allData, loading, error } = useWhaleInjuryDataStore()
+  const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
 
   const entanglementData = useMemo(() => {
     if (!allData) return []
     return allData.filter(
-      (item) => item.InjuryTypeDescription === 'Entanglement'
+      (item) =>
+        item.InjuryTypeDescription === 'Entanglement' &&
+        item.InjuryAccountDescription === 'Gear'
     )
   }, [allData])
 
@@ -99,7 +119,7 @@ export default function EntanglementByRopeAndAgePage() {
     })
 
     entanglementData.forEach((item: WhaleInjury) => {
-      const ageGroup = getAgeGroup(item.InjuryAge)
+      const ageGroup = getAgeGroup(item.InjuryAge, item.InjuryAgeClass)
       const ropeGroup = getRopeDiameterGroup(item.RopeDiameters)
       if (
         ageGroupData[ageGroup] &&
@@ -119,26 +139,53 @@ export default function EntanglementByRopeAndAgePage() {
     return chartData.reduce(
       (sum, item) =>
         sum +
-        Object.values(item).reduce(
-          (acc, val) => (typeof val === 'number' ? acc + val : acc),
-          0
-        ),
+        Object.entries(item)
+          .filter(([key]) => key !== 'ageGroup' && !hiddenSeries.has(key))
+          .reduce(
+            (rowSum, [, value]) =>
+              rowSum + (typeof value === 'number' ? value : 0),
+            0
+          ),
       0
     )
-  }, [chartData])
+  }, [chartData, hiddenSeries])
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
+  const [selectedInjury, setSelectedInjury] = useState<WhaleInjury | null>(null)
+
   const columns = useMemo(
     () => [
+      columnHelper.accessor('CaseId', {
+        header: 'Case ID',
+        cell: (info) => (
+          <button
+            onClick={() => setSelectedInjury(info.row.original)}
+            className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+          >
+            {info.getValue()}
+          </button>
+        ),
+      }),
       columnHelper.accessor('EGNo', {
         header: 'EG No',
+        cell: (info) => {
+          const egNo = info.getValue()
+          if (!egNo) return null
+
+          return (
+            <a
+              href={`https://rwcatalog.neaq.org/#/whales/${egNo}`}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+            >
+              {egNo}
+            </a>
+          )
+        },
         filterFn: 'includesString',
-      }),
-      columnHelper.accessor('InjuryTypeDescription', {
-        header: 'Injury Type',
-        filterFn: 'arrIncludesSome',
       }),
       columnHelper.accessor('InjuryAccountDescription', {
         header: 'Injury Account',
@@ -324,17 +371,33 @@ export default function EntanglementByRopeAndAgePage() {
           yAxisLabel='Number of Entanglements'
           customOrder={ROPE_DIAMETER_ORDER}
           showTotal={false}
+          hiddenSeries={hiddenSeries}
+          onHiddenSeriesChange={setHiddenSeries}
         />
       </ChartLayout>
-      <InjuryTableFilters
-        table={table}
-        data={entanglementData || []}
-        yearRange={yearRange}
-        setYearRange={setYearRange}
-        minYear={minYear}
-        maxYear={maxYear}
+      <div className='mt-8'>
+        <InjuryDownloadButton
+          table={table}
+          filename={`entanglement-by-rope-and-age-data-${yearRange[0]}-${yearRange[1]}.csv`}
+        />
+        <InjuryTableFilters
+          table={table}
+          data={entanglementData || []}
+          yearRange={yearRange}
+          setYearRange={setYearRange}
+          minYear={minYear}
+          maxYear={maxYear}
+        />
+        <div className='mt-4'>
+          <InjuryTable table={table} />
+        </div>
+      </div>
+      <InjuryDetailsPopup
+        injuryData={selectedInjury}
+        isOpen={selectedInjury !== null}
+        onClose={() => setSelectedInjury(null)}
+        context='entanglement'
       />
-      <InjuryTable table={table} />
     </div>
   )
 }

@@ -11,6 +11,7 @@ import ChartAttribution from '@/app/components/charts/ChartAttribution'
 import { ExportChart } from '@/app/components/monitoring/ExportChart'
 import { InjuryTable } from '@/app/components/injury/InjuryTable'
 import { InjuryTableFilters } from '@/app/components/injury/InjuryTableFilters'
+import { InjuryDownloadButton } from '@/app/components/injury/InjuryDownloadButton'
 import {
   useReactTable,
   getCoreRowModel,
@@ -22,6 +23,8 @@ import {
   ColumnFiltersState,
 } from '@tanstack/react-table'
 import { WhaleInjury } from '@/app/types/whaleInjury'
+
+import InjuryDetailsPopup from '@/app/components/injury/InjuryDetailsPopup'
 
 const columnHelper = createColumnHelper<WhaleInjury>()
 
@@ -118,27 +121,53 @@ export default function EntanglementTimeframePage() {
     return chartData.reduce(
       (sum, item) =>
         sum +
-        Object.values(item).reduce(
-          (acc: number, val) => (typeof val === 'number' ? acc + val : acc),
-          0
-        ) -
-        item.year,
+        Object.entries(item)
+          .filter(([key]) => key !== 'year' && !hiddenSeries.has(key))
+          .reduce(
+            (rowSum, [, value]) =>
+              rowSum + (typeof value === 'number' ? value : 0),
+            0
+          ),
       0
     )
-  }, [chartData])
+  }, [chartData, hiddenSeries])
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
+  const [selectedInjury, setSelectedInjury] = useState<WhaleInjury | null>(null)
+
   const columns = useMemo(
     () => [
+      columnHelper.accessor('CaseId', {
+        header: 'Case ID',
+        cell: (info) => (
+          <button
+            onClick={() => setSelectedInjury(info.row.original)}
+            className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+          >
+            {info.getValue()}
+          </button>
+        ),
+      }),
       columnHelper.accessor('EGNo', {
         header: 'EG No',
+        cell: (info) => {
+          const egNo = info.getValue()
+          if (!egNo) return null
+
+          return (
+            <a
+              href={`https://rwcatalog.neaq.org/#/whales/${egNo}`}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+            >
+              {egNo}
+            </a>
+          )
+        },
         filterFn: 'includesString',
-      }),
-      columnHelper.accessor('InjuryTypeDescription', {
-        header: 'Injury Type',
-        filterFn: 'arrIncludesSome',
       }),
       columnHelper.accessor('InjuryAccountDescription', {
         header: 'Injury Account',
@@ -387,6 +416,10 @@ export default function EntanglementTimeframePage() {
         <ChartAttribution />
       </div>
       <div className='mt-8'>
+        <InjuryDownloadButton
+          table={table}
+          filename={`entanglement-timeframe-data-${yearRange[0]}-${yearRange[1]}.csv`}
+        />
         <InjuryTableFilters
           table={table}
           data={entanglementData || []}
@@ -399,6 +432,12 @@ export default function EntanglementTimeframePage() {
           <InjuryTable table={table} />
         </div>
       </div>
+      <InjuryDetailsPopup
+        injuryData={selectedInjury}
+        isOpen={selectedInjury !== null}
+        onClose={() => setSelectedInjury(null)}
+        context='entanglement'
+      />
     </div>
   )
 }
