@@ -4,12 +4,20 @@ import {
   XMarkIcon,
   ArrowsPointingOutIcon,
   ArrowsPointingInIcon,
+  ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline'
 import axios from 'axios'
 import { useAuthStore } from '@/app/store/auth'
 import { usePopupExpandStore } from '@/app/stores/usePopupExpandStore'
 import { RW_BACKEND_URL_CONFIG, url_join } from '@/app/config'
 import { Loader } from '@/app/components/ui/Loader'
+
+interface ImageMetadata {
+  monitorImageId: number
+  fileName: string
+  contentType: string
+  createdDate: string
+}
 
 interface AssessmentPagination {
   next: string | null
@@ -59,6 +67,173 @@ interface CaseCommentResponse {
 
 interface CaseDetailsContentProps {
   caseData: InjuryCase
+}
+
+const ImagesContent: React.FC<{ caseData: InjuryCase }> = ({ caseData }) => {
+  const [images, setImages] = useState<ImageMetadata[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { token } = useAuthStore()
+
+  useEffect(() => {
+    if (!caseData.CaseId) return
+
+    const fetchImageMetadata = async () => {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const url = url_join(
+          RW_BACKEND_URL_CONFIG.BASE_URL,
+          `/anthro/api/v1/monitoring_cases/${caseData.CaseId}/images/`
+        )
+        const response = await axios.get<{ images: ImageMetadata[] }>(url, {
+          headers: { Authorization: `token ${token}` },
+        })
+        setImages(response.data.images)
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'Failed to fetch image metadata.'
+        )
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchImageMetadata()
+  }, [caseData.CaseId, token])
+
+  const handleDownloadAll = async () => {
+    if (!caseData.CaseId || images.length === 0) return
+
+    for (const image of images) {
+      try {
+        const url = url_join(
+          RW_BACKEND_URL_CONFIG.BASE_URL,
+          `/anthro/api/v1/monitoring_cases/${caseData.CaseId}/image/${image.monitorImageId}/`
+        )
+        const response = await axios.get(url, {
+          headers: { Authorization: `token ${token}` },
+          responseType: 'blob',
+        })
+        const blob = new Blob([response.data], { type: image.contentType })
+        const objectUrl = URL.createObjectURL(blob)
+
+        const link = document.createElement('a')
+        link.href = objectUrl
+        link.download = image.fileName
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(objectUrl)
+      } catch (err) {
+        console.error(`Failed to download ${image.fileName}:`, err)
+      }
+    }
+  }
+
+  if (isLoading) return <Loader />
+  if (error) return <div className='text-red-500 text-center'>{error}</div>
+  if (images.length === 0)
+    return <div className='text-center text-gray-500'>No images found.</div>
+
+  return (
+    <div className='h-full flex flex-col'>
+      <div className='flex-none mb-4 flex justify-end'>
+        <button
+          onClick={handleDownloadAll}
+          className='flex items-center gap-2 px-3 py-1.5 bg-blue-500 text-white text-sm font-medium rounded-md hover:bg-blue-600 transition-colors'
+        >
+          <ArrowDownTrayIcon className='w-4 h-4' />
+          Download All
+        </button>
+      </div>
+      <div className='flex-1 overflow-y-auto pr-3 -mr-3'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
+          {images.map((image) => (
+            <DisplayImage
+              key={image.monitorImageId}
+              caseId={caseData.CaseId!}
+              imageMetadata={image}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const DisplayImage: React.FC<{
+  caseId: number
+  imageMetadata: ImageMetadata
+}> = ({ caseId, imageMetadata }) => {
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const { token } = useAuthStore()
+
+  useEffect(() => {
+    let isMounted = true
+    let objectUrl: string | null = null
+
+    const fetchImage = async () => {
+      setLoading(true)
+      try {
+        const url = url_join(
+          RW_BACKEND_URL_CONFIG.BASE_URL,
+          `/anthro/api/v1/monitoring_cases/${caseId}/image/${imageMetadata.monitorImageId}/`
+        )
+        const response = await axios.get(url, {
+          headers: { Authorization: `token ${token}` },
+          responseType: 'blob',
+        })
+        const blob = new Blob([response.data])
+        objectUrl = URL.createObjectURL(blob)
+        if (isMounted) {
+          setImageUrl(objectUrl)
+        }
+      } catch (err) {
+        console.error('Failed to load image', err)
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    fetchImage()
+
+    return () => {
+      isMounted = false
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl)
+      }
+    }
+  }, [caseId, imageMetadata.monitorImageId, token])
+
+  if (loading) {
+    return (
+      <div className='aspect-square bg-gray-100 rounded-lg flex items-center justify-center'>
+        <Loader size='sm' />
+      </div>
+    )
+  }
+
+  return (
+    <a
+      href={imageUrl!}
+      target='_blank'
+      rel='noopener noreferrer'
+      className='group'
+    >
+      <img
+        src={imageUrl!}
+        alt={imageMetadata.fileName}
+        className='w-full h-auto aspect-square object-cover rounded-lg shadow-sm group-hover:shadow-md transition-shadow'
+      />
+      <p className='text-xs text-gray-500 mt-1 truncate'>
+        {imageMetadata.fileName}
+      </p>
+    </a>
+  )
 }
 
 const CaseDetailsContent: React.FC<CaseDetailsContentProps> = ({
@@ -638,7 +813,13 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
   onClose,
 }) => {
   const [activeTab, setActiveTab] = useState<
-    'details' | 'whale-info' | 'additional' | 'comments' | 'case-study' | 'necropsy'
+    | 'details'
+    | 'whale-info'
+    | 'additional'
+    | 'comments'
+    | 'case-study'
+    | 'necropsy'
+    | 'images'
   >('details')
   const [assessmentData, setAssessmentData] =
     useState<AssessmentResponse | null>(null)
@@ -647,6 +828,8 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
   const [hasMore, setHasMore] = useState(true)
   const [comments, setComments] = useState<string[] | null>(null)
   const [isLoadingComments, setIsLoadingComments] = useState(false)
+  const [imageCount, setImageCount] = useState<number | null>(null)
+  const [isLoadingImageCount, setIsLoadingImageCount] = useState(false)
   const { isExpanded, toggleExpanded } = usePopupExpandStore()
 
   // Handle tab navigation with arrow keys
@@ -661,6 +844,7 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
         | 'comments'
         | 'case-study'
         | 'necropsy'
+        | 'images'
       )[] = [
         'details',
         'whale-info',
@@ -668,6 +852,7 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
         'comments',
         ...(caseData.HasNecropsyReport ? (['necropsy'] as const) : []),
         ...(caseData.HasCaseStudy ? (['case-study'] as const) : []),
+        ...(caseData.HasImages ? (['images'] as const) : []),
       ]
 
       const currentIndex = tabs.indexOf(activeTab)
@@ -784,6 +969,32 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
       setHasMore(true)
       fetchAssessments(1)
       fetchComments()
+
+      if (caseData.HasImages) {
+        setIsLoadingImageCount(true)
+        const fetchImageCount = async () => {
+          try {
+            const url = url_join(
+              RW_BACKEND_URL_CONFIG.BASE_URL,
+              `/anthro/api/v1/monitoring_cases/${caseData.CaseId}/images/`
+            )
+            const response = await axios.get<{ images: ImageMetadata[] }>(url, {
+              headers: {
+                Authorization: `token ${useAuthStore.getState().token}`,
+              },
+            })
+            setImageCount(response.data.images.length)
+          } catch (error) {
+            console.error('Error fetching image count:', error)
+            setImageCount(0)
+          } finally {
+            setIsLoadingImageCount(false)
+          }
+        }
+        fetchImageCount()
+      } else {
+        setImageCount(0)
+      }
     }
   }, [isOpen, caseData])
 
@@ -814,6 +1025,8 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
       setHasMore(true)
       setActiveTab('details')
       setComments(null)
+      setImageCount(null)
+      setIsLoadingImageCount(false)
     }
   }, [isOpen])
 
@@ -837,6 +1050,13 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
       activeTab === 'necropsy' &&
       !caseData.HasNecropsyReport
     ) {
+      setActiveTab('details')
+    }
+  }, [isOpen, caseData, activeTab])
+
+  // Reset active tab if user is on images tab but case doesn't have images
+  useEffect(() => {
+    if (isOpen && caseData && activeTab === 'images' && !caseData.HasImages) {
       setActiveTab('details')
     }
   }, [isOpen, caseData, activeTab])
@@ -913,12 +1133,16 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
                   | 'comments'
                   | 'case-study'
                   | 'necropsy'
+                  | 'images'
                 )[] = ['details', 'whale-info', 'additional', 'comments']
                 if (caseData.HasCaseStudy) {
                   tabs.push('case-study')
                 }
                 if (caseData.HasNecropsyReport) {
                   tabs.push('necropsy')
+                }
+                if (caseData.HasImages) {
+                  tabs.push('images')
                 }
                 return tabs.map((tab) => (
                   <button
@@ -939,6 +1163,12 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
                       <CounterBadge
                         count={comments === null ? null : comments.length}
                         isLoading={isLoadingComments}
+                      />
+                    )}
+                    {tab === 'images' && (
+                      <CounterBadge
+                        count={imageCount === null ? null : imageCount}
+                        isLoading={isLoadingImageCount}
                       />
                     )}
                   </button>
@@ -969,6 +1199,8 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
               <NecropsyContent caseData={caseData} />
             ) : activeTab === 'case-study' ? (
               <CaseStudyContent caseData={caseData} />
+            ) : activeTab === 'images' ? (
+              <ImagesContent caseData={caseData} />
             ) : null}
           </div>
         </div>

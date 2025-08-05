@@ -25,6 +25,7 @@ interface InjuryCase {
   CaseComments: string
   HasNecropsyReport: boolean
   HasCaseStudy: boolean
+  HasImages: boolean
   MonitoringCaseAge: string
   MonitoringCaseAgeClass: string
   IsActiveCase: boolean
