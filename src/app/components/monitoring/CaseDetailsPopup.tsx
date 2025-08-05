@@ -4,6 +4,7 @@ import { XMarkIcon } from '@heroicons/react/24/outline'
 import axios from 'axios'
 import { useAuthStore } from '@/app/store/auth'
 import { RW_BACKEND_URL_CONFIG, url_join } from '@/app/config'
+import { Loader } from '@/app/components/ui/Loader'
 
 interface AssessmentPagination {
   next: string | null
@@ -441,6 +442,91 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({
   )
 }
 
+interface CaseStudyContentProps {
+  caseData: InjuryCase
+}
+
+const CaseStudyContent: React.FC<CaseStudyContentProps> = ({ caseData }) => {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { token } = useAuthStore()
+
+  useEffect(() => {
+    const fetchPdf = async () => {
+      if (!caseData.CaseId) {
+        setError('Case ID is missing.')
+        setLoading(false)
+        return
+      }
+      setLoading(true)
+      setError(null)
+      try {
+        const url = url_join(
+          RW_BACKEND_URL_CONFIG.BASE_URL,
+          `/anthro/api/v1/monitoring_cases/${caseData.CaseId}/case_study/`
+        )
+        const response = await axios.get(url, {
+          responseType: 'blob',
+          headers: {
+            Authorization: `token ${token}`,
+          },
+        })
+        const file = new Blob([response.data], { type: 'application/pdf' })
+        const fileURL = URL.createObjectURL(file)
+        setPdfUrl(fileURL)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load PDF.')
+        console.error('Error fetching case study PDF:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPdf()
+
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl)
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [caseData.CaseId, token])
+
+  if (loading) {
+    return (
+      <div className='flex items-center justify-center h-full'>
+        <Loader />
+        <p className='ml-2'>Loading Case Study...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className='flex items-center justify-center h-full text-red-500'>
+        <p>Error loading case study: {error}</p>
+      </div>
+    )
+  }
+
+  if (pdfUrl) {
+    return (
+      <iframe
+        src={pdfUrl}
+        className='w-full h-full'
+        title={`Case Study for Case ${caseData.CaseId}`}
+      />
+    )
+  }
+
+  return (
+    <div className='flex items-center justify-center h-full text-gray-500'>
+      <p>No case study available.</p>
+    </div>
+  )
+}
+
 interface CaseDetailsPopupProps {
   caseData: InjuryCase | null
   isOpen: boolean
@@ -453,7 +539,7 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
   onClose,
 }) => {
   const [activeTab, setActiveTab] = useState<
-    'details' | 'whale-info' | 'additional' | 'comments'
+    'details' | 'whale-info' | 'additional' | 'comments' | 'case-study'
   >('details')
   const [assessmentData, setAssessmentData] =
     useState<AssessmentResponse | null>(null)
@@ -466,14 +552,16 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
   // Handle tab navigation with arrow keys
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (!isOpen) return
+      if (!isOpen || !caseData) return
 
-      const tabs: ('details' | 'whale-info' | 'additional' | 'comments')[] = [
+      const tabs: ('details' | 'whale-info' | 'additional' | 'comments' | 'case-study')[] = [
         'details',
         'whale-info',
         'additional',
         'comments',
+        ...(caseData.HasCaseStudy ? (['case-study'] as const) : []),
       ]
+
       const currentIndex = tabs.indexOf(activeTab)
 
       switch (event.key) {
@@ -494,7 +582,7 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
           break
       }
     },
-    [isOpen, activeTab, onClose]
+    [isOpen, activeTab, onClose, caseData]
   )
 
   // Fetch assessment data
@@ -617,6 +705,13 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
     }
   }, [isOpen])
 
+  // Reset active tab if user is on case-study tab but case doesn't have case study
+  useEffect(() => {
+    if (isOpen && caseData && activeTab === 'case-study' && !caseData.HasCaseStudy) {
+      setActiveTab('details')
+    }
+  }, [isOpen, caseData, activeTab])
+
   if (!isOpen || !caseData) return null
 
   // Handle click outside
@@ -662,50 +757,40 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
           {/* Tabs */}
           <div className='flex-none px-4 sm:px-8 border-b border-gray-200'>
             <nav className='flex space-x-8' aria-label='Tabs'>
-              <button
-                onClick={() => setActiveTab('details')}
-                className={`${
-                  activeTab === 'details'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-              >
-                Details
-              </button>
-              <button
-                onClick={() => setActiveTab('whale-info')}
-                className={`${
-                  activeTab === 'whale-info'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-              >
-                Whale Info
-              </button>
-              <button
-                onClick={() => setActiveTab('additional')}
-                className={`${
-                  activeTab === 'additional'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-              >
-                Assessments
-              </button>
-              <button
-                onClick={() => setActiveTab('comments')}
-                className={`${
-                  activeTab === 'comments'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
-              >
-                Comments
-                <CounterBadge
-                  count={comments === null ? null : comments.length}
-                  isLoading={isLoadingComments}
-                />
-              </button>
+              {(() => {
+                const tabs: ('details' | 'whale-info' | 'additional' | 'comments' | 'case-study')[] = [
+                  'details',
+                  'whale-info',
+                  'additional',
+                  'comments',
+                ]
+                if (caseData.HasCaseStudy) {
+                  tabs.push('case-study')
+                }
+                return tabs.map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`${
+                      activeTab === tab
+                        ? 'border-blue-500 text-blue-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+                  >
+                    {tab
+                      .replace('-', ' ')
+                      .split(' ')
+                      .map((w) => w[0].toUpperCase() + w.substring(1))
+                      .join(' ')}
+                    {tab === 'comments' && (
+                      <CounterBadge
+                        count={comments === null ? null : comments.length}
+                        isLoading={isLoadingComments}
+                      />
+                    )}
+                  </button>
+                ))
+              })()}
             </nav>
           </div>
 
@@ -722,11 +807,13 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
                 isLoading={isLoading}
                 onLoadMore={handleLoadMore}
               />
-            ) : (
+            ) : activeTab === 'comments' ? (
               <CommentsContent
                 comments={comments}
                 isLoadingComments={isLoadingComments}
               />
+            ) : (
+              <CaseStudyContent caseData={caseData} />
             )}
           </div>
         </div>
