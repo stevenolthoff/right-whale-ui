@@ -182,6 +182,58 @@ const YearFilter: React.FC<FilterProps & { data: InjuryCase[] }> = ({
   )
 }
 
+const MonitorRemoveDateFilter: React.FC<
+  FilterProps & { data: InjuryCase[] }
+> = ({ value, onChange, data }) => {
+  const { minYear, maxYear } = React.useMemo(() => {
+    const years = data
+      .map((item) =>
+        item.MonitorRemoveDate
+          ? new Date(item.MonitorRemoveDate).getFullYear()
+          : null
+      )
+      .filter((year): year is number => year !== null && !isNaN(year))
+    return {
+      minYear: years.length ? Math.min(...years) : 1970,
+      maxYear: years.length ? Math.max(...years) : new Date().getFullYear(),
+    }
+  }, [data])
+
+  const [yearRange, setYearRange] = React.useState<[number, number]>([
+    minYear,
+    maxYear,
+  ])
+
+  React.useEffect(() => {
+    if (!value || Array.isArray(value)) {
+      setYearRange([minYear, maxYear])
+      return
+    }
+    try {
+      const [min, max] = JSON.parse(value as string)
+      setYearRange([min ?? minYear, max ?? maxYear])
+    } catch {
+      setYearRange([minYear, maxYear])
+    }
+  }, [value, minYear, maxYear])
+
+  const handleChange = (newRange: [number, number]) => {
+    setYearRange(newRange)
+    onChange(JSON.stringify(newRange))
+  }
+
+  return (
+    <div className='w-full'>
+      <YearRangeSlider
+        yearRange={yearRange}
+        minYear={minYear}
+        maxYear={maxYear}
+        onChange={handleChange}
+      />
+    </div>
+  )
+}
+
 const AgeFilter: React.FC<FilterProps & { data: InjuryCase[] }> = ({
   value,
   onChange,
@@ -280,6 +332,7 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
       MonitoringCaseAgeClass: new Set(),
       GenderDescription: new Set(),
       Cow: new Set(['Yes', 'No']),
+      CountryOriginDescription: new Set(),
     }
 
     data.forEach((item) => {
@@ -375,6 +428,13 @@ export const TableFilters: React.FC<TableFiltersProps> = ({
                 </label>
                 {column.id === 'DetectionDate' ? (
                   <YearFilter
+                    column={column.id}
+                    value={filterValue}
+                    onChange={(value) => column.setFilterValue(value)}
+                    data={data}
+                  />
+                ) : column.id === 'MonitorRemoveDate' ? (
+                  <MonitorRemoveDateFilter
                     column={column.id}
                     value={filterValue}
                     onChange={(value) => column.setFilterValue(value)}

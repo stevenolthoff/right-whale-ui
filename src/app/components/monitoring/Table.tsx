@@ -146,6 +146,42 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
         header: 'Detection Location',
         cell: (info) => info.getValue(),
       }),
+      columnHelper.accessor('MonitorRemoveDate', {
+        header: 'Date Made Inactive',
+        cell: (info) =>
+          info.getValue()
+            ? new Date(info.getValue() as string).getFullYear()
+            : 'N/A',
+        filterFn: (row, columnId, filterValue) => {
+          if (!filterValue) return true
+          const dateVal = row.getValue(columnId) as string | null
+          if (!dateVal) return false
+          const year = new Date(dateVal).getFullYear()
+          let minYear: number | null = null
+          let maxYear: number | null = null
+          if (typeof filterValue === 'string') {
+            try {
+              ;[minYear, maxYear] = JSON.parse(filterValue)
+            } catch (e) {
+              return true
+            }
+          } else if (Array.isArray(filterValue)) {
+            ;[minYear, maxYear] = filterValue
+          }
+          if (minYear !== null && year < minYear) return false
+          if (maxYear !== null && year > maxYear) return false
+          return true
+        },
+      }),
+      columnHelper.accessor('CountryOriginDescription', {
+        header: 'Injury Country Origin',
+        cell: (info) => info.getValue(),
+        filterFn: (row, columnId, filterValue) => {
+          if (!filterValue) return true
+          const value = row.getValue(columnId)
+          return value === filterValue
+        },
+      }),
       columnHelper.accessor('UnusualMortalityEventDescription', {
         header: 'UME Status',
         cell: (info) => info.getValue() || 'N/A',
