@@ -81,6 +81,10 @@ const CaseDetailsContent: React.FC<CaseDetailsContentProps> = ({
       value: caseData.UnusualMortalityEventDescription || 'N/A',
     },
     {
+      label: 'Injury Country of Origin',
+      value: caseData.CountryOriginDescription || 'N/A',
+    },
+    {
       label: 'Date Last Assessed',
       value: caseData.LastAssessedDate
         ? new Date(caseData.LastAssessedDate).toLocaleString('en-US', {
