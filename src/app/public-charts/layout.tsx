@@ -158,8 +158,7 @@ export default function PublicChartsLayout({
           </Link>{' '}
           for additional information. For reasons outlined below, data here
           represent a minimum of entanglement events and are likely an
-          underestimate. Unidentified whales with detected entanglement injuries
-          are not included here.
+          underestimate.
           <br />
           <br />
           <ol className='list-decimal list-inside'>
