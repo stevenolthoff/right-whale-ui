@@ -156,8 +156,8 @@ interface CounterBadgeProps {
 }
 
 const CounterBadge: React.FC<CounterBadgeProps> = ({ count, isLoading }) => {
-  // Don't show anything if loading or count is null (initial state)
-  if (isLoading || count === null) return null
+  // Always render the badge container to prevent layout shift
+  const shouldShow = !isLoading && count !== null
 
   return (
     <>
@@ -174,11 +174,17 @@ const CounterBadge: React.FC<CounterBadgeProps> = ({ count, isLoading }) => {
         `}
       </style>
       <span
-        className={`ml-1.5 inline-flex items-center justify-center px-1.5 min-w-[1.25rem] h-5 text-xs font-medium rounded-full badge-fade-in ${
-          count > 0 ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-500'
+        className={`ml-1.5 inline-flex items-center justify-center px-1.5 min-w-[1.25rem] h-5 text-xs font-medium rounded-full ${
+          shouldShow
+            ? `badge-fade-in ${
+                count > 0
+                  ? 'bg-red-500 text-white'
+                  : 'bg-gray-200 text-gray-500'
+              }`
+            : 'invisible'
         }`}
       >
-        {count}
+        {shouldShow ? count : '0'}
       </span>
     </>
   )
