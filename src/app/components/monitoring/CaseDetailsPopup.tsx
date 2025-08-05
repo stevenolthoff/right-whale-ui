@@ -456,6 +456,91 @@ interface CaseStudyContentProps {
   caseData: InjuryCase
 }
 
+interface NecropsyContentProps {
+  caseData: InjuryCase
+}
+
+const NecropsyContent: React.FC<NecropsyContentProps> = ({ caseData }) => {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { token } = useAuthStore()
+
+  useEffect(() => {
+    const fetchPdf = async () => {
+      if (!caseData.CaseId) {
+        setError('Case ID is missing.')
+        setLoading(false)
+        return
+      }
+      setLoading(true)
+      setError(null)
+      try {
+        const url = url_join(
+          RW_BACKEND_URL_CONFIG.BASE_URL,
+          `/anthro/api/v1/monitoring_cases/${caseData.CaseId}/necropsy/`
+        )
+        const response = await axios.get(url, {
+          responseType: 'blob',
+          headers: {
+            Authorization: `token ${token}`,
+          },
+        })
+        const file = new Blob([response.data], { type: 'application/pdf' })
+        const fileURL = URL.createObjectURL(file)
+        setPdfUrl(fileURL)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load PDF.')
+        console.error('Error fetching necropsy PDF:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPdf()
+
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [caseData.CaseId, token])
+
+  if (loading) {
+    return (
+      <div className='flex items-center justify-center h-full'>
+        <Loader />
+        <p className='ml-2'>Loading Necropsy Report...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className='flex items-center justify-center h-full text-red-500'>
+        <p>Error loading necropsy report: {error}</p>
+      </div>
+    )
+  }
+
+  if (pdfUrl) {
+    return (
+      <iframe
+        src={pdfUrl}
+        className='w-full h-full'
+        title={`Necropsy Report for Case ${caseData.CaseId}`}
+      />
+    )
+  }
+
+  return (
+    <div className='flex items-center justify-center h-full text-gray-500'>
+      <p>No necropsy report available.</p>
+    </div>
+  )
+}
+
 const CaseStudyContent: React.FC<CaseStudyContentProps> = ({ caseData }) => {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -549,7 +634,7 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
   onClose,
 }) => {
   const [activeTab, setActiveTab] = useState<
-    'details' | 'whale-info' | 'additional' | 'comments' | 'case-study'
+    'details' | 'whale-info' | 'additional' | 'comments' | 'case-study' | 'necropsy'
   >('details')
   const [assessmentData, setAssessmentData] =
     useState<AssessmentResponse | null>(null)
@@ -571,11 +656,13 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
         | 'additional'
         | 'comments'
         | 'case-study'
+        | 'necropsy'
       )[] = [
         'details',
         'whale-info',
         'additional',
         'comments',
+        ...(caseData.HasNecropsyReport ? (['necropsy'] as const) : []),
         ...(caseData.HasCaseStudy ? (['case-study'] as const) : []),
       ]
 
@@ -738,6 +825,18 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
     }
   }, [isOpen, caseData, activeTab])
 
+  // Reset active tab if user is on necropsy tab but case doesn't have necropsy report
+  useEffect(() => {
+    if (
+      isOpen &&
+      caseData &&
+      activeTab === 'necropsy' &&
+      !caseData.HasNecropsyReport
+    ) {
+      setActiveTab('details')
+    }
+  }, [isOpen, caseData, activeTab])
+
   if (!isOpen || !caseData) return null
 
   // Handle click outside
@@ -809,9 +908,13 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
                   | 'additional'
                   | 'comments'
                   | 'case-study'
+                  | 'necropsy'
                 )[] = ['details', 'whale-info', 'additional', 'comments']
                 if (caseData.HasCaseStudy) {
                   tabs.push('case-study')
+                }
+                if (caseData.HasNecropsyReport) {
+                  tabs.push('necropsy')
                 }
                 return tabs.map((tab) => (
                   <button
@@ -858,9 +961,11 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
                 comments={comments}
                 isLoadingComments={isLoadingComments}
               />
-            ) : (
+            ) : activeTab === 'necropsy' ? (
+              <NecropsyContent caseData={caseData} />
+            ) : activeTab === 'case-study' ? (
               <CaseStudyContent caseData={caseData} />
-            )}
+            ) : null}
           </div>
         </div>
       </div>
