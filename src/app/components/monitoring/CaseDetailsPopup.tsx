@@ -185,7 +185,9 @@ const DisplayImage: React.FC<{
           headers: { Authorization: `token ${token}` },
           responseType: 'blob',
         })
-        const blob = new Blob([response.data])
+        const blob = new Blob([response.data], {
+          type: imageMetadata.contentType,
+        })
         objectUrl = URL.createObjectURL(blob)
         if (isMounted) {
           setImageUrl(objectUrl)
