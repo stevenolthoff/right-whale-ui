@@ -49,6 +49,7 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
 }) => {
   const { results, loading, error } = useMonitoringData()
   const setFilteredData = useFilteredData((state) => state.setFilteredData)
+  const setColumnFilters = useFilteredData((state) => state.setColumnFilters)
   const { yearRange } = useYearRangeStore()
   const columnHelper = createColumnHelper<InjuryCase>()
 
@@ -126,10 +127,10 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
       }),
       columnHelper.accessor('DetectionDate', {
         header: 'Detection Year',
-        cell: (info) => new Date(info.getValue()).getFullYear(),
+        cell: (info) => new Date(info.getValue()).getUTCFullYear(),
         filterFn: (row, columnId, filterValue) => {
           if (!filterValue) return true
-          const year = new Date(row.getValue(columnId)).getFullYear()
+          const year = new Date(row.getValue(columnId)).getUTCFullYear()
           let minYear: number | null = null
           let maxYear: number | null = null
           if (typeof filterValue === 'string') {
@@ -145,6 +146,42 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
       columnHelper.accessor('DetectionAreaDescription', {
         header: 'Detection Location',
         cell: (info) => info.getValue(),
+      }),
+      columnHelper.accessor('MonitorRemoveDate', {
+        header: 'Date Made Inactive',
+        cell: (info) =>
+          info.getValue()
+            ? new Date(info.getValue() as string).getUTCFullYear()
+            : 'N/A',
+        filterFn: (row, columnId, filterValue) => {
+          if (!filterValue) return true
+          const dateVal = row.getValue(columnId) as string | null
+          if (!dateVal) return false
+          const year = new Date(dateVal).getUTCFullYear()
+          let minYear: number | null = null
+          let maxYear: number | null = null
+          if (typeof filterValue === 'string') {
+            try {
+              ;[minYear, maxYear] = JSON.parse(filterValue)
+            } catch (e) {
+              return true
+            }
+          } else if (Array.isArray(filterValue)) {
+            ;[minYear, maxYear] = filterValue
+          }
+          if (minYear !== null && year < minYear) return false
+          if (maxYear !== null && year > maxYear) return false
+          return true
+        },
+      }),
+      columnHelper.accessor('CountryOriginDescription', {
+        header: 'Injury Country Origin',
+        cell: (info) => info.getValue(),
+        filterFn: (row, columnId, filterValue) => {
+          if (!filterValue) return true
+          const value = row.getValue(columnId)
+          return value === filterValue
+        },
       }),
       columnHelper.accessor('UnusualMortalityEventDescription', {
         header: 'UME Status',
@@ -258,7 +295,13 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
   // Update filtered data when table state changes
   React.useEffect(() => {
     setFilteredData(table.getFilteredRowModel().rows.map((row) => row.original))
-  }, [table.getFilteredRowModel(), setFilteredData])
+    setColumnFilters(table.getState().columnFilters)
+  }, [
+    table.getFilteredRowModel(),
+    setFilteredData,
+    table.getState().columnFilters,
+    setColumnFilters,
+  ])
 
   const getSortIcon = (isSorted: false | 'asc' | 'desc') => {
     if (!isSorted) return <ChevronUpDownIcon className='w-4 h-4 ml-1 inline' />

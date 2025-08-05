@@ -42,7 +42,7 @@ export const useYearRangeStore = create<YearRangeState>((set) => ({
     if (!filteredData.length) return
 
     const years = filteredData
-      .map((item) => new Date(item.DetectionDate).getFullYear())
+      .map((item) => new Date(item.DetectionDate).getUTCFullYear())
       .filter((year) => !isNaN(year))
 
     if (!years.length) return

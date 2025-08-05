@@ -21,9 +21,11 @@ interface InjuryCase {
   DetectionDate: string
   DetectionAreaCode: string
   DetectionAreaDescription: string
+  CountryOriginDescription: string
   CaseComments: string
   HasNecropsyReport: boolean
   HasCaseStudy: boolean
+  HasImages: boolean
   MonitoringCaseAge: string
   MonitoringCaseAgeClass: string
   IsActiveCase: boolean
