@@ -49,6 +49,7 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
 }) => {
   const { results, loading, error } = useMonitoringData()
   const setFilteredData = useFilteredData((state) => state.setFilteredData)
+  const setColumnFilters = useFilteredData((state) => state.setColumnFilters)
   const { yearRange } = useYearRangeStore()
   const columnHelper = createColumnHelper<InjuryCase>()
 
@@ -294,7 +295,13 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
   // Update filtered data when table state changes
   React.useEffect(() => {
     setFilteredData(table.getFilteredRowModel().rows.map((row) => row.original))
-  }, [table.getFilteredRowModel(), setFilteredData])
+    setColumnFilters(table.getState().columnFilters)
+  }, [
+    table.getFilteredRowModel(),
+    setFilteredData,
+    table.getState().columnFilters,
+    setColumnFilters,
+  ])
 
   const getSortIcon = (isSorted: false | 'asc' | 'desc') => {
     if (!isSorted) return <ChevronUpDownIcon className='w-4 h-4 ml-1 inline' />
