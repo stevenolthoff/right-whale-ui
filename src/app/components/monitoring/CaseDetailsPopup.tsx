@@ -776,7 +776,7 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
               <div className='flex items-center gap-2'>
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className='text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full'
+                  className='hidden sm:block text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full'
                   aria-label={isExpanded ? 'Shrink dialog' : 'Expand dialog'}
                 >
                   {isExpanded ? (
