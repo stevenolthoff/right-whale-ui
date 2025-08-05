@@ -73,6 +73,7 @@ const ImagesContent: React.FC<{ caseData: InjuryCase }> = ({ caseData }) => {
   const [images, setImages] = useState<ImageMetadata[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isDownloading, setIsDownloading] = useState(false)
   const { token } = useAuthStore()
 
   useEffect(() => {
@@ -103,31 +104,38 @@ const ImagesContent: React.FC<{ caseData: InjuryCase }> = ({ caseData }) => {
   }, [caseData.CaseId, token])
 
   const handleDownloadAll = async () => {
-    if (!caseData.CaseId || images.length === 0) return
+    if (!caseData.CaseId || images.length === 0 || isDownloading) return
 
-    for (const image of images) {
-      try {
-        const url = url_join(
-          RW_BACKEND_URL_CONFIG.BASE_URL,
-          `/anthro/api/v1/monitoring_cases/${caseData.CaseId}/image/${image.monitorImageId}/`
-        )
-        const response = await axios.get(url, {
-          headers: { Authorization: `token ${token}` },
-          responseType: 'blob',
-        })
-        const blob = new Blob([response.data], { type: image.contentType })
-        const objectUrl = URL.createObjectURL(blob)
+    setIsDownloading(true)
+    try {
+      for (const image of images) {
+        try {
+          const url = url_join(
+            RW_BACKEND_URL_CONFIG.BASE_URL,
+            `/anthro/api/v1/monitoring_cases/${caseData.CaseId}/image/${image.monitorImageId}/`
+          )
+          const response = await axios.get(url, {
+            headers: { Authorization: `token ${token}` },
+            responseType: 'blob',
+          })
+          const blob = new Blob([response.data], {
+            type: image.contentType,
+          })
+          const objectUrl = URL.createObjectURL(blob)
 
-        const link = document.createElement('a')
-        link.href = objectUrl
-        link.download = image.fileName
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        URL.revokeObjectURL(objectUrl)
-      } catch (err) {
-        console.error(`Failed to download ${image.fileName}:`, err)
+          const link = document.createElement('a')
+          link.href = objectUrl
+          link.download = image.fileName
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          URL.revokeObjectURL(objectUrl)
+        } catch (err) {
+          console.error(`Failed to download ${image.fileName}:`, err)
+        }
       }
+    } finally {
+      setIsDownloading(false)
     }
   }
 
@@ -141,10 +149,20 @@ const ImagesContent: React.FC<{ caseData: InjuryCase }> = ({ caseData }) => {
       <div className='flex-none mb-4 flex justify-end'>
         <button
           onClick={handleDownloadAll}
-          className='flex items-center gap-2 px-3 py-1.5 bg-blue-500 text-white text-sm font-medium rounded-md hover:bg-blue-600 transition-colors'
+          disabled={isDownloading}
+          className='flex items-center gap-2 px-3 py-1.5 bg-blue-500 text-white text-sm font-medium rounded-md hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed'
         >
-          <ArrowDownTrayIcon className='w-4 h-4' />
-          Download All
+          {isDownloading ? (
+            <>
+              <div className='animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent'></div>
+              Downloading...
+            </>
+          ) : (
+            <>
+              <ArrowDownTrayIcon className='w-4 h-4' />
+              Download All
+            </>
+          )}
         </button>
       </div>
       <div className='flex-1 overflow-y-auto pr-3 -mr-3'>
@@ -1181,29 +1199,40 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
 
           {/* Content Container */}
           <div className='flex-1 p-4 sm:p-8 pt-6 min-h-0'>
-            {/* Tab Content */}
-            {activeTab === 'details' ? (
+            <div hidden={activeTab !== 'details'} className='h-full'>
               <CaseDetailsContent caseData={caseData} />
-            ) : activeTab === 'whale-info' ? (
+            </div>
+            <div hidden={activeTab !== 'whale-info'} className='h-full'>
               <WhaleInfoContent caseData={caseData} />
-            ) : activeTab === 'additional' ? (
+            </div>
+            <div hidden={activeTab !== 'additional'} className='h-full'>
               <AssessmentContent
                 assessments={assessmentData?.results || []}
                 isLoading={isLoading}
                 onLoadMore={handleLoadMore}
               />
-            ) : activeTab === 'comments' ? (
+            </div>
+            <div hidden={activeTab !== 'comments'} className='h-full'>
               <CommentsContent
                 comments={comments}
                 isLoadingComments={isLoadingComments}
               />
-            ) : activeTab === 'necropsy' ? (
-              <NecropsyContent caseData={caseData} />
-            ) : activeTab === 'case-study' ? (
-              <CaseStudyContent caseData={caseData} />
-            ) : activeTab === 'images' ? (
-              <ImagesContent caseData={caseData} />
-            ) : null}
+            </div>
+            {caseData.HasNecropsyReport && (
+              <div hidden={activeTab !== 'necropsy'} className='h-full'>
+                <NecropsyContent caseData={caseData} />
+              </div>
+            )}
+            {caseData.HasCaseStudy && (
+              <div hidden={activeTab !== 'case-study'} className='h-full'>
+                <CaseStudyContent caseData={caseData} />
+              </div>
+            )}
+            {caseData.HasImages && (
+              <div hidden={activeTab !== 'images'} className='h-full'>
+                <ImagesContent caseData={caseData} />
+              </div>
+            )}
           </div>
         </div>
       </div>
