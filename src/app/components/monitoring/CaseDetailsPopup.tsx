@@ -7,6 +7,7 @@ import {
 } from '@heroicons/react/24/outline'
 import axios from 'axios'
 import { useAuthStore } from '@/app/store/auth'
+import { usePopupExpandStore } from '@/app/stores/usePopupExpandStore'
 import { RW_BACKEND_URL_CONFIG, url_join } from '@/app/config'
 import { Loader } from '@/app/components/ui/Loader'
 
@@ -557,7 +558,7 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
   const [hasMore, setHasMore] = useState(true)
   const [comments, setComments] = useState<string[] | null>(null)
   const [isLoadingComments, setIsLoadingComments] = useState(false)
-  const [isExpanded, setIsExpanded] = useState(false)
+  const { isExpanded, toggleExpanded } = usePopupExpandStore()
 
   // Handle tab navigation with arrow keys
   const handleKeyDown = useCallback(
@@ -598,7 +599,7 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
           break
         case 'F11':
           event.preventDefault()
-          setIsExpanded(!isExpanded)
+          toggleExpanded()
           break
       }
     },
@@ -722,7 +723,6 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
       setHasMore(true)
       setActiveTab('details')
       setComments(null)
-      setIsExpanded(false)
     }
   }, [isOpen])
 
@@ -775,7 +775,7 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
               </h2>
               <div className='flex items-center gap-2'>
                 <button
-                  onClick={() => setIsExpanded(!isExpanded)}
+                  onClick={toggleExpanded}
                   className='hidden sm:block text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full'
                   aria-label={isExpanded ? 'Shrink dialog' : 'Expand dialog'}
                 >
