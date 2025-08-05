@@ -126,10 +126,10 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
       }),
       columnHelper.accessor('DetectionDate', {
         header: 'Detection Year',
-        cell: (info) => new Date(info.getValue()).getFullYear(),
+        cell: (info) => new Date(info.getValue()).getUTCFullYear(),
         filterFn: (row, columnId, filterValue) => {
           if (!filterValue) return true
-          const year = new Date(row.getValue(columnId)).getFullYear()
+          const year = new Date(row.getValue(columnId)).getUTCFullYear()
           let minYear: number | null = null
           let maxYear: number | null = null
           if (typeof filterValue === 'string') {
@@ -150,13 +150,13 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
         header: 'Date Made Inactive',
         cell: (info) =>
           info.getValue()
-            ? new Date(info.getValue() as string).getFullYear()
+            ? new Date(info.getValue() as string).getUTCFullYear()
             : 'N/A',
         filterFn: (row, columnId, filterValue) => {
           if (!filterValue) return true
           const dateVal = row.getValue(columnId) as string | null
           if (!dateVal) return false
-          const year = new Date(dateVal).getFullYear()
+          const year = new Date(dateVal).getUTCFullYear()
           let minYear: number | null = null
           let maxYear: number | null = null
           if (typeof filterValue === 'string') {

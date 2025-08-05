@@ -189,13 +189,13 @@ const MonitorRemoveDateFilter: React.FC<
     const years = data
       .map((item) =>
         item.MonitorRemoveDate
-          ? new Date(item.MonitorRemoveDate).getFullYear()
+          ? new Date(item.MonitorRemoveDate).getUTCFullYear()
           : null
       )
       .filter((year): year is number => year !== null && !isNaN(year))
     return {
       minYear: years.length ? Math.min(...years) : 1970,
-      maxYear: years.length ? Math.max(...years) : new Date().getFullYear(),
+      maxYear: years.length ? Math.max(...years) : new Date().getUTCFullYear(),
     }
   }, [data])
 
