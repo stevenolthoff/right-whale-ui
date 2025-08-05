@@ -1,6 +1,10 @@
 import React, { useEffect, useCallback, useState, useRef } from 'react'
 import { InjuryCase } from '../../types/monitoring'
-import { XMarkIcon } from '@heroicons/react/24/outline'
+import {
+  XMarkIcon,
+  ArrowsPointingOutIcon,
+  ArrowsPointingInIcon,
+} from '@heroicons/react/24/outline'
 import axios from 'axios'
 import { useAuthStore } from '@/app/store/auth'
 import { RW_BACKEND_URL_CONFIG, url_join } from '@/app/config'
@@ -234,7 +238,6 @@ const WhaleInfoContent: React.FC<WhaleInfoContentProps> = ({ caseData }) => {
           </div>
         ))}
       </div>
-
     </div>
   )
 }
@@ -496,7 +499,7 @@ const CaseStudyContent: React.FC<CaseStudyContentProps> = ({ caseData }) => {
         URL.revokeObjectURL(pdfUrl)
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [caseData.CaseId, token])
 
   if (loading) {
@@ -554,13 +557,20 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
   const [hasMore, setHasMore] = useState(true)
   const [comments, setComments] = useState<string[] | null>(null)
   const [isLoadingComments, setIsLoadingComments] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
 
   // Handle tab navigation with arrow keys
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (!isOpen || !caseData) return
 
-      const tabs: ('details' | 'whale-info' | 'additional' | 'comments' | 'case-study')[] = [
+      const tabs: (
+        | 'details'
+        | 'whale-info'
+        | 'additional'
+        | 'comments'
+        | 'case-study'
+      )[] = [
         'details',
         'whale-info',
         'additional',
@@ -585,6 +595,10 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
           break
         case 'Escape':
           onClose()
+          break
+        case 'F11':
+          event.preventDefault()
+          setIsExpanded(!isExpanded)
           break
       }
     },
@@ -640,8 +654,8 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
     try {
       const response = await axios.get<CaseCommentResponse>(
         url_join(
-            RW_BACKEND_URL_CONFIG.BASE_URL,
-            `/anthro/api/v1/monitoring_cases/${caseData.CaseId}/`
+          RW_BACKEND_URL_CONFIG.BASE_URL,
+          `/anthro/api/v1/monitoring_cases/${caseData.CaseId}/`
         ),
         {
           headers: {
@@ -708,12 +722,18 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
       setHasMore(true)
       setActiveTab('details')
       setComments(null)
+      setIsExpanded(false)
     }
   }, [isOpen])
 
   // Reset active tab if user is on case-study tab but case doesn't have case study
   useEffect(() => {
-    if (isOpen && caseData && activeTab === 'case-study' && !caseData.HasCaseStudy) {
+    if (
+      isOpen &&
+      caseData &&
+      activeTab === 'case-study' &&
+      !caseData.HasCaseStudy
+    ) {
       setActiveTab('details')
     }
   }, [isOpen, caseData, activeTab])
@@ -737,7 +757,13 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
       aria-labelledby='case-details-title'
     >
       <div className='flex items-center justify-center min-h-screen'>
-        <div className='relative bg-white w-full h-screen sm:h-[600px] sm:max-w-2xl sm:rounded-2xl shadow-2xl sm:mx-auto sm:my-8 animate-in fade-in duration-300 slide-in-from-bottom-4 flex flex-col'>
+        <div
+          className={`relative bg-white shadow-2xl flex flex-col transition-all duration-300 ease-in-out ${
+            isExpanded
+              ? 'w-screen h-screen rounded-none'
+              : 'w-full h-screen sm:h-[600px] sm:max-w-2xl sm:rounded-2xl sm:mx-auto sm:my-8'
+          } animate-in fade-in duration-300 slide-in-from-bottom-4`}
+        >
           {/* Header Section */}
           <div className='flex-none flex flex-col space-y-1 p-4 sm:p-8 pb-4 border-b border-gray-100'>
             <div className='flex justify-between items-center'>
@@ -747,13 +773,26 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
               >
                 Case {caseData.CaseId}
               </h2>
-              <button
-                onClick={onClose}
-                className='text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full'
-                aria-label='Close dialog'
-              >
-                <XMarkIcon className='h-6 w-6' />
-              </button>
+              <div className='flex items-center gap-2'>
+                <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className='text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full'
+                  aria-label={isExpanded ? 'Shrink dialog' : 'Expand dialog'}
+                >
+                  {isExpanded ? (
+                    <ArrowsPointingInIcon className='h-6 w-6' />
+                  ) : (
+                    <ArrowsPointingOutIcon className='h-6 w-6' />
+                  )}
+                </button>
+                <button
+                  onClick={onClose}
+                  className='text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full'
+                  aria-label='Close dialog'
+                >
+                  <XMarkIcon className='h-6 w-6' />
+                </button>
+              </div>
             </div>
             <p className='text-sm text-gray-500'>
               Details for North Atlantic Right Whale #{caseData.EGNo}
@@ -764,12 +803,13 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
           <div className='flex-none px-4 sm:px-8 border-b border-gray-200'>
             <nav className='flex space-x-8' aria-label='Tabs'>
               {(() => {
-                const tabs: ('details' | 'whale-info' | 'additional' | 'comments' | 'case-study')[] = [
-                  'details',
-                  'whale-info',
-                  'additional',
-                  'comments',
-                ]
+                const tabs: (
+                  | 'details'
+                  | 'whale-info'
+                  | 'additional'
+                  | 'comments'
+                  | 'case-study'
+                )[] = ['details', 'whale-info', 'additional', 'comments']
                 if (caseData.HasCaseStudy) {
                   tabs.push('case-study')
                 }
