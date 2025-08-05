@@ -850,7 +850,10 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
   const [isLoadingComments, setIsLoadingComments] = useState(false)
   const [imageCount, setImageCount] = useState<number | null>(null)
   const [isLoadingImageCount, setIsLoadingImageCount] = useState(false)
+  const [showLeftGradient, setShowLeftGradient] = useState(false)
+  const [showRightGradient, setShowRightGradient] = useState(false)
   const { isExpanded, toggleExpanded } = usePopupExpandStore()
+  const tabsRef = useRef<HTMLElement>(null)
 
   // Handle tab navigation with arrow keys
   const handleKeyDown = useCallback(
@@ -901,6 +904,15 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
     },
     [isOpen, activeTab, onClose, caseData]
   )
+
+  // Handle scroll for gradient indicators
+  const handleTabScroll = useCallback(() => {
+    if (!tabsRef.current) return
+
+    const { scrollLeft, scrollWidth, clientWidth } = tabsRef.current
+    setShowLeftGradient(scrollLeft > 0)
+    setShowRightGradient(scrollLeft < scrollWidth - clientWidth - 1)
+  }, [])
 
   // Fetch assessment data
   const fetchAssessments = async (page: number) => {
@@ -1050,6 +1062,16 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
     }
   }, [isOpen])
 
+  // Initialize gradient states when tabs change
+  useEffect(() => {
+    if (isOpen && tabsRef.current) {
+      // Use setTimeout to ensure the DOM has updated
+      setTimeout(() => {
+        handleTabScroll()
+      }, 0)
+    }
+  }, [isOpen, activeTab, handleTabScroll])
+
   // Reset active tab if user is on case-study tab but case doesn't have case study
   useEffect(() => {
     if (
@@ -1144,57 +1166,80 @@ const CaseDetailsPopup: React.FC<CaseDetailsPopupProps> = ({
 
           {/* Tabs */}
           <div className='flex-none px-4 sm:px-8 border-b border-gray-200'>
-            <nav className='flex space-x-8' aria-label='Tabs'>
-              {(() => {
-                const tabs: (
-                  | 'details'
-                  | 'whale-info'
-                  | 'additional'
-                  | 'comments'
-                  | 'case-study'
-                  | 'necropsy'
-                  | 'images'
-                )[] = ['details', 'whale-info', 'additional', 'comments']
-                if (caseData.HasCaseStudy) {
-                  tabs.push('case-study')
-                }
-                if (caseData.HasNecropsyReport) {
-                  tabs.push('necropsy')
-                }
-                if (caseData.HasImages) {
-                  tabs.push('images')
-                }
-                return tabs.map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`${
-                      activeTab === tab
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
-                  >
-                    {tab
-                      .replace('-', ' ')
-                      .split(' ')
-                      .map((w) => w[0].toUpperCase() + w.substring(1))
-                      .join(' ')}
-                    {tab === 'comments' && (
-                      <CounterBadge
-                        count={comments === null ? null : comments.length}
-                        isLoading={isLoadingComments}
-                      />
-                    )}
-                    {tab === 'images' && (
-                      <CounterBadge
-                        count={imageCount === null ? null : imageCount}
-                        isLoading={isLoadingImageCount}
-                      />
-                    )}
-                  </button>
-                ))
-              })()}
-            </nav>
+            <div className='relative'>
+              {/* Scroll gradient indicators */}
+              <div
+                className={`absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent pointer-events-none z-10 transition-opacity duration-200 ${
+                  showLeftGradient ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
+              <div
+                className={`absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none z-10 transition-opacity duration-200 ${
+                  showRightGradient ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
+
+              <nav
+                ref={tabsRef}
+                onScroll={handleTabScroll}
+                className='flex space-x-8 overflow-x-auto scrollbar-hide pb-2 -mb-2'
+                aria-label='Tabs'
+                style={{
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                }}
+              >
+                {(() => {
+                  const tabs: (
+                    | 'details'
+                    | 'whale-info'
+                    | 'additional'
+                    | 'comments'
+                    | 'case-study'
+                    | 'necropsy'
+                    | 'images'
+                  )[] = ['details', 'whale-info', 'additional', 'comments']
+                  if (caseData.HasCaseStudy) {
+                    tabs.push('case-study')
+                  }
+                  if (caseData.HasNecropsyReport) {
+                    tabs.push('necropsy')
+                  }
+                  if (caseData.HasImages) {
+                    tabs.push('images')
+                  }
+                  return tabs.map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`${
+                        activeTab === tab
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center flex-shrink-0`}
+                    >
+                      {tab
+                        .replace('-', ' ')
+                        .split(' ')
+                        .map((w) => w[0].toUpperCase() + w.substring(1))
+                        .join(' ')}
+                      {tab === 'comments' && (
+                        <CounterBadge
+                          count={comments === null ? null : comments.length}
+                          isLoading={isLoadingComments}
+                        />
+                      )}
+                      {tab === 'images' && (
+                        <CounterBadge
+                          count={imageCount === null ? null : imageCount}
+                          isLoading={isLoadingImageCount}
+                        />
+                      )}
+                    </button>
+                  ))
+                })()}
+              </nav>
+            </div>
           </div>
 
           {/* Content Container */}
