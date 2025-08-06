@@ -43,18 +43,6 @@ const InjuryType = () => {
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor((row) => row.CaseId ?? row.InjuryId, {
-        id: 'caseId',
-        header: 'Injury/Case ID',
-        cell: (info) => (
-          <button
-            onClick={() => setSelectedInjury(info.row.original)}
-            className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
-          >
-            {info.getValue()}
-          </button>
-        ),
-      }),
       columnHelper.accessor('EGNo', {
         header: 'EG No',
         cell: (info) => {
@@ -73,6 +61,18 @@ const InjuryType = () => {
           )
         },
         filterFn: 'includesString',
+      }),
+      columnHelper.accessor((row) => row.CaseId ?? row.InjuryId, {
+        id: 'caseId',
+        header: 'Injury/Case ID',
+        cell: (info) => (
+          <button
+            onClick={() => setSelectedInjury(info.row.original)}
+            className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+          >
+            {info.getValue()}
+          </button>
+        ),
       }),
 
       columnHelper.accessor('InjuryTypeDescription', {
