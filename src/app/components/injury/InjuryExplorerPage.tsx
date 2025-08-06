@@ -45,7 +45,7 @@ interface InjuryExplorerPageProps {
   charts: ChartConfig[]
   tableColumns: (
     setSelectedInjury: (injury: WhaleInjury | null) => void
-  ) => ColumnDef<WhaleInjury>[]
+  ) => any[]
   popupContext: 'entanglement' | 'vessel-strike' | 'unknown-other' | 'total'
   defaultSideBySide?: boolean
 }
@@ -104,9 +104,7 @@ export default function InjuryExplorerPage({
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [selectedInjury, setSelectedInjury] = useState<WhaleInjury | null>(
-    null
-  )
+  const [selectedInjury, setSelectedInjury] = useState<WhaleInjury | null>(null)
 
   const columns = useMemo(
     () => getTableColumns(setSelectedInjury),
