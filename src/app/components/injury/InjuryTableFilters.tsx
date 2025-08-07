@@ -266,11 +266,13 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
       id: 'InjuryAccountDescription',
       label: 'Injury Description',
       type: 'select',
+      isMulti: true,
     },
     {
       id: 'InjurySeverityDescription',
       label: 'Injury Severity',
       type: 'select',
+      isMulti: true,
     },
     {
       id: 'UnusualMortalityEventDescription',
