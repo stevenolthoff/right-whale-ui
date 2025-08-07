@@ -21,15 +21,12 @@ import {
 import { WhaleInjury } from '@/app/types/whaleInjury'
 
 import InjuryDetailsPopup from '@/app/components/injury/InjuryDetailsPopup'
-import { useFilteredInjuryDataStore } from '@/app/stores/useFilteredInjuryDataStore'
 
 const columnHelper = createColumnHelper<WhaleInjury>()
 
 const Entanglement = () => {
   const chartRef = useRef<HTMLDivElement>(null)
   const { data: allData, loading, error } = useWhaleInjuryDataStore()
-  const { filteredData: tableFilteredData, setFilteredData } =
-    useFilteredInjuryDataStore()
 
   const entanglementData = useMemo(() => {
     if (!allData) return []
@@ -45,23 +42,28 @@ const Entanglement = () => {
   )
 
   const chartData = (() => {
-    if (!tableFilteredData) return []
+    if (!entanglementData) return []
 
     const yearData = new Map<number, Record<string, number>>()
 
-    tableFilteredData.forEach((item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      const gearType = item.InjuryAccountDescription
+    entanglementData
+      .filter((item) => {
+        const year = new Date(item.DetectionDate).getFullYear()
+        return year >= yearRange[0] && year <= yearRange[1]
+      })
+      .forEach((item) => {
+        const year = new Date(item.DetectionDate).getFullYear()
+        const gearType = item.InjuryAccountDescription
 
-      if (!yearData.has(year)) {
-        yearData.set(year, {
-          Gear: 0,
-          'No Gear': 0,
-        })
-      }
-      const counts = yearData.get(year)!
-      counts[gearType] = (counts[gearType] || 0) + 1
-    })
+        if (!yearData.has(year)) {
+          yearData.set(year, {
+            Gear: 0,
+            'No Gear': 0,
+          })
+        }
+        const counts = yearData.get(year)!
+        counts[gearType] = (counts[gearType] || 0) + 1
+      })
 
     const formattedData = []
     for (let year = yearRange[0]; year <= yearRange[1]; year++) {
@@ -163,10 +165,6 @@ const Entanglement = () => {
     },
     autoResetPageIndex: false,
   })
-
-  useEffect(() => {
-    setFilteredData(table.getFilteredRowModel().rows.map((row) => row.original))
-  }, [table.getFilteredRowModel().rows, setFilteredData])
 
   useEffect(() => {
     table.getColumn('DetectionDate')?.setFilterValue(yearRange)
