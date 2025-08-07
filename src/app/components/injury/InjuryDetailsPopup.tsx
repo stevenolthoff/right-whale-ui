@@ -1,8 +1,9 @@
 import React, { useEffect, useCallback, useState } from 'react'
 import { WhaleInjury } from '@/app/types/whaleInjury'
-import { XMarkIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, ArrowsPointingOutIcon, ArrowsPointingInIcon } from '@heroicons/react/24/outline'
 import axios from 'axios'
 import { useAuthStore } from '@/app/store/auth'
+import { usePopupExpandStore } from '@/app/stores/usePopupExpandStore'
 import { RW_BACKEND_URL_CONFIG, url_join } from '@/app/config'
 import { Loader } from '@/app/components/ui/Loader'
 
@@ -430,6 +431,7 @@ const InjuryDetailsPopup: React.FC<InjuryDetailsPopupProps> = ({
   context,
 }) => {
   const [activeTab, setActiveTab] = useState<TabOptions>('details')
+  const { isExpanded, toggleExpanded } = usePopupExpandStore()
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -438,8 +440,12 @@ const InjuryDetailsPopup: React.FC<InjuryDetailsPopupProps> = ({
       if (event.key === 'Escape') {
         onClose()
       }
+      if (event.key === 'F11') {
+        event.preventDefault()
+        toggleExpanded()
+      }
     },
-    [isOpen, onClose]
+    [isOpen, onClose, toggleExpanded]
   )
 
   useEffect(() => {
@@ -551,7 +557,13 @@ const InjuryDetailsPopup: React.FC<InjuryDetailsPopupProps> = ({
       aria-labelledby='injury-details-title'
     >
       <div className='flex items-center justify-center min-h-screen'>
-        <div className='relative bg-white w-full h-screen sm:h-[600px] sm:max-w-2xl sm:rounded-2xl shadow-2xl sm:mx-auto sm:my-8 animate-in fade-in duration-300 slide-in-from-bottom-4 flex flex-col'>
+        <div
+          className={`relative bg-white shadow-2xl flex flex-col transition-all duration-300 ease-in-out ${
+            isExpanded
+              ? 'w-screen h-screen rounded-none'
+              : 'w-full h-screen sm:h-[600px] sm:max-w-2xl sm:rounded-2xl sm:mx-auto sm:my-8'
+          } animate-in fade-in duration-300 slide-in-from-bottom-4`}
+        >
           <div className='flex-none flex flex-col space-y-1 p-4 sm:p-8 pb-4 border-b border-gray-100'>
             <div className='flex justify-between items-center'>
               <h2
@@ -560,13 +572,26 @@ const InjuryDetailsPopup: React.FC<InjuryDetailsPopupProps> = ({
               >
                 Record ID: {injuryData.RecordId}
               </h2>
-              <button
-                onClick={onClose}
-                className='text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full'
-                aria-label='Close dialog'
-              >
-                <XMarkIcon className='h-6 w-6' />
-              </button>
+              <div className='flex items-center gap-2'>
+                <button
+                  onClick={toggleExpanded}
+                  className='hidden sm:block text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full'
+                  aria-label={isExpanded ? 'Shrink dialog' : 'Expand dialog'}
+                >
+                  {isExpanded ? (
+                    <ArrowsPointingInIcon className='h-6 w-6' />
+                  ) : (
+                    <ArrowsPointingOutIcon className='h-6 w-6' />
+                  )}
+                </button>
+                <button
+                  onClick={onClose}
+                  className='text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full'
+                  aria-label='Close dialog'
+                >
+                  <XMarkIcon className='h-6 w-6' />
+                </button>
+              </div>
             </div>
             <p className='text-sm text-gray-500'>
               Details for North Atlantic Right Whale #{injuryData.EGNo}
