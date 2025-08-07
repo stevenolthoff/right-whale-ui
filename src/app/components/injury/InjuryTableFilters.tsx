@@ -213,6 +213,7 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
       IsDead: new Set(),
       DeathCauseDescription: new Set(),
       ForensicsCompleted: new Set(),
+      VesselSizeDescription: new Set(),
     }
 
     if (data) {
@@ -294,7 +295,7 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
     {
       id: 'VesselSizeDescription',
       label: 'Vessel Size',
-      type: 'text',
+      type: 'select',
     },
     {
       id: 'InjuryTimeFrame',

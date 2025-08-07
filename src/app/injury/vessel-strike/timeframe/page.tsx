@@ -272,7 +272,11 @@ export default function VesselStrikeTimeframePage() {
       }),
       columnHelper.accessor('VesselSizeDescription', {
         header: 'Vessel Size',
-        filterFn: 'includesString',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
+        filterFn: 'equalsString',
       }),
       columnHelper.accessor('InjuryTimeFrame', {
         header: 'Timeframe (days)',
