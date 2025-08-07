@@ -93,7 +93,7 @@ const Entanglement = () => {
         header: 'EG No',
         cell: (info) => {
           const egNo = info.getValue() as string
-          if (!egNo) return 'N/A'
+          if (!egNo || egNo === '') return 'N/A'
 
           const isFourDigit = /^\d{4}$/.test(egNo)
 
@@ -128,12 +128,18 @@ const Entanglement = () => {
       }),
       columnHelper.accessor('InjuryAccountDescription', {
         header: 'Injury Description',
-        cell: (info) => info.getValue() || 'N/A',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('InjurySeverityDescription', {
-        header: 'Injury Severity',
-        cell: (info) => info.getValue() || 'N/A',
+        header: 'Severity',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('DetectionDate', {
@@ -147,8 +153,11 @@ const Entanglement = () => {
         },
       }),
       columnHelper.accessor('InjuryTimeFrame', {
-        header: 'Timeframe',
-        cell: (info) => info.getValue() || 'N/A',
+        header: 'Timeframe (days)',
+        cell: (info) => {
+          const value = info.getValue()
+          return value !== null && value !== undefined ? value : 'N/A'
+        },
         filterFn: (row, id, value) => {
           if (!value) return true
           const timeframe = row.getValue(id) as number | null

@@ -32,7 +32,7 @@ const getTableColumns = (
     header: 'EG No',
     cell: (info) => {
       const egNo = info.getValue() as string
-      if (!egNo) return 'N/A'
+      if (!egNo || egNo === '') return 'N/A'
 
       const isFourDigit = /^\d{4}$/.test(egNo)
 
@@ -119,10 +119,18 @@ const getTableColumns = (
   }),
   columnHelper.accessor('GearOriginDescription', {
     header: 'Gear Origin',
+    cell: (info) => {
+      const value = info.getValue()
+      return value && value !== '' ? value : 'N/A'
+    },
     filterFn: 'equalsString',
   }),
   columnHelper.accessor('GearComplexityDescription', {
     header: 'Gear Complexity',
+    cell: (info) => {
+      const value = info.getValue()
+      return value && value !== '' ? value : 'N/A'
+    },
     filterFn: 'equalsString',
   }),
   columnHelper.accessor('ConstrictingWrap', {

@@ -111,7 +111,10 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
       }),
       columnHelper.accessor('InjuryTypeDescription', {
         header: 'Injury Type',
-        cell: (info) => info.getValue(),
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
       }),
       columnHelper.accessor('InjuryAccountDescription', {
         header: 'Injury Description',
@@ -163,7 +166,7 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
           if (typeof filterValue === 'string') {
             try {
               ;[minYear, maxYear] = JSON.parse(filterValue)
-            } catch (e) {
+            } catch {
               return true
             }
           } else if (Array.isArray(filterValue)) {
@@ -185,7 +188,10 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
       }),
       columnHelper.accessor('UnusualMortalityEventDescription', {
         header: 'UME Status',
-        cell: (info) => info.getValue() || 'N/A',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: (row, columnId, filterValue) => {
           if (
             !filterValue ||
@@ -227,7 +233,10 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
       ),
       columnHelper.accessor('MonitoringCaseAgeClass', {
         header: 'Age Class',
-        cell: (info) => info.getValue() || 'N/A',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: (row, columnId, filterValue) => {
           if (!filterValue || filterValue.length === 0) return true
           const value = row.getValue(columnId) || 'N/A'

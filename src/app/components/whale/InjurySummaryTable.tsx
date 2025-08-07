@@ -56,7 +56,10 @@ export const columns: ColumnDef<WhaleInjury>[] = [
         </Button>
       )
     },
-    cell: (info) => info.getValue() || 'N/A',
+    cell: (info) => {
+      const value = info.getValue()
+      return value && value !== '' ? value : 'N/A'
+    },
   },
   {
     accessorKey: 'InjuryTypeDescription',
@@ -71,7 +74,10 @@ export const columns: ColumnDef<WhaleInjury>[] = [
         </Button>
       )
     },
-    cell: (info) => info.getValue() || 'N/A',
+    cell: (info) => {
+      const value = info.getValue()
+      return value && value !== '' ? value : 'N/A'
+    },
   },
   {
     accessorKey: 'InjuryAccountDescription',
@@ -86,7 +92,10 @@ export const columns: ColumnDef<WhaleInjury>[] = [
         </Button>
       )
     },
-    cell: (info) => info.getValue() || 'N/A',
+    cell: (info) => {
+      const value = info.getValue()
+      return value && value !== '' ? value : 'N/A'
+    },
   },
   {
     accessorKey: 'InjurySeverityDescription',
@@ -101,7 +110,10 @@ export const columns: ColumnDef<WhaleInjury>[] = [
         </Button>
       )
     },
-    cell: (info) => info.getValue() || 'N/A',
+    cell: (info) => {
+      const value = info.getValue()
+      return value && value !== '' ? value : 'N/A'
+    },
   },
 ]
 

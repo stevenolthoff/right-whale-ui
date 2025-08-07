@@ -19,7 +19,6 @@ import {
   createColumnHelper,
   SortingState,
   ColumnFiltersState,
-  ColumnDef,
 } from '@tanstack/react-table'
 
 import InjuryDetailsPopup from '@/app/components/injury/InjuryDetailsPopup'
@@ -113,12 +112,12 @@ export default function EntanglementByGearPage() {
 
   const getTableColumns = (
     setSelectedInjury: (injury: WhaleInjury | null) => void
-  ): ColumnDef<WhaleInjury>[] => [
+  ) => [
     columnHelper.accessor('EGNo', {
       header: 'EG No',
       cell: (info) => {
         const egNo = info.getValue() as string
-        if (!egNo) return 'N/A'
+        if (!egNo || egNo === '') return 'N/A'
 
         const isFourDigit = /^\d{4}$/.test(egNo)
 
@@ -205,10 +204,18 @@ export default function EntanglementByGearPage() {
     }),
     columnHelper.accessor('GearOriginDescription', {
       header: 'Gear Origin',
+      cell: (info) => {
+        const value = info.getValue()
+        return value && value !== '' ? value : 'N/A'
+      },
       filterFn: 'equalsString',
     }),
     columnHelper.accessor('GearComplexityDescription', {
       header: 'Gear Complexity',
+      cell: (info) => {
+        const value = info.getValue()
+        return value && value !== '' ? value : 'N/A'
+      },
       filterFn: 'equalsString',
     }),
     columnHelper.accessor('ConstrictingWrap', {
