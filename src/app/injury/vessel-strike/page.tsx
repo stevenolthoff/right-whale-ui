@@ -133,7 +133,7 @@ const VesselStrike = () => {
         ),
       }),
       columnHelper.accessor('InjuryAccountDescription', {
-        header: 'Injury Account',
+        header: 'Injury Description',
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('InjurySeverityDescription', {

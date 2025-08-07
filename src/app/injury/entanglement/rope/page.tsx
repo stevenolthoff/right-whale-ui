@@ -188,7 +188,7 @@ export default function EntanglementByRopeAndAgePage() {
         ),
       }),
       columnHelper.accessor('InjuryAccountDescription', {
-        header: 'Injury Account',
+        header: 'Injury Description',
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('InjurySeverityDescription', {

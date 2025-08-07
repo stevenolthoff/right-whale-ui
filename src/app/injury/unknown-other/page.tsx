@@ -117,7 +117,7 @@ export default function UnknownOtherInjuriesPage() {
         filterFn: 'arrIncludesSome',
       }),
       columnHelper.accessor('InjuryAccountDescription', {
-        header: 'Injury Account',
+        header: 'Injury Description',
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('InjurySeverityDescription', {
