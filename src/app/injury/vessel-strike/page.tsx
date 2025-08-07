@@ -219,6 +219,24 @@ const VesselStrike = () => {
         },
         filterFn: 'equalsString',
       }),
+      columnHelper.accessor('ForensicsCompleted', {
+        header: 'Forensics Completed',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
+      }),
+      columnHelper.accessor('VesselSizeDescription', {
+        header: 'Vessel Size',
+        filterFn: 'includesString',
+      }),
       columnHelper.accessor('InjuryTimeFrame', {
         header: 'Timeframe (days)',
         cell: (info) => {

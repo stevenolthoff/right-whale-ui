@@ -212,6 +212,7 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
       GearRetrieved: new Set(),
       IsDead: new Set(),
       DeathCauseDescription: new Set(),
+      ForensicsCompleted: new Set(),
     }
 
     if (data) {
@@ -224,7 +225,8 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
             if (
               key === 'ConstrictingWrap' ||
               key === 'Disentangled' ||
-              key === 'GearRetrieved'
+              key === 'GearRetrieved' ||
+              key === 'ForensicsCompleted'
             ) {
               if (value === 'Y') options[key].add('Yes')
               else if (value === 'N') options[key].add('No')
@@ -288,6 +290,12 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
     { id: 'ConstrictingWrap', label: 'Constricting Wrap', type: 'select' },
     { id: 'Disentangled', label: 'Disentangled', type: 'select' },
     { id: 'GearRetrieved', label: 'Gear Retrieved', type: 'select' },
+    { id: 'ForensicsCompleted', label: 'Forensics Completed', type: 'select' },
+    {
+      id: 'VesselSizeDescription',
+      label: 'Vessel Size',
+      type: 'text',
+    },
     {
       id: 'InjuryTimeFrame',
       label: 'Timeframe (days)',
