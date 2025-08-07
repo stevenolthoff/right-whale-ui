@@ -94,7 +94,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             human impacts on the species. For reasons outlined below, data here
             represent a minimum of injury events and are likely underestimates.
           </p>
-          <ul className='text-lg text-gray-700 leading-relaxed space-y-2 ml-6 list-disc'>
+          <ul className='text-lg text-gray-700 leading-relaxed space-y-2 ml-6 list-disc font-bold'>
             <li>Injuries must be detected to be counted.</li>
             <li>
               Poor quality, distant, and partial images of a whale as well as
