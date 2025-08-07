@@ -1,6 +1,10 @@
 import React, { useEffect, useCallback, useState } from 'react'
 import { WhaleInjury } from '@/app/types/whaleInjury'
 import { XMarkIcon } from '@heroicons/react/24/outline'
+import axios from 'axios'
+import { useAuthStore } from '@/app/store/auth'
+import { RW_BACKEND_URL_CONFIG, url_join } from '@/app/config'
+import { Loader } from '@/app/components/ui/Loader'
 
 interface InjuryDetailsPopupProps {
   injuryData: WhaleInjury | null
@@ -14,6 +18,172 @@ const formatYN = (value: string | null | undefined) => {
   if (value === 'N') return 'No'
   if (value) return value // To handle cases like "Unknown"
   return 'N/A'
+}
+
+const NecropsyContent: React.FC<{ injuryData: WhaleInjury }> = ({
+  injuryData,
+}) => {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { token } = useAuthStore()
+
+  useEffect(() => {
+    const fetchPdf = async () => {
+      if (!injuryData.RecordId) {
+        setError('Record ID is missing.')
+        setLoading(false)
+        return
+      }
+      setLoading(true)
+      setError(null)
+      try {
+        const url = url_join(
+          RW_BACKEND_URL_CONFIG.BASE_URL,
+          `/anthro/api/v1/whale_injuries/${injuryData.RecordId}/necropsy/`
+        )
+        const response = await axios.get(url, {
+          responseType: 'blob',
+          headers: {
+            Authorization: `token ${token}`,
+          },
+        })
+        const file = new Blob([response.data], { type: 'application/pdf' })
+        const fileURL = URL.createObjectURL(file)
+        setPdfUrl(fileURL)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load PDF.')
+        console.error('Error fetching necropsy PDF:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPdf()
+
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [injuryData.RecordId, token])
+
+  if (loading) {
+    return (
+      <div className='flex items-center justify-center h-full'>
+        <Loader />
+        <p className='ml-2'>Loading Necropsy Report...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className='flex items-center justify-center h-full text-red-500'>
+        <p>Error loading necropsy report: No report found.</p>
+      </div>
+    )
+  }
+
+  if (pdfUrl) {
+    return (
+      <iframe
+        src={pdfUrl}
+        className='w-full h-full'
+        title={`Necropsy Report for Record ${injuryData.RecordId}`}
+      />
+    )
+  }
+
+  return (
+    <div className='flex items-center justify-center h-full text-gray-500'>
+      <p>No necropsy report available.</p>
+    </div>
+  )
+}
+
+const CaseStudyContent: React.FC<{ injuryData: WhaleInjury }> = ({
+  injuryData,
+}) => {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { token } = useAuthStore()
+
+  useEffect(() => {
+    const fetchPdf = async () => {
+      if (!injuryData.RecordId) {
+        setError('Record ID is missing.')
+        setLoading(false)
+        return
+      }
+      setLoading(true)
+      setError(null)
+      try {
+        const url = url_join(
+          RW_BACKEND_URL_CONFIG.BASE_URL,
+          `/anthro/api/v1/whale_injuries/${injuryData.RecordId}/case_study/`
+        )
+        const response = await axios.get(url, {
+          responseType: 'blob',
+          headers: {
+            Authorization: `token ${token}`,
+          },
+        })
+        const file = new Blob([response.data], { type: 'application/pdf' })
+        const fileURL = URL.createObjectURL(file)
+        setPdfUrl(fileURL)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load PDF.')
+        console.error('Error fetching case study PDF:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPdf()
+
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [injuryData.RecordId, token])
+
+  if (loading) {
+    return (
+      <div className='flex items-center justify-center h-full'>
+        <Loader />
+        <p className='ml-2'>Loading Case Study...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className='flex items-center justify-center h-full text-red-500'>
+        <p>Error loading case study: No study found.</p>
+      </div>
+    )
+  }
+
+  if (pdfUrl) {
+    return (
+      <iframe
+        src={pdfUrl}
+        className='w-full h-full'
+        title={`Case Study for Record ${injuryData.RecordId}`}
+      />
+    )
+  }
+
+  return (
+    <div className='flex items-center justify-center h-full text-gray-500'>
+      <p>No case study available.</p>
+    </div>
+  )
 }
 
 const DetailsContent: React.FC<{
@@ -251,7 +421,7 @@ const CommentsContent: React.FC<{ injuryData: WhaleInjury }> = ({
   )
 }
 
-type TabOptions = 'details' | 'whale-info' | 'injury-details' | 'comments'
+type TabOptions = 'details' | 'whale-info' | 'injury-details' | 'comments' | 'necropsy' | 'case-study'
 
 const InjuryDetailsPopup: React.FC<InjuryDetailsPopupProps> = ({
   injuryData,
@@ -293,6 +463,18 @@ const InjuryDetailsPopup: React.FC<InjuryDetailsPopupProps> = ({
     }
   }, [isOpen, injuryData?.InjuryId, injuryData?.CaseId])
 
+  // Reset active tab if it's not available for the current injury data
+  useEffect(() => {
+    if (isOpen) {
+      if (activeTab === 'necropsy' && !injuryData?.HasNecropsyReport) {
+        setActiveTab('details')
+      }
+      if (activeTab === 'case-study' && !injuryData?.HasCaseStudy) {
+        setActiveTab('details')
+      }
+    }
+  }, [isOpen, injuryData, activeTab])
+
   if (!isOpen || !injuryData) return null
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -308,6 +490,12 @@ const InjuryDetailsPopup: React.FC<InjuryDetailsPopupProps> = ({
       'injury-details',
       'comments',
     ]
+    if (injuryData.HasNecropsyReport) {
+      tabs.push('necropsy')
+    }
+    if (injuryData.HasCaseStudy) {
+      tabs.push('case-study')
+    }
 
     return (
       <div className='flex-none px-4 sm:px-8 border-b border-gray-200'>
@@ -344,6 +532,10 @@ const InjuryDetailsPopup: React.FC<InjuryDetailsPopupProps> = ({
         return <InjuryDetailsContent injuryData={injuryData} />
       case 'comments':
         return <CommentsContent injuryData={injuryData} />
+      case 'necropsy':
+        return <NecropsyContent injuryData={injuryData} />
+      case 'case-study':
+        return <CaseStudyContent injuryData={injuryData} />
       default:
         return null
     }
@@ -351,7 +543,7 @@ const InjuryDetailsPopup: React.FC<InjuryDetailsPopupProps> = ({
 
   return (
     <div
-      key={injuryData.InjuryId || injuryData.CaseId}
+      key={injuryData.RecordId}
       className='fixed top-0 left-0 right-0 bottom-0 z-[9999] bg-gray-900/25 backdrop-blur-sm'
       onClick={handleBackdropClick}
       role='dialog'
@@ -366,9 +558,7 @@ const InjuryDetailsPopup: React.FC<InjuryDetailsPopupProps> = ({
                 id='injury-details-title'
                 className='text-2xl sm:text-3xl font-semibold text-gray-900'
               >
-                {injuryData.InjuryId
-                  ? `Injury ID: ${injuryData.InjuryId}`
-                  : `Case ID: ${injuryData.CaseId}`}
+                Record ID: {injuryData.RecordId}
               </h2>
               <button
                 onClick={onClose}
