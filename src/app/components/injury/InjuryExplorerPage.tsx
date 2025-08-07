@@ -24,6 +24,7 @@ import {
 import { WhaleInjury } from '@/app/types/whaleInjury'
 import InjuryDetailsPopup from '@/app/components/injury/InjuryDetailsPopup'
 import { useInjuryYearRangeStore } from '@/app/stores/useInjuryYearRangeStore'
+import { useFilteredInjuryDataStore } from '@/app/stores/useFilteredInjuryDataStore'
 
 type ChartConfig = {
   title: string
@@ -41,11 +42,11 @@ interface InjuryExplorerPageProps {
   chartDataProcessor: (
     data: WhaleInjury[],
     yearRange: [number, number]
-  ) => Record<string, any>[]
+  ) => Record<string, unknown>[]
   charts: ChartConfig[]
   tableColumns: (
     setSelectedInjury: (injury: WhaleInjury | null) => void
-  ) => any[]
+  ) => ColumnDef<WhaleInjury, unknown>[]
   popupContext: 'entanglement' | 'vessel-strike' | 'unknown-other' | 'total'
   defaultSideBySide?: boolean
 }
@@ -63,25 +64,27 @@ export default function InjuryExplorerPage({
   const { data: allData, loading, error } = useWhaleInjuryDataStore()
   const { yearRange, setYearRange, minYear, maxYear, setMinMaxYears } =
     useInjuryYearRangeStore()
+  const { filteredData: tableFilteredData, setFilteredData } =
+    useFilteredInjuryDataStore()
 
   const [isSideBySide, setIsSideBySide] = useState(defaultSideBySide)
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
 
-  const filteredData = useMemo(() => {
+  const pageSpecificData = useMemo(() => {
     if (!allData) return []
     return allData.filter(injuryFilter)
   }, [allData, injuryFilter])
 
   useEffect(() => {
-    if (filteredData.length > 0) {
-      setMinMaxYears(filteredData)
+    if (pageSpecificData.length > 0) {
+      setMinMaxYears(pageSpecificData)
     }
-  }, [filteredData, setMinMaxYears])
+  }, [pageSpecificData, setMinMaxYears])
 
   const chartData = useMemo(() => {
-    if (!filteredData.length) return []
-    return chartDataProcessor(filteredData, yearRange)
-  }, [filteredData, yearRange, chartDataProcessor])
+    if (!tableFilteredData.length) return []
+    return chartDataProcessor(tableFilteredData, yearRange)
+  }, [tableFilteredData, yearRange, chartDataProcessor])
 
   const totalCount = useMemo(() => {
     if (!chartData) return 0
@@ -112,7 +115,7 @@ export default function InjuryExplorerPage({
   )
 
   const table = useReactTable({
-    data: filteredData || [],
+    data: pageSpecificData || [],
     columns: columns,
     state: { sorting, columnFilters },
     onSortingChange: setSorting,
@@ -124,6 +127,10 @@ export default function InjuryExplorerPage({
     initialState: { pagination: { pageSize: 10 } },
     autoResetPageIndex: false,
   })
+
+  useEffect(() => {
+    setFilteredData(table.getFilteredRowModel().rows.map((row) => row.original))
+  }, [table.getFilteredRowModel().rows, setFilteredData])
 
   useEffect(() => {
     table.getColumn('DetectionDate')?.setFilterValue(yearRange)
@@ -214,7 +221,7 @@ export default function InjuryExplorerPage({
         />
         <InjuryTableFilters
           table={table}
-          data={filteredData || []}
+          data={pageSpecificData || []}
           yearRange={yearRange}
           setYearRange={setYearRange}
           minYear={minYear}
