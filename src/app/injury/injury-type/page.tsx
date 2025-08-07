@@ -240,42 +240,48 @@ const InjuryType = () => {
 
   const chartData = useMemo(() => {
     if (!data) return []
-    const injuryTypes = Array.from(
+    // Get all possible injury types from the full dataset for a consistent chart legend
+    const allInjuryTypes = Array.from(
       new Set(data.map((item) => item.InjuryTypeDescription))
-    ).filter(Boolean)
+    ).filter(Boolean) as string[]
+
+    // Get the currently filtered data from the table model
+    const filteredTableData = table
+      .getFilteredRowModel()
+      .rows.map((row) => row.original)
 
     const yearData = new Map<number, Record<string, number>>()
 
-    data
-      .filter((item) => {
-        const year = new Date(item.DetectionDate).getFullYear()
-        return year >= yearRange[0] && year <= yearRange[1]
-      })
-      .forEach((item) => {
-        const year = new Date(item.DetectionDate).getFullYear()
+    // Process only the filtered data to get counts
+    filteredTableData.forEach((item) => {
+      const year = new Date(item.DetectionDate).getFullYear()
+      // Ensure data is within the year range slider
+      if (year >= yearRange[0] && year <= yearRange[1]) {
         if (!yearData.has(year)) {
           yearData.set(
             year,
-            Object.fromEntries(injuryTypes.map((type) => [type, 0]))
+            Object.fromEntries(allInjuryTypes.map((type) => [type, 0]))
           )
         }
         const counts = yearData.get(year)!
         if (item.InjuryTypeDescription) {
           counts[item.InjuryTypeDescription]++
         }
-      })
+      }
+    })
 
+    // Format data for the chart, ensuring all years in the range are present for the x-axis
     const formattedData = []
     for (let year = yearRange[0]; year <= yearRange[1]; year++) {
       formattedData.push({
         year,
         ...(yearData.get(year) ||
-          Object.fromEntries(injuryTypes.map((type) => [type, 0]))),
+          Object.fromEntries(allInjuryTypes.map((type) => [type, 0]))),
       })
     }
 
     return formattedData.sort((a, b) => a.year - b.year)
-  }, [data, yearRange])
+  }, [data, yearRange, table.getFilteredRowModel().rows]) // Add table rows to dependency array
 
   const handleChartFilter = useCallback(
     (hiddenSeries: Set<string>) => {
