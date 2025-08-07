@@ -106,7 +106,7 @@ const VesselStrike = () => {
         header: 'EG No',
         cell: (info) => {
           const egNo = info.getValue() as string
-          if (!egNo) return null
+          if (!egNo) return 'N/A'
 
           const isFourDigit = /^\d{4}$/.test(egNo)
 
@@ -140,10 +140,12 @@ const VesselStrike = () => {
       }),
       columnHelper.accessor('InjuryAccountDescription', {
         header: 'Injury Description',
+        cell: (info) => info.getValue() || 'N/A',
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('InjurySeverityDescription', {
         header: 'Severity',
+        cell: (info) => info.getValue() || 'N/A',
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('DetectionDate', {
@@ -158,6 +160,7 @@ const VesselStrike = () => {
       }),
       columnHelper.accessor('InjuryAge', {
         header: 'Age',
+        cell: (info) => info.getValue() || 'N/A',
         filterFn: (row, id, value) => {
           if (!value) return true
           const ageValue = row.getValue(id) as string | null
@@ -169,10 +172,12 @@ const VesselStrike = () => {
       }),
       columnHelper.accessor('InjuryAgeClass', {
         header: 'Age Class',
+        cell: (info) => info.getValue() || 'N/A',
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('GenderDescription', {
         header: 'Sex',
+        cell: (info) => info.getValue() || 'N/A',
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('Cow', {
@@ -185,14 +190,17 @@ const VesselStrike = () => {
       }),
       columnHelper.accessor('UnusualMortalityEventDescription', {
         header: 'UME Status',
+        cell: (info) => info.getValue() || 'N/A',
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('CountryOriginDescription', {
         header: 'Injury Country Origin',
+        cell: (info) => info.getValue() || 'N/A',
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('InjuryTimeFrame', {
         header: 'Timeframe (days)',
+        cell: (info) => info.getValue() || 'N/A',
         filterFn: (row, id, value) => {
           if (!value) return true
           const timeframe = row.getValue(id) as number | null
@@ -224,6 +232,7 @@ const VesselStrike = () => {
       }),
       columnHelper.accessor('DeathCauseDescription', {
         header: 'Cause of Death',
+        cell: (info) => info.getValue() || 'N/A',
         filterFn: 'equalsString',
       }),
     ],

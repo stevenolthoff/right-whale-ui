@@ -118,7 +118,7 @@ export default function EntanglementByGearPage() {
       header: 'EG No',
       cell: (info) => {
         const egNo = info.getValue() as string
-        if (!egNo) return null
+        if (!egNo) return 'N/A'
 
         const isFourDigit = /^\d{4}$/.test(egNo)
 

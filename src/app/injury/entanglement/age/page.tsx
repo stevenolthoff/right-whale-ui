@@ -2,7 +2,7 @@
 
 import React from 'react'
 import InjuryExplorerPage from '@/app/components/injury/InjuryExplorerPage'
-import { createColumnHelper, ColumnDef } from '@tanstack/react-table'
+import { createColumnHelper } from '@tanstack/react-table'
 import { WhaleInjury } from '@/app/types/whaleInjury'
 
 const columnHelper = createColumnHelper<WhaleInjury>()
@@ -27,12 +27,12 @@ const mapAgeClassToAbbreviation = (ageClass: string | null): string => {
 
 const getTableColumns = (
   setSelectedInjury: (injury: WhaleInjury | null) => void
-): ColumnDef<WhaleInjury>[] => [
+) => [
   columnHelper.accessor('EGNo', {
     header: 'EG No',
     cell: (info) => {
       const egNo = info.getValue() as string
-      if (!egNo) return null
+      if (!egNo) return 'N/A'
 
       const isFourDigit = /^\d{4}$/.test(egNo)
 
