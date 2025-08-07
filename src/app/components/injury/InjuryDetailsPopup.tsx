@@ -529,22 +529,32 @@ const InjuryDetailsPopup: React.FC<InjuryDetailsPopupProps> = ({
   }
 
   const renderContent = () => {
-    switch (activeTab) {
-      case 'details':
-        return <DetailsContent injuryData={injuryData} context={context} />
-      case 'whale-info':
-        return <WhaleInfoContent injuryData={injuryData} />
-      case 'injury-details':
-        return <InjuryDetailsContent injuryData={injuryData} />
-      case 'comments':
-        return <CommentsContent injuryData={injuryData} />
-      case 'necropsy':
-        return <NecropsyContent injuryData={injuryData} />
-      case 'case-study':
-        return <CaseStudyContent injuryData={injuryData} />
-      default:
-        return null
-    }
+    return (
+      <>
+        <div hidden={activeTab !== 'details'} className='h-full'>
+          <DetailsContent injuryData={injuryData} context={context} />
+        </div>
+        <div hidden={activeTab !== 'whale-info'} className='h-full'>
+          <WhaleInfoContent injuryData={injuryData} />
+        </div>
+        <div hidden={activeTab !== 'injury-details'} className='h-full'>
+          <InjuryDetailsContent injuryData={injuryData} />
+        </div>
+        <div hidden={activeTab !== 'comments'} className='h-full'>
+          <CommentsContent injuryData={injuryData} />
+        </div>
+        {injuryData.HasNecropsyReport && (
+          <div hidden={activeTab !== 'necropsy'} className='h-full'>
+            <NecropsyContent injuryData={injuryData} />
+          </div>
+        )}
+        {injuryData.HasCaseStudy && (
+          <div hidden={activeTab !== 'case-study'} className='h-full'>
+            <CaseStudyContent injuryData={injuryData} />
+          </div>
+        )}
+      </>
+    )
   }
 
   return (
