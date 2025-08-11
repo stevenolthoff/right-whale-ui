@@ -125,6 +125,17 @@ export default function EntanglementByGearPage() {
           return year >= min && year <= max
         },
       }),
+      columnHelper.accessor('InjuryAge', {
+        header: 'Age',
+        filterFn: (row, id, value) => {
+          if (!value) return true
+          const ageValue = row.getValue(id) as string | null
+          const age = ageValue ? parseInt(ageValue, 10) : null
+          if (age === null || isNaN(age)) return false
+          const [min, max] = value as [number, number]
+          return age >= min && age <= max
+        },
+      }),
       columnHelper.accessor('InjuryAgeClass', {
         header: 'Age Class',
         filterFn: 'arrIncludesSome',

@@ -315,6 +315,7 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
       type: 'select',
       isMulti: true,
     },
+    { id: 'InjuryTimeFrame', label: 'Timeframe (days)', type: 'timeframe-slider' },
     {
       id: 'LastSightedAliveDate',
       label: 'Last Sighted Alive Year',
