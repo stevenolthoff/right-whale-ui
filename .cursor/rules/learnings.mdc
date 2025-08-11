@@ -4,10 +4,6 @@ globs:
 alwaysApply: false
 ---
 
-Of course. Here is a learning entry for `learnings.md` based on the feature we just implemented.
-
----
-
 ### Learning: Synchronizing Chart and Table Filters with TanStack Table
 
 **Date:** 2024-07-26
