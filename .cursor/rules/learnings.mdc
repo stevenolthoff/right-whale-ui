@@ -44,3 +44,68 @@ When implementing custom or complex filtering with TanStack Table, **always ensu
 -   **Range Sliders:** Will pass a tuple (e.g., `[min, max]`). Requires a custom `filterFn` to check if the row's value is within the range.
 
 A quick way to debug this in the future is to inspect the table's `columnFilters` state in React DevTools to see the exact structure of the value being set by the UI.
+
+Of course. Here is a learning document entry explaining the architectural pattern for implementing two-way filtering between charts and a data table in this repository.
+
+---
+
+### Learning: Implementing Two-Way Synchronization Between Charts and a Data Table
+
+**Date:** 2024-07-26
+
+**Feature:** Creating an interactive data exploration experience where filtering the data table updates the charts, and interacting with the chart legends filters the data table. This was implemented on pages like `/injury/entanglement/age` and `/injury/entanglement/timeframe`.
+
+#### Core Architectural Pattern
+
+The key to this feature is establishing the **TanStack Table instance as the single source of truth for the filtered data.** Both the charts and the filter UI act as controllers that manipulate the table's filter state. The chart is simply a reactive visualization of the table's currently filtered data.
+
+The data flow follows this pattern:
+
+1.  A **Parent Page Component** holds all the state and logic.
+2.  The parent initializes the `useReactTable` hook, managing its `columnFilters` state.
+3.  The parent fetches the raw data and, if necessary, pre-processes it (e.g., creating categorical bins like `timeframeBin` from numerical data).
+4.  The **`InjuryTableFilters` component** receives the `table` instance and updates its column filters directly when the user interacts with inputs or dropdowns.
+5.  The **`DataChart` component** receives the *result* of the table's filtering (`table.getFilteredRowModel().rows`) as its primary data source. This ensures the chart always reflects the filtered state of the table.
+6.  When a user clicks a legend item in the **`DataChart`**, it triggers a callback function (`onHiddenSeriesChange`).
+7.  The **Parent Page Component** receives this callback, translates the chart interaction (e.g., a set of hidden series names) into a valid `ColumnFilter` that the table can understand, and updates the table's `columnFilters` state.
+8.  This state update causes the table to re-filter its data, which in turn causes the `DataChart` to re-render with the new data, closing the loop.
+
+#### Conceptual Implementation Steps for a Future AI
+
+To replicate this feature on a new page, follow these conceptual steps:
+
+1.  **Structure the Page Component:**
+    *   The main page component (e.g., `.../age/page.tsx`) should be the owner of all state and logic.
+    *   Do not use the generic `InjuryExplorerPage.tsx` component, as it abstracts away the necessary state control.
+    *   Fetch and hold the raw dataset within this component.
+
+2.  **Pre-process Data (If Necessary):**
+    *   If the chart is based on categorical bins derived from raw data (e.g., `InjuryTimeFrame` number -> `timeframeBin` string), create a `useMemo` hook to map the raw data to a new "processed" dataset that includes these new properties. This processed data will be passed to the table.
+
+3.  **Initialize the Table State:**
+    *   Use the `useState` hook in the parent component to manage the table's `sorting` and `columnFilters` state.
+    *   Instantiate the `useReactTable` hook, passing it the processed data and the state variables.
+
+4.  **Define Table Columns Correctly:**
+    *   Create the `columns` definition using `createColumnHelper`.
+    *   **Crucially, ensure the `filterFn` for each column matches the data type and structure provided by its filter UI.**
+        *   For multi-select dropdowns, use `filterFn: 'arrIncludesSome'`.
+        *   For text inputs, use `filterFn: 'includesString'`.
+        *   For range sliders, use a custom function that checks if the row's value is between the `[min, max]` values in the filter array.
+    *   This is the most common point of failure. Mismatches here lead to React concurrent rendering errors.
+
+5.  **Connect the Table and Filters UI:**
+    *   Pass the fully instantiated `table` object to the `<InjuryTable>` and `<InjuryTableFilters>` components. The filters component is designed to read the column definitions and render the appropriate UI elements automatically.
+
+6.  **Connect the Table to the Chart:**
+    *   Create a `useMemo` hook that derives the chart's data directly from the table's filtered output: `table.getFilteredRowModel().rows.map(row => row.original)`.
+    *   Pass this derived `chartData` to the `<DataChart>` component.
+
+7.  **Implement the Chart-to-Table Callback:**
+    *   Pass a callback function (e.g., `handleHiddenSeriesChange`) to the `onHiddenSeriesChange` prop of the `<DataChart>` component.
+    *   Inside this callback function in the parent component:
+        a.  Receive the set of hidden series from the chart.
+        b.  Translate this set into a filter value that the table's column can understand. For example, create an array of *visible* series names.
+        c.  Use `table.getColumn('columnId').setFilterValue()` to apply the new filter to the table. This will trigger a re-render of both the table and the chart.
+
+By following this pattern, you create a robust, reactive system where the table's state is the central authority, and both the chart and filter UI act as intuitive controllers for manipulating that state.

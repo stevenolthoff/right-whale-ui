@@ -215,6 +215,7 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
       ForensicsCompleted: new Set(),
       VesselSizeDescription: new Set(),
       timeframeBin: new Set(), // Added timeframeBin support
+      gearBin: new Set(), // Added gearBin support
     }
 
     if (data) {
@@ -291,6 +292,12 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
       id: 'GearComplexityDescription',
       label: 'Gear Complexity',
       type: 'select',
+    },
+    {
+      id: 'gearBin',
+      label: 'Gear Status',
+      type: 'select',
+      isMulti: true,
     },
     { id: 'ConstrictingWrap', label: 'Constricting Wrap', type: 'select' },
     { id: 'Disentangled', label: 'Disentangled', type: 'select' },
