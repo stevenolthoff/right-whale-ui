@@ -83,11 +83,11 @@ const getTableColumns = (
   }),
   columnHelper.accessor('InjuryAccountDescription', {
     header: 'Injury Description',
-    filterFn: 'equalsString',
+    filterFn: 'arrIncludesSome',
   }),
   columnHelper.accessor('InjurySeverityDescription', {
     header: 'Severity',
-    filterFn: 'equalsString',
+    filterFn: 'arrIncludesSome',
   }),
   columnHelper.accessor('DetectionDate', {
     header: 'Detection Year',
