@@ -253,7 +253,7 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
     { id: 'EGNo', label: 'EGNo', type: 'text' },
     { id: 'DetectionDate', label: 'Detection Year', type: 'year-slider' },
     { id: 'InjuryAge', label: 'Age', type: 'age-slider' },
-    { id: 'InjuryAgeClass', label: 'Age Class', type: 'select' },
+    { id: 'InjuryAgeClass', label: 'Age Class', type: 'select', isMulti: true },
     { id: 'GenderDescription', label: 'Sex', type: 'select' },
     { id: 'Cow', label: 'Reproductive Female', type: 'select' },
     {
