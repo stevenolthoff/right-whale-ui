@@ -1,0 +1,50 @@
+---
+description: Here we record what we've learned about this codebase whenever we run into difficulties.
+globs:
+alwaysApply: false
+---
+
+Of course. Here is a learning entry for `learnings.md` based on the feature we just implemented.
+
+---
+
+### Learning: Synchronizing Chart and Table Filters with TanStack Table
+
+**Date:** 2024-07-26
+
+**Feature:** Implementing interactive filtering where clicking a chart legend filters a TanStack React Table, specifically on the `/injury/entanglement/age` page.
+
+#### Problem / Symptom
+
+After refactoring the page to connect the chart's legend to the table's filters, a React concurrent rendering error occurred. This error only happened when using the multi-select filters for "Injury Description" and "Injury Severity" in the filter panel, but not for the "Age Class" filter which was also a multi-select.
+
+The error message was:
+```
+Error: There was an error during concurrent rendering but React was able to recover by instead synchronously rendering the entire root.
+```
+
+#### Root Cause Analysis
+
+The error was caused by a data type mismatch between the value provided by the filter UI and the filtering function (`filterFn`) expected by the table's column definition.
+
+1.  **Filter UI (`InjuryTableFilters.tsx`):** The `Select` component, when configured with `isMulti: true`, passes an **array of strings** (e.g., `['Gear', 'No Gear']`) to the table's filter state for that column.
+2.  **Table Column Definition (`.../age/page.tsx`):** The column definitions for `InjuryAccountDescription` and `InjurySeverityDescription` were incorrectly configured with `filterFn: 'equalsString'`. This function expects a single string as its filter value and performs a strict equality check (`===`).
+3.  **The Conflict:** The table attempted to compare a row's string value against an array of filter values using a function designed for string-to-string comparison. This mismatch caused an unstable state during the filtering process, triggering React's concurrent rendering error.
+
+The "Age Class" filter worked correctly because its `filterFn` had already been updated to `'arrIncludesSome'`, which is designed to check for the inclusion of a value within an array.
+
+#### Solution
+
+The fix was to ensure the `filterFn` for each column matched the data type being passed by its corresponding filter component. In this case, we changed the filter function for the multi-select columns to one that handles arrays.
+
+-   In `src/app/injury/entanglement/age/page.tsx`, the `filterFn` for `InjuryAccountDescription` and `InjurySeverityDescription` was changed from `'equalsString'` to `'arrIncludesSome'`.
+
+#### Key Takeaway
+
+When implementing custom or complex filtering with TanStack Table, **always ensure the `filterFn` for a column is compatible with the data type and structure of the filter value being provided by the UI.**
+
+-   **Multi-Select Dropdowns:** Will pass an array. Use a `filterFn` like `'arrIncludesSome'`, `'arrIncludesAll'`, or a custom function that iterates over the array.
+-   **Text Inputs:** Will pass a string. Use `'includesString'`, `'equalsString'`, etc.
+-   **Range Sliders:** Will pass a tuple (e.g., `[min, max]`). Requires a custom `filterFn` to check if the row's value is within the range.
+
+A quick way to debug this in the future is to inspect the table's `columnFilters` state in React DevTools to see the exact structure of the value being set by the UI.
