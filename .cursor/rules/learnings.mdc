@@ -112,7 +112,7 @@ By following this pattern, you create a robust, reactive system where the table'
 
 ### Table Filters for Injury Pages
 
-Always include ALL of these data filters in ALL tables in the `/injury/*` pages. Do not delete filters.
+Always include ALL of these data filters in ALL tables in the `/injury/*` pages. Do not delete filters. If some are missing, add them.
 
 ```
 EGNo
@@ -121,13 +121,14 @@ Age
 Age Class
 Sex
 Reproductive Female
+Injury Type
 Injury Description
 Injury Severity
 UME Status
 Injury Country Origin
 Gear Origin
 Gear Complexity
-Gear Status
+Rope Diameter
 Constricting Wrap
 Disentangled
 Gear Retrieved
