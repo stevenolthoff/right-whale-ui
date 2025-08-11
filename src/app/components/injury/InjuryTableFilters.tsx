@@ -173,7 +173,7 @@ const LastSightedAliveYearFilter: React.FC<{
 
 interface TableFiltersProps {
   table: Table<WhaleInjury>
-  data: WhaleInjury[]
+  data: any[] // Changed from WhaleInjury[] to any[] to accommodate pre-processed data
   yearRange: [number, number]
   setYearRange: (range: [number, number]) => void
   minYear: number
@@ -214,12 +214,13 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
       DeathCauseDescription: new Set(),
       ForensicsCompleted: new Set(),
       VesselSizeDescription: new Set(),
+      timeframeBin: new Set(), // Added timeframeBin support
     }
 
     if (data) {
-      data.forEach((item) => {
+      data.forEach((item: any) => { // Changed type to any to handle new properties
         Object.keys(options).forEach((key) => {
-          const value = item[key as keyof WhaleInjury]
+          const value = item[key as keyof typeof item]
           if (typeof value === 'boolean') {
             options[key].add(value ? 'Yes' : 'No')
           } else if (typeof value === 'string' && value) {
@@ -299,10 +300,12 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
       label: 'Vessel Size',
       type: 'select',
     },
+    // Removed InjuryTimeFrame slider and replaced with timeframeBin multi-select
     {
-      id: 'InjuryTimeFrame',
-      label: 'Timeframe (days)',
-      type: 'timeframe-slider',
+      id: 'timeframeBin',
+      label: 'Timeframe',
+      type: 'select',
+      isMulti: true,
     },
     {
       id: 'LastSightedAliveDate',
