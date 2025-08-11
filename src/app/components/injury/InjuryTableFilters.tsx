@@ -218,7 +218,8 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
     }
 
     if (data) {
-      data.forEach((item: any) => { // Changed type to any to handle new properties
+      data.forEach((item: any) => {
+        // Changed type to any to handle new properties
         Object.keys(options).forEach((key) => {
           const value = item[key as keyof typeof item]
           if (typeof value === 'boolean') {
