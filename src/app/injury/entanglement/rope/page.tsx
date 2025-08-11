@@ -1,10 +1,12 @@
 'use client'
 
-import React, { useRef, useMemo, useEffect, useState } from 'react'
+import React, { useRef, useState, useMemo, useCallback, useEffect } from 'react'
 import { useWhaleInjuryDataStore } from '@/app/stores/useWhaleInjuryDataStore'
 import { DataChart } from '@/app/components/monitoring/DataChart'
-import { ChartLayout } from '@/app/components/charts/ChartLayout'
-import { WhaleInjury } from '@/app/types/whaleInjury'
+import { Loader } from '@/app/components/ui/Loader'
+import { ErrorMessage } from '@/app/components/ui/ErrorMessage'
+import ChartAttribution from '@/app/components/charts/ChartAttribution'
+import { ExportChart } from '@/app/components/monitoring/ExportChart'
 import { InjuryTable } from '@/app/components/injury/InjuryTable'
 import { InjuryTableFilters } from '@/app/components/injury/InjuryTableFilters'
 import { InjuryDownloadButton } from '@/app/components/injury/InjuryDownloadButton'
@@ -17,12 +19,19 @@ import {
   createColumnHelper,
   SortingState,
   ColumnFiltersState,
+  Table as TanstackTable,
 } from '@tanstack/react-table'
+import { WhaleInjury } from '@/app/types/whaleInjury'
+import InjuryDetailsPopup from '@/app/components/injury/InjuryDetailsPopup'
+import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { useYearRange } from '@/app/hooks/useYearRange'
 
-import InjuryDetailsPopup from '@/app/components/injury/InjuryDetailsPopup'
+type ProcessedWhaleInjury = WhaleInjury & {
+  ageGroup: string
+  ropeDiameterBin: string
+}
 
-const columnHelper = createColumnHelper<WhaleInjury>()
+const columnHelper = createColumnHelper<ProcessedWhaleInjury>()
 
 const AGE_GROUPS_ORDER = ['0-2yr', '3-5yr', '6-8yr', '9+yr', 'Unknown']
 const ROPE_DIAMETER_ORDER = ['<7/16", 11mm', '> 1/2", 12mm', 'Other', 'Unknown']
@@ -40,16 +49,11 @@ const getAgeGroup = (
       if (age >= 9) return '9+yr'
     }
   }
-
   if (ageClassStr) {
     const trimmedAgeClass = ageClassStr.trim().toLowerCase()
-    if (trimmedAgeClass === 'adult' || trimmedAgeClass === 'a') {
-      return '9+yr'
-    } else if (trimmedAgeClass === 'calf' || trimmedAgeClass === 'c') {
-      return '0-2yr'
-    }
+    if (trimmedAgeClass === 'adult' || trimmedAgeClass === 'a') return '9+yr'
+    if (trimmedAgeClass === 'calf' || trimmedAgeClass === 'c') return '0-2yr'
   }
-
   return 'Unknown'
 }
 
@@ -70,27 +74,17 @@ const largeRopeValues = [
 const getRopeDiameterGroup = (
   diameters: { RopeDiameterDescription: string }[]
 ): string => {
-  if (!diameters || diameters.length === 0) {
-    return 'Unknown'
-  }
+  if (!diameters || diameters.length === 0) return 'Unknown'
   const desc = (diameters[0].RopeDiameterDescription || '').trim()
-
-  if (smallRopeValues.includes(desc)) {
-    return '<7/16", 11mm'
-  }
-  if (largeRopeValues.includes(desc)) {
-    return '> 1/2", 12mm'
-  }
-  if (desc !== '') {
-    return 'Other'
-  }
+  if (smallRopeValues.includes(desc)) return '<7/16", 11mm'
+  if (largeRopeValues.includes(desc)) return '> 1/2", 12mm'
+  if (desc !== '') return 'Other'
   return 'Unknown'
 }
 
 export default function EntanglementByRopeAndAgePage() {
   const chartRef = useRef<HTMLDivElement>(null)
   const { data: allData, loading, error } = useWhaleInjuryDataStore()
-  const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
 
   const entanglementData = useMemo(() => {
     if (!allData) return []
@@ -101,58 +95,18 @@ export default function EntanglementByRopeAndAgePage() {
     )
   }, [allData])
 
-  const { yearRange, setYearRange, minYear, maxYear } = useYearRange(
-    entanglementData,
-    undefined,
-    1980
-  )
-
-  const chartData = useMemo(() => {
-    if (!entanglementData.length) return []
-
-    const ageGroupData: Record<string, Record<string, number>> = {}
-    AGE_GROUPS_ORDER.forEach((ageGroup) => {
-      ageGroupData[ageGroup] = {}
-      ROPE_DIAMETER_ORDER.forEach((ropeGroup) => {
-        ageGroupData[ageGroup][ropeGroup] = 0
-      })
-    })
-
-    entanglementData.forEach((item: WhaleInjury) => {
-      const ageGroup = getAgeGroup(item.InjuryAge, item.InjuryAgeClass)
-      const ropeGroup = getRopeDiameterGroup(item.RopeDiameters)
-      if (
-        ageGroupData[ageGroup] &&
-        ageGroupData[ageGroup][ropeGroup] !== undefined
-      ) {
-        ageGroupData[ageGroup][ropeGroup]++
-      }
-    })
-
-    return AGE_GROUPS_ORDER.map((ageGroup) => ({
-      ageGroup,
-      ...ageGroupData[ageGroup],
+  const processedData = useMemo(() => {
+    return entanglementData.map((item) => ({
+      ...item,
+      ageGroup: getAgeGroup(item.InjuryAge, item.InjuryAgeClass),
+      ropeDiameterBin: getRopeDiameterGroup(item.RopeDiameters),
     }))
   }, [entanglementData])
 
-  const totalEntanglements = useMemo(() => {
-    return chartData.reduce(
-      (sum, item) =>
-        sum +
-        Object.entries(item)
-          .filter(([key]) => key !== 'ageGroup' && !hiddenSeries.has(key))
-          .reduce(
-            (rowSum, [, value]) =>
-              rowSum + (typeof value === 'number' ? value : 0),
-            0
-          ),
-      0
-    )
-  }, [chartData, hiddenSeries])
+  const yearRangeProps = useYearRange(entanglementData, undefined, 1980)
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-
   const [selectedInjury, setSelectedInjury] = useState<WhaleInjury | null>(null)
 
   const columns = useMemo(
@@ -160,11 +114,9 @@ export default function EntanglementByRopeAndAgePage() {
       columnHelper.accessor('EGNo', {
         header: 'EG No',
         cell: (info) => {
-          const egNo = info.getValue() as string
-          if (!egNo || egNo === '') return 'N/A'
-
+          const egNo = info.getValue()
+          if (!egNo) return 'N/A'
           const isFourDigit = /^\d{4}$/.test(egNo)
-
           if (isFourDigit) {
             return (
               <a
@@ -177,7 +129,6 @@ export default function EntanglementByRopeAndAgePage() {
               </a>
             )
           }
-
           return <span>{egNo}</span>
         },
         filterFn: 'includesString',
@@ -193,22 +144,6 @@ export default function EntanglementByRopeAndAgePage() {
           </button>
         ),
       }),
-      columnHelper.accessor('InjuryAccountDescription', {
-        header: 'Injury Description',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
-        filterFn: 'equalsString',
-      }),
-      columnHelper.accessor('InjurySeverityDescription', {
-        header: 'Severity',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
-        filterFn: 'equalsString',
-      }),
       columnHelper.accessor('DetectionDate', {
         header: 'Detection Year',
         cell: (info) => new Date(info.getValue()).getFullYear(),
@@ -221,10 +156,6 @@ export default function EntanglementByRopeAndAgePage() {
       }),
       columnHelper.accessor('InjuryAge', {
         header: 'Age',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
         filterFn: (row, id, value) => {
           if (!value) return true
           const ageValue = row.getValue(id) as string | null
@@ -236,18 +167,10 @@ export default function EntanglementByRopeAndAgePage() {
       }),
       columnHelper.accessor('InjuryAgeClass', {
         header: 'Age Class',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
-        filterFn: 'equalsString',
+        filterFn: 'arrIncludesSome',
       }),
       columnHelper.accessor('GenderDescription', {
         header: 'Sex',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('Cow', {
@@ -258,37 +181,37 @@ export default function EntanglementByRopeAndAgePage() {
           return rowValue === value
         },
       }),
+      columnHelper.accessor('InjuryTypeDescription', {
+        header: 'Injury Type',
+        filterFn: 'arrIncludesSome',
+      }),
+      columnHelper.accessor('InjuryAccountDescription', {
+        header: 'Injury Description',
+        filterFn: 'arrIncludesSome',
+      }),
+      columnHelper.accessor('InjurySeverityDescription', {
+        header: 'Injury Severity',
+        filterFn: 'arrIncludesSome',
+      }),
       columnHelper.accessor('UnusualMortalityEventDescription', {
         header: 'UME Status',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('CountryOriginDescription', {
         header: 'Injury Country Origin',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('GearOriginDescription', {
         header: 'Gear Origin',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('GearComplexityDescription', {
         header: 'Gear Complexity',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
         filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('ropeDiameterBin', {
+        header: 'Rope Diameter',
+        filterFn: 'arrIncludesSome',
       }),
       columnHelper.accessor('ConstrictingWrap', {
         header: 'Constricting Wrap',
@@ -334,10 +257,6 @@ export default function EntanglementByRopeAndAgePage() {
       }),
       columnHelper.accessor('InjuryTimeFrame', {
         header: 'Timeframe (days)',
-        cell: (info) => {
-          const value = info.getValue()
-          return value !== null && value !== undefined ? value : 'N/A'
-        },
         filterFn: (row, id, value) => {
           if (!value) return true
           const timeframe = row.getValue(id) as number | null
@@ -369,10 +288,6 @@ export default function EntanglementByRopeAndAgePage() {
       }),
       columnHelper.accessor('DeathCauseDescription', {
         header: 'Cause of Death',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
         filterFn: 'equalsString',
       }),
     ],
@@ -380,7 +295,7 @@ export default function EntanglementByRopeAndAgePage() {
   )
 
   const table = useReactTable({
-    data: entanglementData || [],
+    data: processedData,
     columns,
     state: { sorting, columnFilters },
     onSortingChange: setSorting,
@@ -389,57 +304,144 @@ export default function EntanglementByRopeAndAgePage() {
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    initialState: {
-      pagination: { pageSize: 10 },
-    },
+    initialState: { pagination: { pageSize: 10 } },
     autoResetPageIndex: false,
   })
 
   useEffect(() => {
-    table.getColumn('DetectionDate')?.setFilterValue(yearRange)
-  }, [yearRange, table])
+    table.getColumn('DetectionDate')?.setFilterValue(yearRangeProps.yearRange)
+  }, [yearRangeProps.yearRange, table])
+
+  const tableFilteredData = useMemo(
+    () => table.getFilteredRowModel().rows.map((row) => row.original),
+    [table.getFilteredRowModel().rows]
+  )
+
+  const chartData = useMemo(() => {
+    const ageGroupData: Record<string, Record<string, number>> = {}
+    AGE_GROUPS_ORDER.forEach((ageGroup) => {
+      ageGroupData[ageGroup] = {}
+      ROPE_DIAMETER_ORDER.forEach((ropeGroup) => {
+        ageGroupData[ageGroup][ropeGroup] = 0
+      })
+    })
+
+    tableFilteredData.forEach((item) => {
+      ageGroupData[item.ageGroup][item.ropeDiameterBin]++
+    })
+
+    return AGE_GROUPS_ORDER.map((ageGroup) => ({
+      ageGroup,
+      ...ageGroupData[ageGroup],
+    }))
+  }, [tableFilteredData])
+
+  const handleHiddenSeriesChange = useCallback(
+    (hidden: Set<string>) => {
+      const column = table.getColumn('ropeDiameterBin')
+      if (!column) return
+      const visibleValues = ROPE_DIAMETER_ORDER.filter(
+        (bin) => !hidden.has(bin)
+      )
+      if (
+        visibleValues.length === 0 ||
+        visibleValues.length === ROPE_DIAMETER_ORDER.length
+      ) {
+        column.setFilterValue(undefined)
+      } else {
+        column.setFilterValue(visibleValues)
+      }
+    },
+    [table]
+  )
+
+  const ropeBinColumnFilter = columnFilters.find(
+    (f) => f.id === 'ropeDiameterBin'
+  )?.value as string[] | undefined
+
+  const hiddenSeries = useMemo(() => {
+    if (!ropeBinColumnFilter || ropeBinColumnFilter.length === 0) {
+      return new Set<string>()
+    }
+    return new Set(
+      ROPE_DIAMETER_ORDER.filter((bin) => !ropeBinColumnFilter.includes(bin))
+    )
+  }, [ropeBinColumnFilter])
+
+  const totalCount = useMemo(
+    () => tableFilteredData.length,
+    [tableFilteredData]
+  )
+
+  if (loading) return <Loader />
+  if (error) return <ErrorMessage error={error} />
 
   return (
     <div className='space-y-6'>
-      <ChartLayout
-        title='Entanglement by Rope Diameter and Age Group'
-        chartRef={chartRef}
-        exportFilename='entanglement-rope-by-age.png'
-        totalCount={totalEntanglements}
-        loading={loading}
-        error={error || undefined}
-        description='Data represents entanglement cases of North Atlantic Right Whales, categorized by rope diameter and the age of the whale at the time of injury.'
-      >
-        <DataChart
-          data={chartData}
-          xAxisDataKey='ageGroup'
-          xAxisLabel='Age Group'
-          xAxisInterval={0}
-          xAxisTickAngle={0}
-          xAxisTextAnchor='middle'
-          stacked={true}
-          yAxisLabel='Number of Entanglements'
-          customOrder={ROPE_DIAMETER_ORDER}
-          showTotal={false}
-          hiddenSeries={hiddenSeries}
-          onHiddenSeriesChange={setHiddenSeries}
+      <div className='flex flex-col md:flex-row gap-4 md:items-center md:justify-between bg-slate-50 p-4 rounded-lg'>
+        <div className='flex-grow max-w-2xl'>
+          <label className='block text-sm font-medium text-slate-600 mb-2'>
+            Select Year Range
+          </label>
+          <YearRangeSlider
+            yearRange={yearRangeProps.yearRange}
+            minYear={yearRangeProps.minYear}
+            maxYear={yearRangeProps.maxYear}
+            onChange={yearRangeProps.setYearRange}
+          />
+        </div>
+        <ExportChart
+          chartRef={chartRef}
+          filename='entanglement-rope-by-age.png'
+          title='Entanglement by Rope Diameter and Age Group'
+          caption={`Data from ${yearRangeProps.yearRange[0]} to ${yearRangeProps.yearRange[1]}`}
         />
-      </ChartLayout>
+      </div>
+
+      <div ref={chartRef} className='w-full bg-white p-4 rounded-lg'>
+        <div className='text-center'>
+          <h2 className='text-2xl font-bold text-blue-900'>
+            Entanglement by Rope Diameter and Age Group
+          </h2>
+          <p className='text-sm text-slate-500'>
+            Data from {yearRangeProps.yearRange[0]} to{' '}
+            {yearRangeProps.yearRange[1]} • Total Count: {totalCount}
+          </p>
+        </div>
+        <div className='h-[500px] mt-4'>
+          <DataChart
+            data={chartData}
+            xAxisDataKey='ageGroup'
+            xAxisLabel='Age Group'
+            xAxisInterval={0}
+            xAxisTickAngle={0}
+            xAxisTextAnchor='middle'
+            stacked={true}
+            yAxisLabel='Number of Entanglements'
+            customOrder={ROPE_DIAMETER_ORDER}
+            showTotal={false}
+            hiddenSeries={hiddenSeries}
+            onHiddenSeriesChange={handleHiddenSeriesChange}
+          />
+        </div>
+        <ChartAttribution />
+      </div>
+
       <div className='mt-8'>
         <InjuryDownloadButton
-          table={table}
-          filename={`entanglement-by-rope-and-age-data-${yearRange[0]}-${yearRange[1]}.csv`}
+          table={table as unknown as TanstackTable<WhaleInjury>}
+          filename={`entanglement-by-rope-and-age-data-${yearRangeProps.yearRange[0]}-${yearRangeProps.yearRange[1]}.csv`}
         />
         <InjuryTableFilters
-          table={table}
-          data={entanglementData || []}
-          yearRange={yearRange}
-          setYearRange={setYearRange}
-          minYear={minYear}
-          maxYear={maxYear}
+          table={table as unknown as TanstackTable<WhaleInjury>}
+          data={processedData}
+          yearRange={yearRangeProps.yearRange}
+          setYearRange={yearRangeProps.setYearRange}
+          minYear={yearRangeProps.minYear}
+          maxYear={yearRangeProps.maxYear}
         />
         <div className='mt-4'>
-          <InjuryTable table={table} />
+          <InjuryTable table={table as unknown as TanstackTable<WhaleInjury>} />
         </div>
       </div>
       <InjuryDetailsPopup

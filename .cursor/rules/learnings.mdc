@@ -109,3 +109,30 @@ To replicate this feature on a new page, follow these conceptual steps:
         c.  Use `table.getColumn('columnId').setFilterValue()` to apply the new filter to the table. This will trigger a re-render of both the table and the chart.
 
 By following this pattern, you create a robust, reactive system where the table's state is the central authority, and both the chart and filter UI act as intuitive controllers for manipulating that state.
+
+### Table Filters for Injury Pages
+
+Always include ALL of these data filters in ALL tables in the `/injury/*` pages. Do not delete filters.
+
+```
+EGNo
+Detection Year
+Age
+Age Class
+Sex
+Reproductive Female
+Injury Description
+Injury Severity
+UME Status
+Injury Country Origin
+Gear Origin
+Gear Complexity
+Gear Status
+Constricting Wrap
+Disentangled
+Gear Retrieved
+Timeframe (days)
+Last Sighted Alive Year
+Is Dead from Injury
+Cause of Death
+```

@@ -216,6 +216,7 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
       VesselSizeDescription: new Set(),
       timeframeBin: new Set(), // Added timeframeBin support
       gearBin: new Set(), // Added gearBin support
+      ropeDiameterBin: new Set(), // Added ropeDiameterBin support
     }
 
     if (data) {
@@ -296,6 +297,12 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
     {
       id: 'gearBin',
       label: 'Gear Status',
+      type: 'select',
+      isMulti: true,
+    },
+    {
+      id: 'ropeDiameterBin',
+      label: 'Rope Diameter',
       type: 'select',
       isMulti: true,
     },
