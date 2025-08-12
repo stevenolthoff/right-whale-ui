@@ -102,6 +102,31 @@ const VesselStrike = () => {
 
   const columns = useMemo(
     () => [
+      columnHelper.accessor('EGNo', {
+        header: 'EG No',
+        cell: (info) => {
+          const egNo = info.getValue() as string
+          if (!egNo || egNo === '') return 'N/A'
+
+          const isFourDigit = /^\d{4}$/.test(egNo)
+
+          if (isFourDigit) {
+            return (
+              <a
+                href={`https://rwcatalog.neaq.org/#/whales/${egNo}`}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+              >
+                {egNo}
+              </a>
+            )
+          }
+
+          return <span>{egNo}</span>
+        },
+        filterFn: 'includesString',
+      }),
       columnHelper.accessor('CaseId', {
         header: 'Case ID',
         cell: (info) => (
@@ -113,31 +138,20 @@ const VesselStrike = () => {
           </button>
         ),
       }),
-      columnHelper.accessor('EGNo', {
-        header: 'EG No',
-        cell: (info) => {
-          const egNo = info.getValue()
-          if (!egNo) return null
-
-          return (
-            <a
-              href={`https://rwcatalog.neaq.org/#/whales/${egNo}`}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
-            >
-              {egNo}
-            </a>
-          )
-        },
-        filterFn: 'includesString',
-      }),
       columnHelper.accessor('InjuryAccountDescription', {
-        header: 'Injury Account',
+        header: 'Injury Description',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('InjurySeverityDescription', {
         header: 'Severity',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('DetectionDate', {
@@ -152,6 +166,10 @@ const VesselStrike = () => {
       }),
       columnHelper.accessor('InjuryAge', {
         header: 'Age',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: (row, id, value) => {
           if (!value) return true
           const ageValue = row.getValue(id) as string | null
@@ -163,10 +181,18 @@ const VesselStrike = () => {
       }),
       columnHelper.accessor('InjuryAgeClass', {
         header: 'Age Class',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('GenderDescription', {
         header: 'Sex',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('Cow', {
@@ -179,14 +205,48 @@ const VesselStrike = () => {
       }),
       columnHelper.accessor('UnusualMortalityEventDescription', {
         header: 'UME Status',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('CountryOriginDescription', {
         header: 'Injury Country Origin',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('ForensicsCompleted', {
+        header: 'Forensics Completed',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
+      }),
+      columnHelper.accessor('VesselSizeDescription', {
+        header: 'Vessel Size',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('InjuryTimeFrame', {
         header: 'Timeframe (days)',
+        cell: (info) => {
+          const value = info.getValue()
+          return value !== null && value !== undefined ? value : 'N/A'
+        },
         filterFn: (row, id, value) => {
           if (!value) return true
           const timeframe = row.getValue(id) as number | null
@@ -218,6 +278,10 @@ const VesselStrike = () => {
       }),
       columnHelper.accessor('DeathCauseDescription', {
         header: 'Cause of Death',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
     ],

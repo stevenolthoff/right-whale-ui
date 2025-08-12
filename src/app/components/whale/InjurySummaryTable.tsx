@@ -56,6 +56,10 @@ export const columns: ColumnDef<WhaleInjury>[] = [
         </Button>
       )
     },
+    cell: (info) => {
+      const value = info.getValue()
+      return value && value !== '' ? value : 'N/A'
+    },
   },
   {
     accessorKey: 'InjuryTypeDescription',
@@ -69,6 +73,10 @@ export const columns: ColumnDef<WhaleInjury>[] = [
           <ArrowUpDown className='ml-2 h-4 w-4' />
         </Button>
       )
+    },
+    cell: (info) => {
+      const value = info.getValue()
+      return value && value !== '' ? value : 'N/A'
     },
   },
   {
@@ -84,6 +92,10 @@ export const columns: ColumnDef<WhaleInjury>[] = [
         </Button>
       )
     },
+    cell: (info) => {
+      const value = info.getValue()
+      return value && value !== '' ? value : 'N/A'
+    },
   },
   {
     accessorKey: 'InjurySeverityDescription',
@@ -97,6 +109,10 @@ export const columns: ColumnDef<WhaleInjury>[] = [
           <ArrowUpDown className='ml-2 h-4 w-4' />
         </Button>
       )
+    },
+    cell: (info) => {
+      const value = info.getValue()
+      return value && value !== '' ? value : 'N/A'
     },
   },
 ]

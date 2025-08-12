@@ -91,6 +91,27 @@ const Entanglement = () => {
     () => [
       columnHelper.accessor('EGNo', {
         header: 'EG No',
+        cell: (info) => {
+          const egNo = info.getValue() as string
+          if (!egNo || egNo === '') return 'N/A'
+
+          const isFourDigit = /^\d{4}$/.test(egNo)
+
+          if (isFourDigit) {
+            return (
+              <a
+                href={`https://rwcatalog.neaq.org/#/whales/${egNo}`}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+              >
+                {egNo}
+              </a>
+            )
+          }
+
+          return <span>{egNo}</span>
+        },
         filterFn: 'includesString',
       }),
       columnHelper.accessor((row) => row.CaseId ?? row.InjuryId, {
@@ -107,10 +128,18 @@ const Entanglement = () => {
       }),
       columnHelper.accessor('InjuryAccountDescription', {
         header: 'Injury Description',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('InjurySeverityDescription', {
-        header: 'Injury Severity',
+        header: 'Severity',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('DetectionDate', {
@@ -124,7 +153,11 @@ const Entanglement = () => {
         },
       }),
       columnHelper.accessor('InjuryTimeFrame', {
-        header: 'Timeframe',
+        header: 'Timeframe (days)',
+        cell: (info) => {
+          const value = info.getValue()
+          return value !== null && value !== undefined ? value : 'N/A'
+        },
         filterFn: (row, id, value) => {
           if (!value) return true
           const timeframe = row.getValue(id) as number | null

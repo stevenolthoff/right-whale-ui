@@ -26,6 +26,7 @@ export const InjuryDownloadButton: React.FC<InjuryDownloadButtonProps> = ({
     <CsvDownload
       data={filteredData}
       filename={filename}
+      delimiter=","
       className={
         className ||
         'mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors'

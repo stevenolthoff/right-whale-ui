@@ -36,6 +36,24 @@ const Sidebar = ({ categories }: SidebarProps) => {
     }
   }, [isOpen])
 
+  // Prevent body scroll when mobile sidebar is open
+  useEffect(() => {
+    if (isOpen !== null) {
+      if (isOpen && window.innerWidth < 768) {
+        // Prevent body scroll on mobile when sidebar is open
+        document.body.style.overflow = 'hidden'
+      } else {
+        // Restore body scroll
+        document.body.style.overflow = 'unset'
+      }
+    }
+
+    // Cleanup: restore body scroll when component unmounts
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isOpen])
+
   // Add keyboard shortcut listener
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -139,27 +157,28 @@ const Sidebar = ({ categories }: SidebarProps) => {
       <nav
         className={`
           peer
-          fixed md:static inset-0 z-[90]
+          fixed md:sticky md:top-[70px] md:inset-auto inset-0 z-[90]
           bg-white/95 backdrop-blur-sm md:backdrop-blur-none md:bg-white
           transform transition-all duration-300 ease-in-out
-          ${isOpen ? 'w-72 p-6' : 'w-0 md:w-0 overflow-hidden'}
+          ${isOpen ? 'w-72 p-4' : 'w-0 md:w-0 overflow-hidden'}
           ${
             isOpen
               ? 'translate-x-0 shadow-2xl md:shadow-none'
               : '-translate-x-full md:translate-x-0'
           }
           mt-[70px] md:mt-0
-          min-h-[calc(100vh-70px)] md:min-h-screen
+          md:h-fit md:max-h-[calc(100vh-70px)]
+          h-[calc(100vh-70px)]
           overflow-y-auto
-          border-r border-gray-200
+          border-r border-gray-200 md:border-r-0
           scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent
         `}
         aria-hidden={!isOpen}
       >
-        <div className='space-y-8'>
+        <div className='space-y-6'>
           {/* Desktop close button */}
           {isOpen && (
-            <div className='group hidden md:flex absolute right-4 top-4 items-center'>
+            <div className='group hidden md:flex absolute right-3 top-3 items-center'>
               <span className='absolute top-1/2 -translate-y-1/2 right-full mr-2 px-2 py-1 bg-gray-700 text-white text-xs font-semibold rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap'>
                 Toggle with{' '}
                 <kbd className='font-sans text-xs font-bold bg-gray-500 rounded-sm px-1.5 py-0.5'>
@@ -167,14 +186,14 @@ const Sidebar = ({ categories }: SidebarProps) => {
                 </kbd>
               </span>
               <button
-                className='p-2 hover:bg-gray-100 rounded-lg 
+                className='p-1.5 hover:bg-gray-100 rounded-lg 
                   transition-colors duration-200 items-center justify-center
                   text-gray-500 hover:text-gray-700'
                 onClick={() => setIsOpen(false)}
                 aria-label='Close sidebar'
               >
                 <svg
-                  className='w-5 h-5'
+                  className='w-4 h-4'
                   fill='none'
                   stroke='currentColor'
                   viewBox='0 0 24 24'
@@ -191,20 +210,20 @@ const Sidebar = ({ categories }: SidebarProps) => {
           )}
 
           {/* Categories and links */}
-          <div className='space-y-10'>
+          <div className='space-y-6'>
             {categories.map((category, index) => (
-              <div key={index} className='space-y-4'>
-                <h2 className='text-xs font-bold tracking-wider text-gray-400 uppercase pl-2'>
+              <div key={index} className='space-y-2'>
+                <h2 className='text-xs font-bold tracking-wider text-gray-400 uppercase pl-1'>
                   {category.title}
                 </h2>
-                <div className='space-y-1 pl-1'>
+                <div className='space-y-0.5 pl-0.5'>
                   {category.links.map((link) => (
                     <Link
                       key={link.href}
                       href={link.href}
                       className={`
-                        group flex items-center w-full px-3 py-2.5
-                        rounded-lg transition-all duration-200
+                        group flex items-center w-full px-2 py-1.5
+                        rounded-md transition-all duration-200
                         ${
                           pathname === link.href
                             ? 'bg-blue-50 text-blue-600 font-medium'
@@ -217,9 +236,9 @@ const Sidebar = ({ categories }: SidebarProps) => {
                         }
                       }}
                     >
-                      <span className='truncate'>{link.label}</span>
+                      <span className='truncate text-sm'>{link.label}</span>
                       {pathname === link.href && (
-                        <span className='ml-auto w-1.5 h-1.5 rounded-full bg-blue-600'></span>
+                        <span className='ml-auto w-1 h-1 rounded-full bg-blue-600'></span>
                       )}
                     </Link>
                   ))}

@@ -1,0 +1,29 @@
+---
+description: These are the full list of table filters that can be used in `/injury/*` pages. We may or may not need all of them on a given injury page.
+globs:
+alwaysApply: false
+---
+
+```
+EGNo
+Detection Year
+Age
+Age Class
+Sex
+Reproductive Female
+Injury Type
+Injury Description
+Injury Severity
+UME Status
+Injury Country Origin
+Gear Origin
+Gear Complexity
+Rope Diameter
+Constricting Wrap
+Disentangled
+Gear Retrieved
+Timeframe (days)
+Last Sighted Alive Year
+Is Dead from Injury
+Cause of Death
+```

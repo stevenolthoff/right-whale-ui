@@ -82,6 +82,9 @@ const SelectFilter: React.FC<{
       className='text-sm'
       placeholder='Select...'
       isClearable
+      styles={{
+        menu: (provided) => ({ ...provided, zIndex: 9999 }),
+      }}
     />
   )
 }
@@ -173,7 +176,7 @@ const LastSightedAliveYearFilter: React.FC<{
 
 interface TableFiltersProps {
   table: Table<WhaleInjury>
-  data: WhaleInjury[]
+  data: any[] // Changed from WhaleInjury[] to any[] to accommodate pre-processed data
   yearRange: [number, number]
   setYearRange: (range: [number, number]) => void
   minYear: number
@@ -212,19 +215,26 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
       GearRetrieved: new Set(),
       IsDead: new Set(),
       DeathCauseDescription: new Set(),
+      ForensicsCompleted: new Set(),
+      VesselSizeDescription: new Set(),
+      timeframeBin: new Set(), // Added timeframeBin support
+      gearBin: new Set(), // Added gearBin support
+      ropeDiameterBin: new Set(), // Added ropeDiameterBin support
     }
 
     if (data) {
-      data.forEach((item) => {
+      data.forEach((item: any) => {
+        // Changed type to any to handle new properties
         Object.keys(options).forEach((key) => {
-          const value = item[key as keyof WhaleInjury]
+          const value = item[key as keyof typeof item]
           if (typeof value === 'boolean') {
             options[key].add(value ? 'Yes' : 'No')
           } else if (typeof value === 'string' && value) {
             if (
               key === 'ConstrictingWrap' ||
               key === 'Disentangled' ||
-              key === 'GearRetrieved'
+              key === 'GearRetrieved' ||
+              key === 'ForensicsCompleted'
             ) {
               if (value === 'Y') options[key].add('Yes')
               else if (value === 'N') options[key].add('No')
@@ -250,7 +260,7 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
     { id: 'EGNo', label: 'EGNo', type: 'text' },
     { id: 'DetectionDate', label: 'Detection Year', type: 'year-slider' },
     { id: 'InjuryAge', label: 'Age', type: 'age-slider' },
-    { id: 'InjuryAgeClass', label: 'Age Class', type: 'select' },
+    { id: 'InjuryAgeClass', label: 'Age Class', type: 'select', isMulti: true },
     { id: 'GenderDescription', label: 'Sex', type: 'select' },
     { id: 'Cow', label: 'Reproductive Female', type: 'select' },
     {
@@ -259,11 +269,17 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
       type: 'select',
       isMulti: true,
     },
-    { id: 'InjuryAccountDescription', label: 'Injury Account', type: 'select' },
+    {
+      id: 'InjuryAccountDescription',
+      label: 'Injury Description',
+      type: 'select',
+      isMulti: true,
+    },
     {
       id: 'InjurySeverityDescription',
       label: 'Injury Severity',
       type: 'select',
+      isMulti: true,
     },
     {
       id: 'UnusualMortalityEventDescription',
@@ -281,14 +297,35 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
       label: 'Gear Complexity',
       type: 'select',
     },
+    {
+      id: 'gearBin',
+      label: 'Gear Status',
+      type: 'select',
+      isMulti: true,
+    },
+    {
+      id: 'ropeDiameterBin',
+      label: 'Rope Diameter',
+      type: 'select',
+      isMulti: true,
+    },
     { id: 'ConstrictingWrap', label: 'Constricting Wrap', type: 'select' },
     { id: 'Disentangled', label: 'Disentangled', type: 'select' },
     { id: 'GearRetrieved', label: 'Gear Retrieved', type: 'select' },
+    { id: 'ForensicsCompleted', label: 'Forensics Completed', type: 'select' },
     {
-      id: 'InjuryTimeFrame',
-      label: 'Timeframe (days)',
-      type: 'timeframe-slider',
+      id: 'VesselSizeDescription',
+      label: 'Vessel Size',
+      type: 'select',
     },
+    // Removed InjuryTimeFrame slider and replaced with timeframeBin multi-select
+    {
+      id: 'timeframeBin',
+      label: 'Timeframe',
+      type: 'select',
+      isMulti: true,
+    },
+    { id: 'InjuryTimeFrame', label: 'Timeframe (days)', type: 'timeframe-slider' },
     {
       id: 'LastSightedAliveDate',
       label: 'Last Sighted Alive Year',
