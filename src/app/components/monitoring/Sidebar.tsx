@@ -139,7 +139,7 @@ const Sidebar = ({ categories }: SidebarProps) => {
       <nav
         className={`
           peer
-          fixed md:sticky md:top-[70px] inset-0 z-[90]
+          fixed md:sticky md:top-[70px] md:inset-auto inset-0 z-[90]
           bg-white/95 backdrop-blur-sm md:backdrop-blur-none md:bg-white
           transform transition-all duration-300 ease-in-out
           ${isOpen ? 'w-72 p-4' : 'w-0 md:w-0 overflow-hidden'}
