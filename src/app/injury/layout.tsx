@@ -593,7 +593,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <Sidebar categories={categories} />
       <main className='flex-1 p-2 md:p-12 min-w-0 transition-all duration-200 peer-[.-translate-x-full]:ml-0 bg-white md:border-l md:border-gray-200'>
         <div className='text-3xl font-bold'>{text[pathname].title}</div>
-        <div className='max-w-prose mx-auto mt-4 mb-8'>
+        <div
+          className={`max-w-prose ${
+            pathname === '/injury/overview' ? 'mx-auto' : ''
+          } mt-4 mb-8`}
+        >
           {text[pathname].description}
         </div>
         {children}
