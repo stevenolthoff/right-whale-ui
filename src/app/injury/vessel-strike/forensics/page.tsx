@@ -21,14 +21,19 @@ import {
   createColumnHelper,
   SortingState,
   ColumnFiltersState,
+  Table as TanstackTable,
 } from '@tanstack/react-table'
-
 import InjuryDetailsPopup from '@/app/components/injury/InjuryDetailsPopup'
 
-const columnHelper = createColumnHelper<WhaleInjury>()
+type ProcessedWhaleInjury = WhaleInjury & {
+  forensicsBin: string
+  vesselSizeBin: string
+}
+
+const columnHelper = createColumnHelper<ProcessedWhaleInjury>()
 
 // Constants for bin orders
-const FORENSICS_ORDER = ['Yes', 'No']
+const FORENSICS_ORDER = ['Yes', 'No', 'Unknown']
 const VESSEL_SIZE_ORDER = [
   '< 40 ft',
   '40 to 65 ft',
@@ -60,12 +65,6 @@ export default function VesselStrikeForensicsPage() {
   const chartRef = useRef<HTMLDivElement>(null)
   const { data, loading, error } = useWhaleInjuryDataStore()
   const [isSideBySide, setIsSideBySide] = useState(true)
-  const [forensicsFilters, setForensicsFilters] = useState<Set<string>>(
-    new Set()
-  )
-  const [vesselSizeFilters, setVesselSizeFilters] = useState<Set<string>>(
-    new Set()
-  )
 
   const vesselStrikeData = useMemo(() => {
     if (!data) return []
@@ -74,113 +73,22 @@ export default function VesselStrikeForensicsPage() {
     )
   }, [data])
 
+  const processedData = useMemo(() => {
+    return vesselStrikeData.map((item) => ({
+      ...item,
+      forensicsBin: getForensicsBin(item),
+      vesselSizeBin: getVesselSizeBin(item),
+    }))
+  }, [vesselStrikeData])
+
   const yearRangeProps = useYearRange(
     loading ? null : vesselStrikeData,
     undefined,
     1980
   )
 
-  const forensicsChartData = React.useMemo(() => {
-    const filteredData = vesselStrikeData.filter((item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      const matchesYear =
-        year >= yearRangeProps.yearRange[0] &&
-        year <= yearRangeProps.yearRange[1]
-      const vesselSizeBin = getVesselSizeBin(item)
-      const passesVesselSizeFilter =
-        vesselSizeFilters.size === 0 || !vesselSizeFilters.has(vesselSizeBin)
-      return matchesYear && passesVesselSizeFilter
-    })
-
-    const yearData = new Map<number, Record<string, number>>()
-
-    filteredData.forEach((item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      const forensicsBin = getForensicsBin(item)
-      if (forensicsBin === 'Unknown') return
-
-      if (!yearData.has(year)) {
-        yearData.set(
-          year,
-          Object.fromEntries(FORENSICS_ORDER.map((t) => [t, 0]))
-        )
-      }
-      yearData.get(year)![forensicsBin]++
-    })
-
-    const formattedData = []
-    for (
-      let year = yearRangeProps.yearRange[0];
-      year <= yearRangeProps.yearRange[1];
-      year++
-    ) {
-      formattedData.push({
-        year,
-        ...(yearData.get(year) ||
-          Object.fromEntries(FORENSICS_ORDER.map((t) => [t, 0]))),
-      })
-    }
-
-    return formattedData.sort((a, b) => a.year - b.year)
-  }, [vesselStrikeData, yearRangeProps.yearRange, vesselSizeFilters])
-
-  const vesselSizeChartData = React.useMemo(() => {
-    const filteredData = vesselStrikeData.filter((item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      const forensicsBin = getForensicsBin(item)
-      const matchesYear =
-        year >= yearRangeProps.yearRange[0] &&
-        year <= yearRangeProps.yearRange[1]
-      const passesForensicsFilter =
-        forensicsFilters.size === 0 || !forensicsFilters.has(forensicsBin)
-      return matchesYear && passesForensicsFilter
-    })
-
-    const yearData = new Map<number, Record<string, number>>()
-
-    filteredData.forEach((item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      const vesselSizeBin = getVesselSizeBin(item)
-
-      if (!yearData.has(year)) {
-        yearData.set(
-          year,
-          Object.fromEntries(VESSEL_SIZE_ORDER.map((s) => [s, 0]))
-        )
-      }
-      yearData.get(year)![vesselSizeBin]++
-    })
-
-    const formattedData = []
-    for (
-      let year = yearRangeProps.yearRange[0];
-      year <= yearRangeProps.yearRange[1];
-      year++
-    ) {
-      formattedData.push({
-        year,
-        ...(yearData.get(year) ||
-          Object.fromEntries(VESSEL_SIZE_ORDER.map((s) => [s, 0]))),
-      })
-    }
-
-    return formattedData.sort((a, b) => a.year - b.year)
-  }, [vesselStrikeData, yearRangeProps.yearRange, forensicsFilters])
-
-  const handleFilterChange = useCallback(
-    (chartType: 'forensics' | 'vesselSize', filters: Set<string>) => {
-      if (chartType === 'forensics') {
-        setForensicsFilters(filters)
-      } else {
-        setVesselSizeFilters(filters)
-      }
-    },
-    []
-  )
-
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-
   const [selectedInjury, setSelectedInjury] = useState<WhaleInjury | null>(null)
 
   const columns = useMemo(
@@ -190,9 +98,7 @@ export default function VesselStrikeForensicsPage() {
         cell: (info) => {
           const egNo = info.getValue() as string
           if (!egNo || egNo === '') return 'N/A'
-
           const isFourDigit = /^\d{4}$/.test(egNo)
-
           if (isFourDigit) {
             return (
               <a
@@ -205,7 +111,6 @@ export default function VesselStrikeForensicsPage() {
               </a>
             )
           }
-
           return <span>{egNo}</span>
         },
         filterFn: 'includesString',
@@ -221,22 +126,6 @@ export default function VesselStrikeForensicsPage() {
           </button>
         ),
       }),
-      columnHelper.accessor('InjuryAccountDescription', {
-        header: 'Injury Description',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
-        filterFn: 'equalsString',
-      }),
-      columnHelper.accessor('InjurySeverityDescription', {
-        header: 'Severity',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
-        filterFn: 'equalsString',
-      }),
       columnHelper.accessor('DetectionDate', {
         header: 'Detection Year',
         cell: (info) => new Date(info.getValue()).getFullYear(),
@@ -249,10 +138,6 @@ export default function VesselStrikeForensicsPage() {
       }),
       columnHelper.accessor('InjuryAge', {
         header: 'Age',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
         filterFn: (row, id, value) => {
           if (!value) return true
           const ageValue = row.getValue(id) as string | null
@@ -264,18 +149,10 @@ export default function VesselStrikeForensicsPage() {
       }),
       columnHelper.accessor('InjuryAgeClass', {
         header: 'Age Class',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
-        filterFn: 'equalsString',
+        filterFn: 'arrIncludesSome',
       }),
       columnHelper.accessor('GenderDescription', {
         header: 'Sex',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('Cow', {
@@ -286,24 +163,42 @@ export default function VesselStrikeForensicsPage() {
           return rowValue === value
         },
       }),
+      columnHelper.accessor('InjuryTypeDescription', {
+        header: 'Injury Type',
+        filterFn: 'arrIncludesSome',
+      }),
+      columnHelper.accessor('InjuryAccountDescription', {
+        header: 'Injury Description',
+        filterFn: 'arrIncludesSome',
+      }),
+      columnHelper.accessor('InjurySeverityDescription', {
+        header: 'Injury Severity',
+        filterFn: 'arrIncludesSome',
+      }),
       columnHelper.accessor('UnusualMortalityEventDescription', {
         header: 'UME Status',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('CountryOriginDescription', {
         header: 'Injury Country Origin',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
         filterFn: 'equalsString',
       }),
-      columnHelper.accessor('ForensicsCompleted', {
-        header: 'Forensics Completed',
+      columnHelper.accessor('GearOriginDescription', {
+        header: 'Gear Origin',
+        cell: (info) => info.getValue() || 'N/A',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('GearComplexityDescription', {
+        header: 'Gear Complexity',
+        cell: (info) => info.getValue() || 'N/A',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('ropeDiameterBin', {
+        header: 'Rope Diameter',
+        filterFn: 'arrIncludesSome',
+      }),
+      columnHelper.accessor('ConstrictingWrap', {
+        header: 'Constricting Wrap',
         cell: (info) =>
           info.getValue() === 'Y'
             ? 'Yes'
@@ -311,25 +206,41 @@ export default function VesselStrikeForensicsPage() {
             ? 'No'
             : 'Unknown',
         filterFn: (row, id, value) => {
-          const val = row.getValue(id) as string
+          const val = row.getValue(id)
           const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
           return strVal === value
         },
       }),
-      columnHelper.accessor('VesselSizeDescription', {
-        header: 'Vessel Size',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
+      columnHelper.accessor('Disentangled', {
+        header: 'Disentangled',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
         },
-        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('GearRetrieved', {
+        header: 'Gear Retrieved',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
       }),
       columnHelper.accessor('InjuryTimeFrame', {
         header: 'Timeframe (days)',
-        cell: (info) => {
-          const value = info.getValue()
-          return value !== null && value !== undefined ? value : 'N/A'
-        },
         filterFn: (row, id, value) => {
           if (!value) return true
           const timeframe = row.getValue(id) as number | null
@@ -361,10 +272,6 @@ export default function VesselStrikeForensicsPage() {
       }),
       columnHelper.accessor('DeathCauseDescription', {
         header: 'Cause of Death',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
         filterFn: 'equalsString',
       }),
     ],
@@ -372,7 +279,7 @@ export default function VesselStrikeForensicsPage() {
   )
 
   const table = useReactTable({
-    data: vesselStrikeData || [],
+    data: processedData,
     columns,
     state: { sorting, columnFilters },
     onSortingChange: setSorting,
@@ -381,15 +288,137 @@ export default function VesselStrikeForensicsPage() {
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    initialState: {
-      pagination: { pageSize: 10 },
-    },
+    initialState: { pagination: { pageSize: 10 } },
     autoResetPageIndex: false,
   })
 
   useEffect(() => {
     table.getColumn('DetectionDate')?.setFilterValue(yearRangeProps.yearRange)
   }, [yearRangeProps.yearRange, table])
+
+  const tableFilteredData = useMemo(
+    () => table.getFilteredRowModel().rows.map((row) => row.original),
+    [table.getFilteredRowModel().rows]
+  )
+
+  const forensicsChartData = React.useMemo(() => {
+    const yearData = new Map<number, Record<string, number>>()
+
+    tableFilteredData.forEach((item) => {
+      const year = new Date(item.DetectionDate).getFullYear()
+      const forensicsBin = item.forensicsBin
+
+      if (!yearData.has(year)) {
+        yearData.set(
+          year,
+          Object.fromEntries(FORENSICS_ORDER.map((t) => [t, 0]))
+        )
+      }
+      yearData.get(year)![forensicsBin]++
+    })
+
+    const formattedData = []
+    for (
+      let year = yearRangeProps.yearRange[0];
+      year <= yearRangeProps.yearRange[1];
+      year++
+    ) {
+      formattedData.push({
+        year,
+        ...(yearData.get(year) ||
+          Object.fromEntries(FORENSICS_ORDER.map((t) => [t, 0]))),
+      })
+    }
+
+    return formattedData.sort((a, b) => a.year - b.year)
+  }, [tableFilteredData, yearRangeProps.yearRange])
+
+  const vesselSizeChartData = React.useMemo(() => {
+    const yearData = new Map<number, Record<string, number>>()
+
+    tableFilteredData.forEach((item) => {
+      const year = new Date(item.DetectionDate).getFullYear()
+      const vesselSizeBin = item.vesselSizeBin
+
+      if (!yearData.has(year)) {
+        yearData.set(
+          year,
+          Object.fromEntries(VESSEL_SIZE_ORDER.map((s) => [s, 0]))
+        )
+      }
+      yearData.get(year)![vesselSizeBin]++
+    })
+
+    const formattedData = []
+    for (
+      let year = yearRangeProps.yearRange[0];
+      year <= yearRangeProps.yearRange[1];
+      year++
+    ) {
+      formattedData.push({
+        year,
+        ...(yearData.get(year) ||
+          Object.fromEntries(VESSEL_SIZE_ORDER.map((s) => [s, 0]))),
+      })
+    }
+
+    return formattedData.sort((a, b) => a.year - b.year)
+  }, [tableFilteredData, yearRangeProps.yearRange])
+
+  const handleHiddenSeriesChange = useCallback(
+    (
+      columnId: 'forensicsBin' | 'vesselSizeBin',
+      allPossibleValues: string[],
+      hiddenSeries: Set<string>
+    ) => {
+      const column = table.getColumn(columnId)
+      if (!column) return
+
+      const visibleValues = allPossibleValues.filter(
+        (value) => !hiddenSeries.has(value)
+      )
+
+      if (
+        visibleValues.length === 0 ||
+        visibleValues.length === allPossibleValues.length
+      ) {
+        column.setFilterValue(undefined)
+      } else {
+        column.setFilterValue(visibleValues)
+      }
+    },
+    [table]
+  )
+
+  const forensicsBinColumnFilter = columnFilters.find(
+    (f) => f.id === 'forensicsBin'
+  )?.value as string[] | undefined
+
+  const vesselSizeBinColumnFilter = columnFilters.find(
+    (f) => f.id === 'vesselSizeBin'
+  )?.value as string[] | undefined
+
+  const hiddenForensicsSeries = useMemo(() => {
+    if (!forensicsBinColumnFilter || forensicsBinColumnFilter.length === 0) {
+      return new Set<string>()
+    }
+    return new Set(
+      FORENSICS_ORDER.filter((bin) => !forensicsBinColumnFilter.includes(bin))
+    )
+  }, [forensicsBinColumnFilter])
+  
+  const hiddenVesselSizeSeries = useMemo(() => {
+    if (!vesselSizeBinColumnFilter || vesselSizeBinColumnFilter.length === 0) {
+      return new Set<string>()
+    }
+    return new Set(
+      VESSEL_SIZE_ORDER.filter((bin) => !vesselSizeBinColumnFilter.includes(bin))
+    )
+  }, [vesselSizeBinColumnFilter])
+
+  const totalCount = useMemo(() => tableFilteredData.length, [
+    tableFilteredData,
+  ])
 
   if (loading) return <Loader />
   if (error) return <ErrorMessage error={error} />
@@ -431,7 +460,7 @@ export default function VesselStrikeForensicsPage() {
           </h2>
           <p className='text-sm text-gray-600'>
             Data from {yearRangeProps.yearRange[0]} to{' '}
-            {yearRangeProps.yearRange[1]}
+            {yearRangeProps.yearRange[1]} • Total Count: {totalCount}
           </p>
         </div>
         <div
@@ -448,8 +477,13 @@ export default function VesselStrikeForensicsPage() {
               stackId='forensics'
               stacked={true}
               yAxisLabel='Vessel Strikes'
-              onFilterChange={(filters) =>
-                handleFilterChange('forensics', filters)
+              hiddenSeries={hiddenForensicsSeries}
+              onHiddenSeriesChange={(hidden) =>
+                handleHiddenSeriesChange(
+                  'forensicsBin',
+                  FORENSICS_ORDER,
+                  hidden
+                )
               }
               customOrder={FORENSICS_ORDER}
             />
@@ -464,8 +498,13 @@ export default function VesselStrikeForensicsPage() {
               stackId='vesselSize'
               stacked={true}
               yAxisLabel='Vessel Strikes'
-              onFilterChange={(filters) =>
-                handleFilterChange('vesselSize', filters)
+              hiddenSeries={hiddenVesselSizeSeries}
+              onHiddenSeriesChange={(hidden) =>
+                handleHiddenSeriesChange(
+                  'vesselSizeBin',
+                  VESSEL_SIZE_ORDER,
+                  hidden
+                )
               }
               customOrder={VESSEL_SIZE_ORDER}
             />
@@ -475,19 +514,19 @@ export default function VesselStrikeForensicsPage() {
       </div>
       <div className='mt-8'>
         <InjuryDownloadButton
-          table={table}
+          table={table as unknown as TanstackTable<WhaleInjury>}
           filename={`vessel-strike-forensics-data-${yearRangeProps.yearRange[0]}-${yearRangeProps.yearRange[1]}.csv`}
         />
         <InjuryTableFilters
-          table={table}
-          data={vesselStrikeData || []}
+          table={table as unknown as TanstackTable<WhaleInjury>}
+          data={processedData}
           yearRange={yearRangeProps.yearRange}
           setYearRange={yearRangeProps.setYearRange}
           minYear={yearRangeProps.minYear}
           maxYear={yearRangeProps.maxYear}
         />
         <div className='mt-4'>
-          <InjuryTable table={table} />
+          <InjuryTable table={table as unknown as TanstackTable<WhaleInjury>} />
         </div>
       </div>
       <InjuryDetailsPopup
