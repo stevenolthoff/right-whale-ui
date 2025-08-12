@@ -139,7 +139,7 @@ const Sidebar = ({ categories }: SidebarProps) => {
       <nav
         className={`
           peer
-          fixed md:static inset-0 z-[90]
+          fixed md:sticky md:top-[70px] inset-0 z-[90]
           bg-white/95 backdrop-blur-sm md:backdrop-blur-none md:bg-white
           transform transition-all duration-300 ease-in-out
           ${isOpen ? 'w-72 p-6' : 'w-0 md:w-0 overflow-hidden'}
@@ -149,7 +149,7 @@ const Sidebar = ({ categories }: SidebarProps) => {
               : '-translate-x-full md:translate-x-0'
           }
           mt-[70px] md:mt-0
-          min-h-[calc(100vh-70px)] md:min-h-screen
+          h-[calc(100vh-70px)]
           overflow-y-auto
           border-r border-gray-200
           scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent
