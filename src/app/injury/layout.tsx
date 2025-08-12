@@ -5,6 +5,16 @@ import { usePathname } from 'next/navigation'
 import { useWhaleInjuryDataStore } from '../stores/useWhaleInjuryDataStore'
 import { useAuthStore } from '../store/auth'
 
+// Helper function to compute the incomplete years
+// Based on client explanation: data becomes "completed" towards the end of the year
+// So if we're in 2024, years 2022-2024 are considered incomplete
+function getIncompleteYears(): { startYear: number; endYear: number } {
+  const currentYear = new Date().getFullYear()
+  const startYear = currentYear - 2
+  const endYear = currentYear
+  return { startYear, endYear }
+}
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const { token } = useAuthStore()
@@ -15,6 +25,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       fetchData(token)
     }
   }, [token, fetchData])
+
+  // Get the incomplete years for the disclaimer
+  const { startYear, endYear } = getIncompleteYears()
+  const disclaimerText = `Data for ${startYear}-${endYear} are not yet complete and should not be interpreted as such.`
+
   const text: Record<
     string,
     { title: string; description: string | React.ReactNode }
@@ -132,6 +147,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </a>
             .
           </p>
+          <p className='text-lg text-gray-700 leading-relaxed font-semibold'>
+            {disclaimerText}
+          </p>
         </div>
       ),
     },
@@ -152,23 +170,34 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             reflect every documented injury/scar detected on right whales.
             Additionally, since assessments for these injury types began in 2013
             under the right whale monitoring work, injuries of unknown origin
-            prior to 2013 are not captured here. Whales listed as “Poor Body
-            Condition” and “Dependent Calf” are cases specific to the ongoing
-            North Atlantic right whale Unusual Mortality Event (UME) which began
-            in 2017. Broader population wide information on right whale health
-            over time is accessible through the Visual Health Assessment
-            Database via a NARWC data access request.
+            prior to 2013 are not captured here. Whales listed as &ldquo;Poor
+            Body Condition&rdquo; and &ldquo;Dependent Calf&rdquo; are cases
+            specific to the ongoing North Atlantic right whale Unusual Mortality
+            Event (UME) which began in 2017. Broader population wide information
+            on right whale health over time is accessible through the Visual
+            Health Assessment Database via a NARWC data access request.
           </p>
+          <p className='font-semibold'>{disclaimerText}</p>
         </div>
       ),
     },
     '/injury/entanglement': {
       title: 'Entanglement',
-      description: 'View entanglement-related injuries.',
+      description: (
+        <div>
+          <p>View entanglement-related injuries.</p>
+          <p className='font-semibold mt-2'>{disclaimerText}</p>
+        </div>
+      ),
     },
     '/injury/vessel-strike': {
       title: 'Vessel Strikes',
-      description: 'View vessel strike incidents by year.',
+      description: (
+        <div>
+          <p>View vessel strike incidents by year.</p>
+          <p className='font-semibold mt-2'>{disclaimerText}</p>
+        </div>
+      ),
     },
     '/injury/entanglement/timeframe': {
       title: 'Entanglement Timeframe',
@@ -179,8 +208,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             timeframe of injury acquisition and year. Timeframe is calculated as
             days between the pre-injury sighting and the initial injury
             detection sighting. Whales for which there is no pre-injury
-            detection sighting (i.e. unknown ID whale, whale’s first sighting is
-            with injury) do not have calculated timeframes.
+            detection sighting (i.e. unknown ID whale, whale&apos;s first
+            sighting is with injury) do not have calculated timeframes.
           </p>
           <div>
             <span className='font-semibold'>
@@ -216,6 +245,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </li>
             </ul>
           </div>
+          <p className='font-semibold'>{disclaimerText}</p>
         </div>
       ),
     },
@@ -266,6 +296,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </a>{' '}
             for additional information.
           </p>
+          <p className='font-semibold'>{disclaimerText}</p>
         </div>
       ),
     },
@@ -296,6 +327,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             are unknown ID and are not cataloged are classified as Unknown age
             class.
           </p>
+          <p className='font-semibold'>{disclaimerText}</p>
         </div>
       ),
     },
@@ -310,6 +342,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             retrieval status is listed for those cases with attached gear. Cases
             for which there was no gear attached are flagged as such.
           </p>
+          <p className='font-semibold'>{disclaimerText}</p>
         </div>
       ),
     },
@@ -326,6 +359,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             interactive data table to see specific information related to rope
             diameter for each.
           </p>
+          <p className='font-semibold'>{disclaimerText}</p>
         </div>
       ),
     },
@@ -338,8 +372,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             timeframe of injury acquisition and year. Timeframe is calculated as
             days between the pre-injury sighting and the initial injury
             detection sighting. Whales for which there is no pre-injury
-            detection sighting (i.e. unknown ID whale, whale’s first sighting is
-            with injury) do not have calculated timeframes.
+            detection sighting (i.e. unknown ID whale, whale&apos;s first
+            sighting is with injury) do not have calculated timeframes.
           </p>
           <div>
             <span className='font-semibold'>
@@ -375,6 +409,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </li>
             </ul>
           </div>
+          <p className='font-semibold'>{disclaimerText}</p>
         </div>
       ),
     },
@@ -393,6 +428,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             depth). Because Blunt cases are almost exclusively detected
             post-mortem, the severity for those cases is listed as Blunt.
           </p>
+          <p className='font-semibold'>{disclaimerText}</p>
         </div>
       ),
     },
@@ -423,13 +459,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             are unknown ID and are not cataloged are classified as Unknown age
             class.
           </p>
+          <p className='font-semibold'>{disclaimerText}</p>
         </div>
       ),
     },
     '/injury/vessel-strike/forensics': {
       title: 'Vessel Strike Forensics',
-      description:
-        'Vessel strike forensics for North Atlantic right whale vessel strike cases. Forensic analyses are not possible for all vessel strike cases.',
+      description: (
+        <div>
+          <p>
+            Vessel strike forensics for North Atlantic right whale vessel strike
+            cases. Forensic analyses are not possible for all vessel strike
+            cases.
+          </p>
+          <p className='font-semibold mt-2'>{disclaimerText}</p>
+        </div>
+      ),
     },
     '/injury/unknown-other': {
       title: 'Unknown/Other Injuries',
@@ -450,6 +495,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             right whale health over time is accessible through the Visual Health
             Assessment Database via a NARWC data access request.
           </p>
+          <p className='font-semibold'>{disclaimerText}</p>
         </div>
       ),
     },
