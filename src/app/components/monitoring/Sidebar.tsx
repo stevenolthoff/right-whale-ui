@@ -36,6 +36,24 @@ const Sidebar = ({ categories }: SidebarProps) => {
     }
   }, [isOpen])
 
+  // Prevent body scroll when mobile sidebar is open
+  useEffect(() => {
+    if (isOpen !== null) {
+      if (isOpen && window.innerWidth < 768) {
+        // Prevent body scroll on mobile when sidebar is open
+        document.body.style.overflow = 'hidden'
+      } else {
+        // Restore body scroll
+        document.body.style.overflow = 'unset'
+      }
+    }
+
+    // Cleanup: restore body scroll when component unmounts
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isOpen])
+
   // Add keyboard shortcut listener
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
