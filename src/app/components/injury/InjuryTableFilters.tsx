@@ -82,6 +82,9 @@ const SelectFilter: React.FC<{
       className='text-sm'
       placeholder='Select...'
       isClearable
+      styles={{
+        menu: (provided) => ({ ...provided, zIndex: 9999 }),
+      }}
     />
   )
 }

@@ -101,6 +101,7 @@ const SelectFilter: React.FC<FilterProps> = ({
           menu: (base) => ({
             ...base,
             backgroundColor: 'white',
+            zIndex: 9999,
           }),
         }}
       />
