@@ -337,10 +337,7 @@ export default function VesselStrikeTypeAndSeverity() {
     tableFilteredData.forEach((item) => {
       const year = new Date(item.DetectionDate).getFullYear()
       if (!yearData.has(year)) {
-        yearData.set(
-          year,
-          Object.fromEntries(allSeverities.map((s) => [s, 0]))
-        )
+        yearData.set(year, Object.fromEntries(allSeverities.map((s) => [s, 0])))
       }
       if (item.InjurySeverityDescription) {
         yearData.get(year)![item.InjurySeverityDescription]++
@@ -411,9 +408,10 @@ export default function VesselStrikeTypeAndSeverity() {
     )
   }, [allSeverities, severityColumnFilter])
 
-  const totalVesselStrikes = useMemo(() => tableFilteredData.length, [
-    tableFilteredData,
-  ])
+  const totalVesselStrikes = useMemo(
+    () => tableFilteredData.length,
+    [tableFilteredData]
+  )
 
   if (loading) return <Loader />
   if (error) return <ErrorMessage error={error} />
