@@ -166,7 +166,7 @@ const MonitoringTable: React.FC<MonitoringTableProps> = ({
           if (typeof filterValue === 'string') {
             try {
               ;[minYear, maxYear] = JSON.parse(filterValue)
-            } catch {
+            } catch (e) {
               return true
             }
           } else if (Array.isArray(filterValue)) {
