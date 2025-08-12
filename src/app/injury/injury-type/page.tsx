@@ -170,6 +170,88 @@ const InjuryType = () => {
         },
         filterFn: 'equalsString',
       }),
+
+      columnHelper.accessor('GearOriginDescription', {
+        header: 'Gear Origin',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('GearComplexityDescription', {
+        header: 'Gear Complexity',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('ConstrictingWrap', {
+        header: 'Constricting Wrap',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
+      }),
+      columnHelper.accessor('Disentangled', {
+        header: 'Disentangled',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
+      }),
+      columnHelper.accessor('GearRetrieved', {
+        header: 'Gear Retrieved',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
+      }),
+      columnHelper.accessor('ForensicsCompleted', {
+        header: 'Forensics Completed',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
+      }),
+      columnHelper.accessor('VesselSizeDescription', {
+        header: 'Vessel Size',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
+        filterFn: 'equalsString',
+      }),
+
       columnHelper.accessor('InjuryTimeFrame', {
         header: 'Timeframe (days)',
         cell: (info) => {
@@ -229,6 +311,17 @@ const InjuryType = () => {
     getPaginationRowModel: getPaginationRowModel(),
     initialState: {
       pagination: { pageSize: 10 },
+      // START ADDED CODE
+      columnVisibility: {
+        GearOriginDescription: false,
+        GearComplexityDescription: false,
+        ConstrictingWrap: false,
+        Disentangled: false,
+        GearRetrieved: false,
+        ForensicsCompleted: false,
+        VesselSizeDescription: false,
+      },
+      // END ADDED CODE
     },
     autoResetPageIndex: false,
   })
