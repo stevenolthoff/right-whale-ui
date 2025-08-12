@@ -610,6 +610,10 @@ function EntanglementTable({ egno }: { egno: string }) {
           Event
         </button>
       ),
+      cell: (info) => {
+        const value = info.getValue()
+        return value && value !== '' ? value : 'N/A'
+      },
     },
     {
       accessorKey: 'InjurySeverityDescription',
@@ -621,6 +625,10 @@ function EntanglementTable({ egno }: { egno: string }) {
           Severity
         </button>
       ),
+      cell: (info) => {
+        const value = info.getValue()
+        return value && value !== '' ? value : 'N/A'
+      },
     },
     {
       accessorKey: 'InjuryId',
@@ -746,6 +754,10 @@ function VesselStrikeTable({ egno }: { egno: string }) {
           Event
         </button>
       ),
+      cell: (info) => {
+        const value = info.getValue()
+        return value && value !== '' ? value : 'N/A'
+      },
     },
     {
       accessorKey: 'InjurySeverityDescription',
@@ -757,6 +769,10 @@ function VesselStrikeTable({ egno }: { egno: string }) {
           Severity
         </button>
       ),
+      cell: (info) => {
+        const value = info.getValue()
+        return value && value !== '' ? value : 'N/A'
+      },
     },
     {
       accessorKey: 'InjuryId',

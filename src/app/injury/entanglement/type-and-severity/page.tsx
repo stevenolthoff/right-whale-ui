@@ -31,8 +31,10 @@ export default function EntanglementTypeAndSeverity() {
   const chartRef = useRef<HTMLDivElement>(null)
   const { data, loading, error } = useWhaleInjuryDataStore()
   const [isSideBySide, setIsSideBySide] = useState(true)
-  const [typeFilters, setTypeFilters] = useState<Set<string>>(new Set())
-  const [severityFilters, setSeverityFilters] = useState<Set<string>>(new Set())
+
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [selectedInjury, setSelectedInjury] = useState<WhaleInjury | null>(null)
 
   const entanglementData = useMemo(() => {
     if (!data) return []
@@ -47,109 +49,36 @@ export default function EntanglementTypeAndSeverity() {
     1980
   )
 
-  const typeChartData = React.useMemo(() => {
-    const filteredData = entanglementData.filter((item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      const matchesYear =
-        year >= yearRangeProps.yearRange[0] &&
-        year <= yearRangeProps.yearRange[1]
-      const passesSeverityFilter =
-        severityFilters.size === 0 ||
-        !severityFilters.has(item.InjurySeverityDescription)
-      return matchesYear && passesSeverityFilter
-    })
-
-    const types = Array.from(
-      new Set(filteredData.map((item) => item.InjuryAccountDescription))
-    ).sort()
-
-    const yearData = new Map<number, Record<string, number>>()
-
-    filteredData.forEach((item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      if (!yearData.has(year)) {
-        yearData.set(year, Object.fromEntries(types.map((t) => [t, 0])))
-      }
-      yearData.get(year)![item.InjuryAccountDescription]++
-    })
-
-    const formattedData = []
-    for (
-      let year = yearRangeProps.yearRange[0];
-      year <= yearRangeProps.yearRange[1];
-      year++
-    ) {
-      formattedData.push({
-        year,
-        ...(yearData.get(year) || Object.fromEntries(types.map((t) => [t, 0]))),
-      })
-    }
-
-    return formattedData.sort((a, b) => a.year - b.year)
-  }, [entanglementData, yearRangeProps.yearRange, severityFilters])
-
-  const severityChartData = React.useMemo(() => {
-    const filteredData = entanglementData.filter((item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      const matchesYear =
-        year >= yearRangeProps.yearRange[0] &&
-        year <= yearRangeProps.yearRange[1]
-      const passesTypeFilter =
-        typeFilters.size === 0 ||
-        !typeFilters.has(item.InjuryAccountDescription)
-      return matchesYear && passesTypeFilter
-    })
-
-    const severities = Array.from(
-      new Set(filteredData.map((item) => item.InjurySeverityDescription))
-    ).sort()
-
-    const yearData = new Map<number, Record<string, number>>()
-
-    filteredData.forEach((item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      if (!yearData.has(year)) {
-        yearData.set(year, Object.fromEntries(severities.map((s) => [s, 0])))
-      }
-      yearData.get(year)![item.InjurySeverityDescription]++
-    })
-
-    const formattedData = []
-    for (
-      let year = yearRangeProps.yearRange[0];
-      year <= yearRangeProps.yearRange[1];
-      year++
-    ) {
-      formattedData.push({
-        year,
-        ...(yearData.get(year) ||
-          Object.fromEntries(severities.map((s) => [s, 0]))),
-      })
-    }
-
-    return formattedData.sort((a, b) => a.year - b.year)
-  }, [entanglementData, yearRangeProps.yearRange, typeFilters])
-
-  const handleFilterChange = useCallback(
-    (chartType: 'type' | 'severity', filters: Set<string>) => {
-      if (chartType === 'type') {
-        setTypeFilters(filters)
-      } else {
-        setSeverityFilters(filters)
-      }
-    },
-    []
-  )
-
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-
-  const [selectedInjury, setSelectedInjury] = useState<WhaleInjury | null>(null)
-
   const columns = useMemo(
     () => [
-      columnHelper.accessor('CaseId', {
-        header: 'Case ID',
+      columnHelper.accessor('EGNo', {
+        header: 'EG No',
+        cell: (info) => {
+          const egNo = info.getValue() as string
+          if (!egNo || egNo === '') return 'N/A'
+
+          const isFourDigit = /^\d{4}$/.test(egNo)
+
+          if (isFourDigit) {
+            return (
+              <a
+                href={`https://rwcatalog.neaq.org/#/whales/${egNo}`}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+              >
+                {egNo}
+              </a>
+            )
+          }
+
+          return <span>{egNo}</span>
+        },
+        filterFn: 'includesString',
+      }),
+      columnHelper.accessor((row) => row.CaseId ?? row.InjuryId, {
+        id: 'caseId',
+        header: 'Injury/Case ID',
         cell: (info) => (
           <button
             onClick={() => setSelectedInjury(info.row.original)}
@@ -159,32 +88,21 @@ export default function EntanglementTypeAndSeverity() {
           </button>
         ),
       }),
-      columnHelper.accessor('EGNo', {
-        header: 'EG No',
-        cell: (info) => {
-          const egNo = info.getValue()
-          if (!egNo) return null
-
-          return (
-            <a
-              href={`https://rwcatalog.neaq.org/#/whales/${egNo}`}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
-            >
-              {egNo}
-            </a>
-          )
-        },
-        filterFn: 'includesString',
-      }),
       columnHelper.accessor('InjuryAccountDescription', {
-        header: 'Injury Account',
-        filterFn: 'equalsString',
+        header: 'Injury Description',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
+        filterFn: 'arrIncludesSome',
       }),
       columnHelper.accessor('InjurySeverityDescription', {
         header: 'Severity',
-        filterFn: 'equalsString',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
+        filterFn: 'arrIncludesSome',
       }),
       columnHelper.accessor('DetectionDate', {
         header: 'Detection Year',
@@ -198,6 +116,10 @@ export default function EntanglementTypeAndSeverity() {
       }),
       columnHelper.accessor('InjuryAge', {
         header: 'Age',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: (row, id, value) => {
           if (!value) return true
           const ageValue = row.getValue(id) as string | null
@@ -209,10 +131,18 @@ export default function EntanglementTypeAndSeverity() {
       }),
       columnHelper.accessor('InjuryAgeClass', {
         header: 'Age Class',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('GenderDescription', {
         header: 'Sex',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('Cow', {
@@ -225,18 +155,34 @@ export default function EntanglementTypeAndSeverity() {
       }),
       columnHelper.accessor('UnusualMortalityEventDescription', {
         header: 'UME Status',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('CountryOriginDescription', {
         header: 'Injury Country Origin',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('GearOriginDescription', {
         header: 'Gear Origin',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('GearComplexityDescription', {
         header: 'Gear Complexity',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('ConstrictingWrap', {
@@ -283,6 +229,10 @@ export default function EntanglementTypeAndSeverity() {
       }),
       columnHelper.accessor('InjuryTimeFrame', {
         header: 'Timeframe (days)',
+        cell: (info) => {
+          const value = info.getValue()
+          return value !== null && value !== undefined ? value : 'N/A'
+        },
         filterFn: (row, id, value) => {
           if (!value) return true
           const timeframe = row.getValue(id) as number | null
@@ -314,6 +264,10 @@ export default function EntanglementTypeAndSeverity() {
       }),
       columnHelper.accessor('DeathCauseDescription', {
         header: 'Cause of Death',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
     ],
@@ -339,6 +293,134 @@ export default function EntanglementTypeAndSeverity() {
   useEffect(() => {
     table.getColumn('DetectionDate')?.setFilterValue(yearRangeProps.yearRange)
   }, [yearRangeProps.yearRange, table])
+
+  const tableFilteredData = useMemo(
+    () => table.getFilteredRowModel().rows.map((row) => row.original),
+    [table.getFilteredRowModel().rows]
+  )
+
+  const allTypes = useMemo(
+    () =>
+      Array.from(
+        new Set(entanglementData.map((item) => item.InjuryAccountDescription))
+      ),
+    [entanglementData]
+  )
+  const allSeverities = useMemo(
+    () =>
+      Array.from(
+        new Set(entanglementData.map((item) => item.InjurySeverityDescription))
+      ),
+    [entanglementData]
+  )
+
+  const typeChartData = React.useMemo(() => {
+    const yearData = new Map<number, Record<string, number>>()
+
+    tableFilteredData.forEach((item) => {
+      const year = new Date(item.DetectionDate).getFullYear()
+      if (!yearData.has(year)) {
+        yearData.set(year, Object.fromEntries(allTypes.map((t) => [t, 0])))
+      }
+      if (item.InjuryAccountDescription) {
+        yearData.get(year)![item.InjuryAccountDescription]++
+      }
+    })
+
+    const formattedData = []
+    for (
+      let year = yearRangeProps.yearRange[0];
+      year <= yearRangeProps.yearRange[1];
+      year++
+    ) {
+      formattedData.push({
+        year,
+        ...(yearData.get(year) ||
+          Object.fromEntries(allTypes.map((t) => [t, 0]))),
+      })
+    }
+    return formattedData.sort((a, b) => a.year - b.year)
+  }, [tableFilteredData, yearRangeProps.yearRange, allTypes])
+
+  const severityChartData = React.useMemo(() => {
+    const yearData = new Map<number, Record<string, number>>()
+
+    tableFilteredData.forEach((item) => {
+      const year = new Date(item.DetectionDate).getFullYear()
+      if (!yearData.has(year)) {
+        yearData.set(
+          year,
+          Object.fromEntries(allSeverities.map((s) => [s, 0]))
+        )
+      }
+      if (item.InjurySeverityDescription) {
+        yearData.get(year)![item.InjurySeverityDescription]++
+      }
+    })
+
+    const formattedData = []
+    for (
+      let year = yearRangeProps.yearRange[0];
+      year <= yearRangeProps.yearRange[1];
+      year++
+    ) {
+      formattedData.push({
+        year,
+        ...(yearData.get(year) ||
+          Object.fromEntries(allSeverities.map((s) => [s, 0]))),
+      })
+    }
+    return formattedData.sort((a, b) => a.year - b.year)
+  }, [tableFilteredData, yearRangeProps.yearRange, allSeverities])
+
+  const handleHiddenSeriesChange = useCallback(
+    (
+      columnId: 'InjuryAccountDescription' | 'InjurySeverityDescription',
+      allPossibleValues: string[],
+      hiddenSeries: Set<string>
+    ) => {
+      const column = table.getColumn(columnId)
+      if (!column) return
+
+      const visibleValues = allPossibleValues.filter(
+        (value) => !hiddenSeries.has(value)
+      )
+
+      if (
+        visibleValues.length === 0 ||
+        visibleValues.length === allPossibleValues.length
+      ) {
+        column.setFilterValue(undefined)
+      } else {
+        column.setFilterValue(visibleValues)
+      }
+    },
+    [table]
+  )
+
+  const typeColumnFilter = columnFilters.find(
+    (f) => f.id === 'InjuryAccountDescription'
+  )?.value as string[] | undefined
+
+  const severityColumnFilter = columnFilters.find(
+    (f) => f.id === 'InjurySeverityDescription'
+  )?.value as string[] | undefined
+
+  const hiddenTypes = useMemo(() => {
+    if (!typeColumnFilter || typeColumnFilter.length === 0) {
+      return new Set<string>()
+    }
+    return new Set(allTypes.filter((t) => !typeColumnFilter.includes(t)))
+  }, [allTypes, typeColumnFilter])
+
+  const hiddenSeverities = useMemo(() => {
+    if (!severityColumnFilter || severityColumnFilter.length === 0) {
+      return new Set<string>()
+    }
+    return new Set(
+      allSeverities.filter((s) => !severityColumnFilter.includes(s))
+    )
+  }, [allSeverities, severityColumnFilter])
 
   if (loading) return <Loader />
   if (error) return <ErrorMessage error={error} />
@@ -397,7 +479,14 @@ export default function EntanglementTypeAndSeverity() {
               stackId='type'
               stacked={true}
               yAxisLabel='Entanglements'
-              onFilterChange={(filters) => handleFilterChange('type', filters)}
+              hiddenSeries={hiddenTypes}
+              onHiddenSeriesChange={(hidden) =>
+                handleHiddenSeriesChange(
+                  'InjuryAccountDescription',
+                  allTypes,
+                  hidden
+                )
+              }
             />
           </div>
 
@@ -410,8 +499,13 @@ export default function EntanglementTypeAndSeverity() {
               stackId='severity'
               stacked={true}
               yAxisLabel='Entanglements'
-              onFilterChange={(filters) =>
-                handleFilterChange('severity', filters)
+              hiddenSeries={hiddenSeverities}
+              onHiddenSeriesChange={(hidden) =>
+                handleHiddenSeriesChange(
+                  'InjurySeverityDescription',
+                  allSeverities,
+                  hidden
+                )
               }
               customOrder={['Severe', 'Moderate', 'Minor']}
             />
@@ -444,4 +538,4 @@ export default function EntanglementTypeAndSeverity() {
       />
     </div>
   )
-} 
+}

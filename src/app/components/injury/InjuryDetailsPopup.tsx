@@ -1,6 +1,11 @@
 import React, { useEffect, useCallback, useState } from 'react'
 import { WhaleInjury } from '@/app/types/whaleInjury'
-import { XMarkIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, ArrowsPointingOutIcon, ArrowsPointingInIcon } from '@heroicons/react/24/outline'
+import axios from 'axios'
+import { useAuthStore } from '@/app/store/auth'
+import { usePopupExpandStore } from '@/app/stores/usePopupExpandStore'
+import { RW_BACKEND_URL_CONFIG, url_join } from '@/app/config'
+import { Loader } from '@/app/components/ui/Loader'
 
 interface InjuryDetailsPopupProps {
   injuryData: WhaleInjury | null
@@ -14,6 +19,172 @@ const formatYN = (value: string | null | undefined) => {
   if (value === 'N') return 'No'
   if (value) return value // To handle cases like "Unknown"
   return 'N/A'
+}
+
+const NecropsyContent: React.FC<{ injuryData: WhaleInjury }> = ({
+  injuryData,
+}) => {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { token } = useAuthStore()
+
+  useEffect(() => {
+    const fetchPdf = async () => {
+      if (!injuryData.RecordId) {
+        setError('Record ID is missing.')
+        setLoading(false)
+        return
+      }
+      setLoading(true)
+      setError(null)
+      try {
+        const url = url_join(
+          RW_BACKEND_URL_CONFIG.BASE_URL,
+          `/anthro/api/v1/whale_injuries/${injuryData.RecordId}/necropsy/`
+        )
+        const response = await axios.get(url, {
+          responseType: 'blob',
+          headers: {
+            Authorization: `token ${token}`,
+          },
+        })
+        const file = new Blob([response.data], { type: 'application/pdf' })
+        const fileURL = URL.createObjectURL(file)
+        setPdfUrl(fileURL)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load PDF.')
+        console.error('Error fetching necropsy PDF:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPdf()
+
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [injuryData.RecordId, token])
+
+  if (loading) {
+    return (
+      <div className='flex items-center justify-center h-full'>
+        <Loader />
+        <p className='ml-2'>Loading Necropsy Report...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className='flex items-center justify-center h-full text-red-500'>
+        <p>Error loading necropsy report: No report found.</p>
+      </div>
+    )
+  }
+
+  if (pdfUrl) {
+    return (
+      <iframe
+        src={pdfUrl}
+        className='w-full h-full'
+        title={`Necropsy Report for Record ${injuryData.RecordId}`}
+      />
+    )
+  }
+
+  return (
+    <div className='flex items-center justify-center h-full text-gray-500'>
+      <p>No necropsy report available.</p>
+    </div>
+  )
+}
+
+const CaseStudyContent: React.FC<{ injuryData: WhaleInjury }> = ({
+  injuryData,
+}) => {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { token } = useAuthStore()
+
+  useEffect(() => {
+    const fetchPdf = async () => {
+      if (!injuryData.RecordId) {
+        setError('Record ID is missing.')
+        setLoading(false)
+        return
+      }
+      setLoading(true)
+      setError(null)
+      try {
+        const url = url_join(
+          RW_BACKEND_URL_CONFIG.BASE_URL,
+          `/anthro/api/v1/whale_injuries/${injuryData.RecordId}/case_study/`
+        )
+        const response = await axios.get(url, {
+          responseType: 'blob',
+          headers: {
+            Authorization: `token ${token}`,
+          },
+        })
+        const file = new Blob([response.data], { type: 'application/pdf' })
+        const fileURL = URL.createObjectURL(file)
+        setPdfUrl(fileURL)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load PDF.')
+        console.error('Error fetching case study PDF:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPdf()
+
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [injuryData.RecordId, token])
+
+  if (loading) {
+    return (
+      <div className='flex items-center justify-center h-full'>
+        <Loader />
+        <p className='ml-2'>Loading Case Study...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className='flex items-center justify-center h-full text-red-500'>
+        <p>Error loading case study: No study found.</p>
+      </div>
+    )
+  }
+
+  if (pdfUrl) {
+    return (
+      <iframe
+        src={pdfUrl}
+        className='w-full h-full'
+        title={`Case Study for Record ${injuryData.RecordId}`}
+      />
+    )
+  }
+
+  return (
+    <div className='flex items-center justify-center h-full text-gray-500'>
+      <p>No case study available.</p>
+    </div>
+  )
 }
 
 const DetailsContent: React.FC<{
@@ -251,7 +422,7 @@ const CommentsContent: React.FC<{ injuryData: WhaleInjury }> = ({
   )
 }
 
-type TabOptions = 'details' | 'whale-info' | 'injury-details' | 'comments'
+type TabOptions = 'details' | 'whale-info' | 'injury-details' | 'comments' | 'necropsy' | 'case-study'
 
 const InjuryDetailsPopup: React.FC<InjuryDetailsPopupProps> = ({
   injuryData,
@@ -260,6 +431,7 @@ const InjuryDetailsPopup: React.FC<InjuryDetailsPopupProps> = ({
   context,
 }) => {
   const [activeTab, setActiveTab] = useState<TabOptions>('details')
+  const { isExpanded, toggleExpanded } = usePopupExpandStore()
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -268,8 +440,12 @@ const InjuryDetailsPopup: React.FC<InjuryDetailsPopupProps> = ({
       if (event.key === 'Escape') {
         onClose()
       }
+      if (event.key === 'F11') {
+        event.preventDefault()
+        toggleExpanded()
+      }
     },
-    [isOpen, onClose]
+    [isOpen, onClose, toggleExpanded]
   )
 
   useEffect(() => {
@@ -293,6 +469,18 @@ const InjuryDetailsPopup: React.FC<InjuryDetailsPopupProps> = ({
     }
   }, [isOpen, injuryData?.InjuryId, injuryData?.CaseId])
 
+  // Reset active tab if it's not available for the current injury data
+  useEffect(() => {
+    if (isOpen) {
+      if (activeTab === 'necropsy' && !injuryData?.HasNecropsyReport) {
+        setActiveTab('details')
+      }
+      if (activeTab === 'case-study' && !injuryData?.HasCaseStudy) {
+        setActiveTab('details')
+      }
+    }
+  }, [isOpen, injuryData, activeTab])
+
   if (!isOpen || !injuryData) return null
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -308,6 +496,12 @@ const InjuryDetailsPopup: React.FC<InjuryDetailsPopupProps> = ({
       'injury-details',
       'comments',
     ]
+    if (injuryData.HasNecropsyReport) {
+      tabs.push('necropsy')
+    }
+    if (injuryData.HasCaseStudy) {
+      tabs.push('case-study')
+    }
 
     return (
       <div className='flex-none px-4 sm:px-8 border-b border-gray-200'>
@@ -335,23 +529,37 @@ const InjuryDetailsPopup: React.FC<InjuryDetailsPopupProps> = ({
   }
 
   const renderContent = () => {
-    switch (activeTab) {
-      case 'details':
-        return <DetailsContent injuryData={injuryData} context={context} />
-      case 'whale-info':
-        return <WhaleInfoContent injuryData={injuryData} />
-      case 'injury-details':
-        return <InjuryDetailsContent injuryData={injuryData} />
-      case 'comments':
-        return <CommentsContent injuryData={injuryData} />
-      default:
-        return null
-    }
+    return (
+      <>
+        <div hidden={activeTab !== 'details'} className='h-full'>
+          <DetailsContent injuryData={injuryData} context={context} />
+        </div>
+        <div hidden={activeTab !== 'whale-info'} className='h-full'>
+          <WhaleInfoContent injuryData={injuryData} />
+        </div>
+        <div hidden={activeTab !== 'injury-details'} className='h-full'>
+          <InjuryDetailsContent injuryData={injuryData} />
+        </div>
+        <div hidden={activeTab !== 'comments'} className='h-full'>
+          <CommentsContent injuryData={injuryData} />
+        </div>
+        {injuryData.HasNecropsyReport && (
+          <div hidden={activeTab !== 'necropsy'} className='h-full'>
+            <NecropsyContent injuryData={injuryData} />
+          </div>
+        )}
+        {injuryData.HasCaseStudy && (
+          <div hidden={activeTab !== 'case-study'} className='h-full'>
+            <CaseStudyContent injuryData={injuryData} />
+          </div>
+        )}
+      </>
+    )
   }
 
   return (
     <div
-      key={injuryData.InjuryId || injuryData.CaseId}
+      key={injuryData.RecordId}
       className='fixed top-0 left-0 right-0 bottom-0 z-[9999] bg-gray-900/25 backdrop-blur-sm'
       onClick={handleBackdropClick}
       role='dialog'
@@ -359,24 +567,41 @@ const InjuryDetailsPopup: React.FC<InjuryDetailsPopupProps> = ({
       aria-labelledby='injury-details-title'
     >
       <div className='flex items-center justify-center min-h-screen'>
-        <div className='relative bg-white w-full h-screen sm:h-[600px] sm:max-w-2xl sm:rounded-2xl shadow-2xl sm:mx-auto sm:my-8 animate-in fade-in duration-300 slide-in-from-bottom-4 flex flex-col'>
+        <div
+          className={`relative bg-white shadow-2xl flex flex-col transition-all duration-300 ease-in-out ${
+            isExpanded
+              ? 'w-screen h-screen rounded-none'
+              : 'w-full h-screen sm:h-[600px] sm:max-w-2xl sm:rounded-2xl sm:mx-auto sm:my-8'
+          } animate-in fade-in duration-300 slide-in-from-bottom-4`}
+        >
           <div className='flex-none flex flex-col space-y-1 p-4 sm:p-8 pb-4 border-b border-gray-100'>
             <div className='flex justify-between items-center'>
               <h2
                 id='injury-details-title'
                 className='text-2xl sm:text-3xl font-semibold text-gray-900'
               >
-                {injuryData.InjuryId
-                  ? `Injury ID: ${injuryData.InjuryId}`
-                  : `Case ID: ${injuryData.CaseId}`}
+                Record ID: {injuryData.RecordId}
               </h2>
-              <button
-                onClick={onClose}
-                className='text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full'
-                aria-label='Close dialog'
-              >
-                <XMarkIcon className='h-6 w-6' />
-              </button>
+              <div className='flex items-center gap-2'>
+                <button
+                  onClick={toggleExpanded}
+                  className='hidden sm:block text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full'
+                  aria-label={isExpanded ? 'Shrink dialog' : 'Expand dialog'}
+                >
+                  {isExpanded ? (
+                    <ArrowsPointingInIcon className='h-6 w-6' />
+                  ) : (
+                    <ArrowsPointingOutIcon className='h-6 w-6' />
+                  )}
+                </button>
+                <button
+                  onClick={onClose}
+                  className='text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full'
+                  aria-label='Close dialog'
+                >
+                  <XMarkIcon className='h-6 w-6' />
+                </button>
+              </div>
             </div>
             <p className='text-sm text-gray-500'>
               Details for North Atlantic Right Whale #{injuryData.EGNo}

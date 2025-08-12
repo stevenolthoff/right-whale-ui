@@ -27,7 +27,7 @@ import InjuryDetailsPopup from '@/app/components/injury/InjuryDetailsPopup'
 
 const columnHelper = createColumnHelper<WhaleInjury>()
 
-const STRIKE_TYPE_ORDER = ['Blunt', 'Gash', 'Prop Cut(s)']
+const STRIKE_TYPE_ORDER = ['Blunt', 'Gash', 'Prop Cut(s)', 'Other']
 const SEVERITY_ORDER = [
   'Blunt',
   'Deep',
@@ -40,8 +40,10 @@ export default function VesselStrikeTypeAndSeverity() {
   const chartRef = useRef<HTMLDivElement>(null)
   const { data, loading, error } = useWhaleInjuryDataStore()
   const [isSideBySide, setIsSideBySide] = useState(true)
-  const [typeFilters, setTypeFilters] = useState<Set<string>>(new Set())
-  const [severityFilters, setSeverityFilters] = useState<Set<string>>(new Set())
+
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [selectedInjury, setSelectedInjury] = useState<WhaleInjury | null>(null)
 
   const vesselStrikeData = useMemo(() => {
     if (!data) return []
@@ -56,121 +58,36 @@ export default function VesselStrikeTypeAndSeverity() {
     1980
   )
 
-  const typeChartData = React.useMemo(() => {
-    const filteredData = vesselStrikeData.filter((item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      return (
-        year >= yearRangeProps.yearRange[0] &&
-        year <= yearRangeProps.yearRange[1] &&
-        (severityFilters.size === 0 ||
-          !severityFilters.has(item.InjurySeverityDescription))
-      )
-    })
-
-    const types = Array.from(
-      new Set(filteredData.map((item) => item.InjuryAccountDescription))
-    ).sort((a, b) => {
-      const aIndex = STRIKE_TYPE_ORDER.indexOf(a)
-      const bIndex = STRIKE_TYPE_ORDER.indexOf(b)
-      if (aIndex === -1 && bIndex === -1) return a.localeCompare(b)
-      if (aIndex === -1) return 1
-      if (bIndex === -1) return -1
-      return aIndex - bIndex
-    })
-
-    const yearData = new Map<number, Record<string, number>>()
-
-    filteredData.forEach((item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      if (!yearData.has(year)) {
-        yearData.set(year, Object.fromEntries(types.map((t) => [t, 0])))
-      }
-      yearData.get(year)![item.InjuryAccountDescription]++
-    })
-
-    const formattedData = []
-    for (
-      let year = yearRangeProps.yearRange[0];
-      year <= yearRangeProps.yearRange[1];
-      year++
-    ) {
-      formattedData.push({
-        year,
-        ...(yearData.get(year) || Object.fromEntries(types.map((t) => [t, 0]))),
-      })
-    }
-
-    return formattedData.sort((a, b) => a.year - b.year)
-  }, [vesselStrikeData, yearRangeProps.yearRange, severityFilters])
-
-  const severityChartData = React.useMemo(() => {
-    const filteredData = vesselStrikeData.filter((item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      return (
-        year >= yearRangeProps.yearRange[0] &&
-        year <= yearRangeProps.yearRange[1] &&
-        (typeFilters.size === 0 ||
-          !typeFilters.has(item.InjuryAccountDescription))
-      )
-    })
-
-    const severities = Array.from(
-      new Set(filteredData.map((item) => item.InjurySeverityDescription))
-    ).sort((a, b) => {
-      const aIndex = SEVERITY_ORDER.indexOf(a)
-      const bIndex = SEVERITY_ORDER.indexOf(b)
-      if (aIndex === -1 && bIndex === -1) return a.localeCompare(b)
-      if (aIndex === -1) return 1
-      if (bIndex === -1) return -1
-      return aIndex - bIndex
-    })
-
-    const yearData = new Map<number, Record<string, number>>()
-
-    filteredData.forEach((item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      if (!yearData.has(year)) {
-        yearData.set(year, Object.fromEntries(severities.map((s) => [s, 0])))
-      }
-      yearData.get(year)![item.InjurySeverityDescription]++
-    })
-
-    const formattedData = []
-    for (
-      let year = yearRangeProps.yearRange[0];
-      year <= yearRangeProps.yearRange[1];
-      year++
-    ) {
-      formattedData.push({
-        year,
-        ...(yearData.get(year) ||
-          Object.fromEntries(severities.map((s) => [s, 0]))),
-      })
-    }
-
-    return formattedData.sort((a, b) => a.year - b.year)
-  }, [vesselStrikeData, yearRangeProps.yearRange, typeFilters])
-
-  const handleFilterChange = useCallback(
-    (chartType: 'type' | 'severity', filters: Set<string>) => {
-      if (chartType === 'type') {
-        setTypeFilters(filters)
-      } else {
-        setSeverityFilters(filters)
-      }
-    },
-    []
-  )
-
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-
-  const [selectedInjury, setSelectedInjury] = useState<WhaleInjury | null>(null)
-
   const columns = useMemo(
     () => [
-      columnHelper.accessor('CaseId', {
-        header: 'Case ID',
+      columnHelper.accessor('EGNo', {
+        header: 'EG No',
+        cell: (info) => {
+          const egNo = info.getValue() as string
+          if (!egNo || egNo === '') return 'N/A'
+
+          const isFourDigit = /^\d{4}$/.test(egNo)
+
+          if (isFourDigit) {
+            return (
+              <a
+                href={`https://rwcatalog.neaq.org/#/whales/${egNo}`}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+              >
+                {egNo}
+              </a>
+            )
+          }
+
+          return <span>{egNo}</span>
+        },
+        filterFn: 'includesString',
+      }),
+      columnHelper.accessor((row) => row.CaseId ?? row.InjuryId, {
+        id: 'caseId',
+        header: 'Injury/Case ID',
         cell: (info) => (
           <button
             onClick={() => setSelectedInjury(info.row.original)}
@@ -180,32 +97,17 @@ export default function VesselStrikeTypeAndSeverity() {
           </button>
         ),
       }),
-      columnHelper.accessor('EGNo', {
-        header: 'EG No',
-        cell: (info) => {
-          const egNo = info.getValue()
-          if (!egNo) return null
-
-          return (
-            <a
-              href={`https://rwcatalog.neaq.org/#/whales/${egNo}`}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
-            >
-              {egNo}
-            </a>
-          )
-        },
-        filterFn: 'includesString',
+      columnHelper.accessor('InjuryTypeDescription', {
+        header: 'Injury Type',
+        filterFn: 'arrIncludesSome',
       }),
       columnHelper.accessor('InjuryAccountDescription', {
-        header: 'Injury Account',
-        filterFn: 'equalsString',
+        header: 'Injury Description',
+        filterFn: 'arrIncludesSome',
       }),
       columnHelper.accessor('InjurySeverityDescription', {
-        header: 'Severity',
-        filterFn: 'equalsString',
+        header: 'Injury Severity',
+        filterFn: 'arrIncludesSome',
       }),
       columnHelper.accessor('DetectionDate', {
         header: 'Detection Year',
@@ -230,7 +132,7 @@ export default function VesselStrikeTypeAndSeverity() {
       }),
       columnHelper.accessor('InjuryAgeClass', {
         header: 'Age Class',
-        filterFn: 'equalsString',
+        filterFn: 'arrIncludesSome',
       }),
       columnHelper.accessor('GenderDescription', {
         header: 'Sex',
@@ -250,6 +152,76 @@ export default function VesselStrikeTypeAndSeverity() {
       }),
       columnHelper.accessor('CountryOriginDescription', {
         header: 'Injury Country Origin',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('GearOriginDescription', {
+        header: 'Gear Origin',
+        cell: (info) => info.getValue() || 'N/A',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('GearComplexityDescription', {
+        header: 'Gear Complexity',
+        cell: (info) => info.getValue() || 'N/A',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('ConstrictingWrap', {
+        header: 'Constricting Wrap',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
+      }),
+      columnHelper.accessor('Disentangled', {
+        header: 'Disentangled',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
+      }),
+      columnHelper.accessor('GearRetrieved', {
+        header: 'Gear Retrieved',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
+      }),
+      columnHelper.accessor('ForensicsCompleted', {
+        header: 'Forensics Completed',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id) as string
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
+      }),
+      columnHelper.accessor('VesselSizeDescription', {
+        header: 'Vessel Size',
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('InjuryTimeFrame', {
@@ -311,6 +283,136 @@ export default function VesselStrikeTypeAndSeverity() {
     table.getColumn('DetectionDate')?.setFilterValue(yearRangeProps.yearRange)
   }, [yearRangeProps.yearRange, table])
 
+  const tableFilteredData = useMemo(
+    () => table.getFilteredRowModel().rows.map((row) => row.original),
+    [table.getFilteredRowModel().rows]
+  )
+
+  const allTypes = useMemo(
+    () =>
+      Array.from(
+        new Set(vesselStrikeData.map((item) => item.InjuryAccountDescription))
+      ).filter(Boolean),
+    [vesselStrikeData]
+  )
+  const allSeverities = useMemo(
+    () =>
+      Array.from(
+        new Set(vesselStrikeData.map((item) => item.InjurySeverityDescription))
+      ).filter(Boolean),
+    [vesselStrikeData]
+  )
+
+  const typeChartData = React.useMemo(() => {
+    const yearData = new Map<number, Record<string, number>>()
+
+    tableFilteredData.forEach((item) => {
+      const year = new Date(item.DetectionDate).getFullYear()
+      if (!yearData.has(year)) {
+        yearData.set(year, Object.fromEntries(allTypes.map((t) => [t, 0])))
+      }
+      if (item.InjuryAccountDescription) {
+        yearData.get(year)![item.InjuryAccountDescription]++
+      }
+    })
+
+    const formattedData = []
+    for (
+      let year = yearRangeProps.yearRange[0];
+      year <= yearRangeProps.yearRange[1];
+      year++
+    ) {
+      formattedData.push({
+        year,
+        ...(yearData.get(year) ||
+          Object.fromEntries(allTypes.map((t) => [t, 0]))),
+      })
+    }
+    return formattedData.sort((a, b) => a.year - b.year)
+  }, [tableFilteredData, yearRangeProps.yearRange, allTypes])
+
+  const severityChartData = React.useMemo(() => {
+    const yearData = new Map<number, Record<string, number>>()
+
+    tableFilteredData.forEach((item) => {
+      const year = new Date(item.DetectionDate).getFullYear()
+      if (!yearData.has(year)) {
+        yearData.set(year, Object.fromEntries(allSeverities.map((s) => [s, 0])))
+      }
+      if (item.InjurySeverityDescription) {
+        yearData.get(year)![item.InjurySeverityDescription]++
+      }
+    })
+
+    const formattedData = []
+    for (
+      let year = yearRangeProps.yearRange[0];
+      year <= yearRangeProps.yearRange[1];
+      year++
+    ) {
+      formattedData.push({
+        year,
+        ...(yearData.get(year) ||
+          Object.fromEntries(allSeverities.map((s) => [s, 0]))),
+      })
+    }
+    return formattedData.sort((a, b) => a.year - b.year)
+  }, [tableFilteredData, yearRangeProps.yearRange, allSeverities])
+
+  const handleHiddenSeriesChange = useCallback(
+    (
+      columnId: 'InjuryAccountDescription' | 'InjurySeverityDescription',
+      allPossibleValues: string[],
+      hiddenSeries: Set<string>
+    ) => {
+      const column = table.getColumn(columnId)
+      if (!column) return
+
+      const visibleValues = allPossibleValues.filter(
+        (value) => !hiddenSeries.has(value)
+      )
+
+      if (
+        visibleValues.length === 0 ||
+        visibleValues.length === allPossibleValues.length
+      ) {
+        column.setFilterValue(undefined)
+      } else {
+        column.setFilterValue(visibleValues)
+      }
+    },
+    [table]
+  )
+
+  const typeColumnFilter = columnFilters.find(
+    (f) => f.id === 'InjuryAccountDescription'
+  )?.value as string[] | undefined
+
+  const severityColumnFilter = columnFilters.find(
+    (f) => f.id === 'InjurySeverityDescription'
+  )?.value as string[] | undefined
+
+  const hiddenTypes = useMemo(() => {
+    if (!typeColumnFilter || typeColumnFilter.length === 0) {
+      return new Set<string>()
+    }
+    return new Set(allTypes.filter((t) => !typeColumnFilter.includes(t)))
+  }, [allTypes, typeColumnFilter])
+
+  const hiddenSeverities = useMemo(() => {
+    if (!severityColumnFilter || severityColumnFilter.length === 0) {
+      return new Set<string>()
+    }
+    return new Set(
+      allSeverities.filter((s) => !severityColumnFilter.includes(s))
+    )
+  }, [allSeverities, severityColumnFilter])
+
+  const totalVesselStrikes = useMemo(
+    () => tableFilteredData.length,
+    [tableFilteredData]
+  )
+
   if (loading) return <Loader />
   if (error) return <ErrorMessage error={error} />
 
@@ -351,7 +453,7 @@ export default function VesselStrikeTypeAndSeverity() {
           </h2>
           <p className='text-sm text-gray-600'>
             Data from {yearRangeProps.yearRange[0]} to{' '}
-            {yearRangeProps.yearRange[1]}
+            {yearRangeProps.yearRange[1]} • Total Count: {totalVesselStrikes}
           </p>
         </div>
         <div
@@ -368,7 +470,14 @@ export default function VesselStrikeTypeAndSeverity() {
               stackId='type'
               stacked={true}
               yAxisLabel='Vessel Strikes'
-              onFilterChange={(filters) => handleFilterChange('type', filters)}
+              hiddenSeries={hiddenTypes}
+              onHiddenSeriesChange={(hidden) =>
+                handleHiddenSeriesChange(
+                  'InjuryAccountDescription',
+                  allTypes,
+                  hidden
+                )
+              }
               customOrder={STRIKE_TYPE_ORDER}
             />
           </div>
@@ -382,8 +491,13 @@ export default function VesselStrikeTypeAndSeverity() {
               stackId='severity'
               stacked={true}
               yAxisLabel='Vessel Strikes'
-              onFilterChange={(filters) =>
-                handleFilterChange('severity', filters)
+              hiddenSeries={hiddenSeverities}
+              onHiddenSeriesChange={(hidden) =>
+                handleHiddenSeriesChange(
+                  'InjurySeverityDescription',
+                  allSeverities,
+                  hidden
+                )
               }
               customOrder={SEVERITY_ORDER}
             />

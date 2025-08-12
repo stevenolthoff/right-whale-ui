@@ -3,7 +3,8 @@ import React from 'react'
 
 export default function Overview() {
   return (
-    <div className=''>
+    <div className='min-h-[120vh] max-w-prose mx-auto'>
+      <div className='text-3xl font-bold mb-6'>Introduction to the Data</div>
       <div className='space-y-6 text-gray-700 leading-relaxed'>
         <p className='text-lg'>
           The ability to monitor North Atlantic right whale vital rates and

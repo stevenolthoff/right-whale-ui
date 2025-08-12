@@ -11,7 +11,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     { title: string; description: string | React.ReactNode }
   > = {
     '/monitoring/overview': {
-      title: 'Introduction to the Data',
+      title: '',
       description: '',
     },
     '/monitoring/active': {
@@ -52,7 +52,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <p className='text-lg text-gray-700 leading-relaxed mb-4'>
             Monitoring Cases displayed here represent those captured in the
             ongoing North Atlantic Right Whale Mortality Event (UME) 2017-2025.
-            More information on the UME is available on NOAA's{' '}
+            More information on the UME is available on NOAA&apos;s{' '}
             <Link
               href='https://www.fisheries.noaa.gov/national/marine-life-distress/2017-2025-north-atlantic-right-whale-unusual-mortality-event'
               className='text-blue-500 hover:text-blue-700'
@@ -125,9 +125,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   ]
 
   return (
-    <div className='flex min-h-screen bg-white pt-[70px]'>
+    <div className='flex bg-white pt-[70px] overflow-visible min-h-screen'>
       <Sidebar categories={categories} />
-      <main className='flex-1 p-2 md:p-12 min-w-0 transition-all duration-200 peer-[.-translate-x-full]:ml-0 bg-white'>
+      <main className='flex-1 p-2 md:p-12 min-w-0 transition-all duration-200 peer-[.-translate-x-full]:ml-0 bg-white md:border-l md:border-gray-200'>
         <div className='text-3xl font-bold'>{text[pathname].title}</div>
         <div className='max-w-[800px] mt-4 mb-8'>
           {text[pathname].description}

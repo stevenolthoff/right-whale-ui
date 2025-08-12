@@ -43,6 +43,31 @@ const InjuryType = () => {
 
   const columns = useMemo(
     () => [
+      columnHelper.accessor('EGNo', {
+        header: 'EG No',
+        cell: (info) => {
+          const egNo = info.getValue() as string
+          if (!egNo || egNo === '') return 'N/A'
+
+          const isFourDigit = /^\d{4}$/.test(egNo)
+
+          if (isFourDigit) {
+            return (
+              <a
+                href={`https://rwcatalog.neaq.org/#/whales/${egNo}`}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
+              >
+                {egNo}
+              </a>
+            )
+          }
+
+          return <span>{egNo}</span>
+        },
+        filterFn: 'includesString',
+      }),
       columnHelper.accessor((row) => row.CaseId ?? row.InjuryId, {
         id: 'caseId',
         header: 'Injury/Case ID',
@@ -55,36 +80,29 @@ const InjuryType = () => {
           </button>
         ),
       }),
-      columnHelper.accessor('EGNo', {
-        header: 'EG No',
-        cell: (info) => {
-          const egNo = info.getValue()
-          if (!egNo) return null
-
-          return (
-            <a
-              href={`https://rwcatalog.neaq.org/#/whales/${egNo}`}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-blue-600 hover:text-blue-800 bg-blue-100 px-2 py-1 rounded-md'
-            >
-              {egNo}
-            </a>
-          )
-        },
-        filterFn: 'includesString',
-      }),
 
       columnHelper.accessor('InjuryTypeDescription', {
         header: 'Injury Type',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'arrIncludesSome',
       }),
       columnHelper.accessor('InjuryAccountDescription', {
         header: 'Injury Description',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('InjurySeverityDescription', {
         header: 'Severity',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('DetectionDate', {
@@ -99,6 +117,10 @@ const InjuryType = () => {
       }),
       columnHelper.accessor('InjuryAge', {
         header: 'Age',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: (row, id, value) => {
           if (!value) return true
           const ageValue = row.getValue(id) as string | null
@@ -110,10 +132,18 @@ const InjuryType = () => {
       }),
       columnHelper.accessor('InjuryAgeClass', {
         header: 'Age Class',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('GenderDescription', {
         header: 'Sex',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('Cow', {
@@ -126,14 +156,108 @@ const InjuryType = () => {
       }),
       columnHelper.accessor('UnusualMortalityEventDescription', {
         header: 'UME Status',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('CountryOriginDescription', {
         header: 'Injury Country Origin',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
+
+      columnHelper.accessor('GearOriginDescription', {
+        header: 'Gear Origin',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('GearComplexityDescription', {
+        header: 'Gear Complexity',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('ConstrictingWrap', {
+        header: 'Constricting Wrap',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
+      }),
+      columnHelper.accessor('Disentangled', {
+        header: 'Disentangled',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
+      }),
+      columnHelper.accessor('GearRetrieved', {
+        header: 'Gear Retrieved',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
+      }),
+      columnHelper.accessor('ForensicsCompleted', {
+        header: 'Forensics Completed',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
+      }),
+      columnHelper.accessor('VesselSizeDescription', {
+        header: 'Vessel Size',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
+        filterFn: 'equalsString',
+      }),
+
       columnHelper.accessor('InjuryTimeFrame', {
         header: 'Timeframe (days)',
+        cell: (info) => {
+          const value = info.getValue()
+          return value !== null && value !== undefined ? value : 'N/A'
+        },
         filterFn: (row, id, value) => {
           if (!value) return true
           const timeframe = row.getValue(id) as number | null
@@ -165,6 +289,10 @@ const InjuryType = () => {
       }),
       columnHelper.accessor('DeathCauseDescription', {
         header: 'Cause of Death',
+        cell: (info) => {
+          const value = info.getValue()
+          return value && value !== '' ? value : 'N/A'
+        },
         filterFn: 'equalsString',
       }),
     ],
@@ -183,6 +311,17 @@ const InjuryType = () => {
     getPaginationRowModel: getPaginationRowModel(),
     initialState: {
       pagination: { pageSize: 10 },
+      // START ADDED CODE
+      columnVisibility: {
+        GearOriginDescription: false,
+        GearComplexityDescription: false,
+        ConstrictingWrap: false,
+        Disentangled: false,
+        GearRetrieved: false,
+        ForensicsCompleted: false,
+        VesselSizeDescription: false,
+      },
+      // END ADDED CODE
     },
     autoResetPageIndex: false,
   })
@@ -194,42 +333,48 @@ const InjuryType = () => {
 
   const chartData = useMemo(() => {
     if (!data) return []
-    const injuryTypes = Array.from(
+    // Get all possible injury types from the full dataset for a consistent chart legend
+    const allInjuryTypes = Array.from(
       new Set(data.map((item) => item.InjuryTypeDescription))
-    ).filter(Boolean)
+    ).filter(Boolean) as string[]
+
+    // Get the currently filtered data from the table model
+    const filteredTableData = table
+      .getFilteredRowModel()
+      .rows.map((row) => row.original)
 
     const yearData = new Map<number, Record<string, number>>()
 
-    data
-      .filter((item) => {
-        const year = new Date(item.DetectionDate).getFullYear()
-        return year >= yearRange[0] && year <= yearRange[1]
-      })
-      .forEach((item) => {
-        const year = new Date(item.DetectionDate).getFullYear()
+    // Process only the filtered data to get counts
+    filteredTableData.forEach((item) => {
+      const year = new Date(item.DetectionDate).getFullYear()
+      // Ensure data is within the year range slider
+      if (year >= yearRange[0] && year <= yearRange[1]) {
         if (!yearData.has(year)) {
           yearData.set(
             year,
-            Object.fromEntries(injuryTypes.map((type) => [type, 0]))
+            Object.fromEntries(allInjuryTypes.map((type) => [type, 0]))
           )
         }
         const counts = yearData.get(year)!
         if (item.InjuryTypeDescription) {
           counts[item.InjuryTypeDescription]++
         }
-      })
+      }
+    })
 
+    // Format data for the chart, ensuring all years in the range are present for the x-axis
     const formattedData = []
     for (let year = yearRange[0]; year <= yearRange[1]; year++) {
       formattedData.push({
         year,
         ...(yearData.get(year) ||
-          Object.fromEntries(injuryTypes.map((type) => [type, 0]))),
+          Object.fromEntries(allInjuryTypes.map((type) => [type, 0]))),
       })
     }
 
     return formattedData.sort((a, b) => a.year - b.year)
-  }, [data, yearRange])
+  }, [data, yearRange, table.getFilteredRowModel().rows]) // Add table rows to dependency array
 
   const handleChartFilter = useCallback(
     (hiddenSeries: Set<string>) => {
