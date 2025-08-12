@@ -152,7 +152,7 @@ const Sidebar = ({ categories }: SidebarProps) => {
           md:h-fit md:max-h-[calc(100vh-70px)]
           h-[calc(100vh-70px)]
           overflow-y-auto
-          border-r border-gray-200
+          border-r border-gray-200 md:border-r-0
           scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent
         `}
         aria-hidden={!isOpen}
