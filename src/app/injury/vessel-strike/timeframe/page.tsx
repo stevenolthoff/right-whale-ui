@@ -79,9 +79,7 @@ export default function VesselStrikeTimeframePage() {
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [selectedInjury, setSelectedInjury] = useState<WhaleInjury | null>(
-    null
-  )
+  const [selectedInjury, setSelectedInjury] = useState<WhaleInjury | null>(null)
 
   const columns = useMemo(
     () => [
@@ -242,7 +240,7 @@ export default function VesselStrikeTimeframePage() {
           return strVal === value
         },
       }),
-       columnHelper.accessor('ForensicsCompleted', {
+      columnHelper.accessor('ForensicsCompleted', {
         header: 'Forensics Completed',
         cell: (info) =>
           info.getValue() === 'Y'
@@ -372,9 +370,10 @@ export default function VesselStrikeTimeframePage() {
     )
   }, [timeframeBinColumnFilter])
 
-  const totalCount = useMemo(() => tableFilteredData.length, [
-    tableFilteredData,
-  ])
+  const totalCount = useMemo(
+    () => tableFilteredData.length,
+    [tableFilteredData]
+  )
 
   if (loading) return <Loader />
   if (error) return <ErrorMessage error={error} />
