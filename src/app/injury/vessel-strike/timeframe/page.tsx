@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useState, useMemo, useEffect } from 'react'
+import React, { useRef, useState, useMemo, useCallback, useEffect } from 'react'
 import { useWhaleInjuryDataStore } from '@/app/stores/useWhaleInjuryDataStore'
 import { YearRangeSlider } from '@/app/components/monitoring/YearRangeSlider'
 import { DataChart } from '@/app/components/monitoring/DataChart'
@@ -21,14 +21,15 @@ import {
   createColumnHelper,
   SortingState,
   ColumnFiltersState,
+  Table as TanstackTable,
 } from '@tanstack/react-table'
 import { WhaleInjury } from '@/app/types/whaleInjury'
-
 import InjuryDetailsPopup from '@/app/components/injury/InjuryDetailsPopup'
 
-const columnHelper = createColumnHelper<WhaleInjury>()
+type ProcessedWhaleInjury = WhaleInjury & { timeframeBin: string }
 
-// Helper function to categorize the injury timeframe into bins
+const columnHelper = createColumnHelper<ProcessedWhaleInjury>()
+
 const getTimeframeBin = (days: number | null): string => {
   if (days === null || typeof days !== 'number' || isNaN(days)) {
     return 'Unknown'
@@ -41,7 +42,6 @@ const getTimeframeBin = (days: number | null): string => {
   return '3+yr'
 }
 
-// Constant for bin order in the chart
 const TIMEFRAME_BINS = [
   '<3m',
   '3m-6m',
@@ -55,7 +55,7 @@ const TIMEFRAME_BINS = [
 export default function VesselStrikeTimeframePage() {
   const chartRef = useRef<HTMLDivElement>(null)
   const { data: allData, loading, error } = useWhaleInjuryDataStore()
-  const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
+  const [isSideBySide, setIsSideBySide] = useState(true)
 
   const vesselStrikeData = useMemo(() => {
     if (!allData) return []
@@ -64,89 +64,33 @@ export default function VesselStrikeTimeframePage() {
     )
   }, [allData])
 
-  const { yearRange, setYearRange, minYear, maxYear } = useYearRange(
-    vesselStrikeData,
+  const processedData = useMemo(() => {
+    return vesselStrikeData.map((item) => ({
+      ...item,
+      timeframeBin: getTimeframeBin(item.InjuryTimeFrame),
+    }))
+  }, [vesselStrikeData])
+
+  const yearRangeProps = useYearRange(
+    loading ? null : vesselStrikeData,
     undefined,
     1980
   )
 
-  const [isSideBySide, setIsSideBySide] = useState(true)
-
-  const chartData = useMemo(() => {
-    if (!vesselStrikeData.length) return []
-    const yearFilteredData = vesselStrikeData.filter((item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      return year >= yearRange[0] && year <= yearRange[1]
-    })
-
-    const yearData = new Map<number, Record<string, number>>()
-
-    yearFilteredData.forEach((item) => {
-      const year = new Date(item.DetectionDate).getFullYear()
-      const bin = getTimeframeBin(item.InjuryTimeFrame)
-      if (!yearData.has(year)) {
-        const initialBins: Record<string, number> = {}
-        TIMEFRAME_BINS.forEach((b) => (initialBins[b] = 0))
-        yearData.set(year, initialBins)
-      }
-      const yearCounts = yearData.get(year)!
-      yearCounts[bin]++
-    })
-
-    const formattedData = []
-    for (let year = yearRange[0]; year <= yearRange[1]; year++) {
-      const initialBins: Record<string, number> = {}
-      TIMEFRAME_BINS.forEach((b) => (initialBins[b] = 0))
-      const row: Record<string, number> & { year: number } = {
-        year,
-        ...(yearData.get(year) || initialBins),
-      }
-      const total = TIMEFRAME_BINS.reduce(
-        (sum, bin) => sum + (row[bin] || 0),
-        0
-      )
-      const knownTotal = TIMEFRAME_BINS.filter((b) => b !== 'Unknown').reduce(
-        (sum, bin) => sum + (row[bin] || 0),
-        0
-      )
-      if (total > 0 && knownTotal > 0) {
-        formattedData.push(row)
-      }
-    }
-
-    return formattedData.sort((a, b) => a.year - b.year)
-  }, [vesselStrikeData, yearRange])
-
-  const totalVesselStrikesInView = useMemo(() => {
-    return chartData.reduce(
-      (sum, item) =>
-        sum +
-        Object.entries(item)
-          .filter(([key]) => key !== 'year' && !hiddenSeries.has(key))
-          .reduce(
-            (rowSum, [, value]) =>
-              rowSum + (typeof value === 'number' ? value : 0),
-            0
-          ),
-      0
-    )
-  }, [chartData, hiddenSeries])
-
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-
-  const [selectedInjury, setSelectedInjury] = useState<WhaleInjury | null>(null)
+  const [selectedInjury, setSelectedInjury] = useState<WhaleInjury | null>(
+    null
+  )
 
   const columns = useMemo(
     () => [
       columnHelper.accessor('EGNo', {
         header: 'EG No',
         cell: (info) => {
-          const egNo = info.getValue() as string
-          if (!egNo || egNo === '') return 'N/A'
-
+          const egNo = info.getValue()
+          if (!egNo) return 'N/A'
           const isFourDigit = /^\d{4}$/.test(egNo)
-
           if (isFourDigit) {
             return (
               <a
@@ -159,7 +103,6 @@ export default function VesselStrikeTimeframePage() {
               </a>
             )
           }
-
           return <span>{egNo}</span>
         },
         filterFn: 'includesString',
@@ -175,21 +118,13 @@ export default function VesselStrikeTimeframePage() {
           </button>
         ),
       }),
-      columnHelper.accessor('InjuryAccountDescription', {
-        header: 'Injury Description',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
-        filterFn: 'equalsString',
+      columnHelper.accessor('timeframeBin', {
+        header: 'Timeframe',
+        filterFn: 'arrIncludesSome',
       }),
-      columnHelper.accessor('InjurySeverityDescription', {
-        header: 'Severity',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
-        filterFn: 'equalsString',
+      columnHelper.accessor('InjuryTimeFrame', {
+        header: 'Timeframe (days)',
+        cell: (info) => info.getValue() ?? 'N/A',
       }),
       columnHelper.accessor('DetectionDate', {
         header: 'Detection Year',
@@ -201,12 +136,23 @@ export default function VesselStrikeTimeframePage() {
           return year >= min && year <= max
         },
       }),
+      columnHelper.accessor('InjuryTypeDescription', {
+        header: 'Injury Type',
+        filterFn: 'arrIncludesSome',
+      }),
+      columnHelper.accessor('InjuryAccountDescription', {
+        header: 'Injury Description',
+        cell: (info) => info.getValue() || 'N/A',
+        filterFn: 'arrIncludesSome',
+      }),
+      columnHelper.accessor('InjurySeverityDescription', {
+        header: 'Severity',
+        cell: (info) => info.getValue() || 'N/A',
+        filterFn: 'arrIncludesSome',
+      }),
       columnHelper.accessor('InjuryAge', {
         header: 'Age',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
+        cell: (info) => info.getValue() || 'N/A',
         filterFn: (row, id, value) => {
           if (!value) return true
           const ageValue = row.getValue(id) as string | null
@@ -218,18 +164,12 @@ export default function VesselStrikeTimeframePage() {
       }),
       columnHelper.accessor('InjuryAgeClass', {
         header: 'Age Class',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
-        filterFn: 'equalsString',
+        cell: (info) => info.getValue() || 'N/A',
+        filterFn: 'arrIncludesSome',
       }),
       columnHelper.accessor('GenderDescription', {
         header: 'Sex',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
+        cell: (info) => info.getValue() || 'N/A',
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('Cow', {
@@ -242,21 +182,67 @@ export default function VesselStrikeTimeframePage() {
       }),
       columnHelper.accessor('UnusualMortalityEventDescription', {
         header: 'UME Status',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
+        cell: (info) => info.getValue() || 'N/A',
         filterFn: 'equalsString',
       }),
       columnHelper.accessor('CountryOriginDescription', {
         header: 'Injury Country Origin',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
+        cell: (info) => info.getValue() || 'N/A',
         filterFn: 'equalsString',
       }),
-      columnHelper.accessor('ForensicsCompleted', {
+      columnHelper.accessor('GearOriginDescription', {
+        header: 'Gear Origin',
+        cell: (info) => info.getValue() || 'N/A',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('GearComplexityDescription', {
+        header: 'Gear Complexity',
+        cell: (info) => info.getValue() || 'N/A',
+        filterFn: 'equalsString',
+      }),
+      columnHelper.accessor('ConstrictingWrap', {
+        header: 'Constricting Wrap',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
+      }),
+      columnHelper.accessor('Disentangled', {
+        header: 'Disentangled',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
+      }),
+      columnHelper.accessor('GearRetrieved', {
+        header: 'Gear Retrieved',
+        cell: (info) =>
+          info.getValue() === 'Y'
+            ? 'Yes'
+            : info.getValue() === 'N'
+            ? 'No'
+            : 'Unknown',
+        filterFn: (row, id, value) => {
+          const val = row.getValue(id)
+          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
+          return strVal === value
+        },
+      }),
+       columnHelper.accessor('ForensicsCompleted', {
         header: 'Forensics Completed',
         cell: (info) =>
           info.getValue() === 'Y'
@@ -272,25 +258,7 @@ export default function VesselStrikeTimeframePage() {
       }),
       columnHelper.accessor('VesselSizeDescription', {
         header: 'Vessel Size',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
         filterFn: 'equalsString',
-      }),
-      columnHelper.accessor('InjuryTimeFrame', {
-        header: 'Timeframe (days)',
-        cell: (info) => {
-          const value = info.getValue()
-          return value !== null && value !== undefined ? value : 'N/A'
-        },
-        filterFn: (row, id, value) => {
-          if (!value) return true
-          const timeframe = row.getValue(id) as number | null
-          if (timeframe === null || timeframe === undefined) return false
-          const [min, max] = value as [number, number]
-          return timeframe >= min && timeframe <= max
-        },
       }),
       columnHelper.accessor('LastSightedAliveDate', {
         header: 'Last Sighted Alive Year',
@@ -315,10 +283,7 @@ export default function VesselStrikeTimeframePage() {
       }),
       columnHelper.accessor('DeathCauseDescription', {
         header: 'Cause of Death',
-        cell: (info) => {
-          const value = info.getValue()
-          return value && value !== '' ? value : 'N/A'
-        },
+        cell: (info) => info.getValue() || 'N/A',
         filterFn: 'equalsString',
       }),
     ],
@@ -326,7 +291,7 @@ export default function VesselStrikeTimeframePage() {
   )
 
   const table = useReactTable({
-    data: vesselStrikeData || [],
+    data: processedData,
     columns,
     state: { sorting, columnFilters },
     onSortingChange: setSorting,
@@ -335,15 +300,81 @@ export default function VesselStrikeTimeframePage() {
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    initialState: {
-      pagination: { pageSize: 10 },
-    },
+    initialState: { pagination: { pageSize: 10 } },
     autoResetPageIndex: false,
   })
 
   useEffect(() => {
-    table.getColumn('DetectionDate')?.setFilterValue(yearRange)
-  }, [yearRange, table])
+    table.getColumn('DetectionDate')?.setFilterValue(yearRangeProps.yearRange)
+  }, [yearRangeProps.yearRange, table])
+
+  const tableFilteredData = useMemo(
+    () => table.getFilteredRowModel().rows.map((row) => row.original),
+    [table.getFilteredRowModel().rows]
+  )
+
+  const chartData = useMemo(() => {
+    const yearData = new Map<number, Record<string, number>>()
+    tableFilteredData.forEach((item) => {
+      const year = new Date(item.DetectionDate).getFullYear()
+      const bin = item.timeframeBin
+      if (!yearData.has(year)) {
+        const initialBins: Record<string, number> = {}
+        TIMEFRAME_BINS.forEach((b) => (initialBins[b] = 0))
+        yearData.set(year, initialBins)
+      }
+      yearData.get(year)![bin]++
+    })
+
+    const formattedData = []
+    for (
+      let year = yearRangeProps.yearRange[0];
+      year <= yearRangeProps.yearRange[1];
+      year++
+    ) {
+      const initialBins: Record<string, number> = {}
+      TIMEFRAME_BINS.forEach((b) => (initialBins[b] = 0))
+      formattedData.push({
+        year,
+        ...(yearData.get(year) || initialBins),
+      })
+    }
+    return formattedData.sort((a, b) => a.year - b.year)
+  }, [tableFilteredData, yearRangeProps.yearRange])
+
+  const handleHiddenSeriesChange = useCallback(
+    (hidden: Set<string>) => {
+      const column = table.getColumn('timeframeBin')
+      if (!column) return
+      const visibleValues = TIMEFRAME_BINS.filter((bin) => !hidden.has(bin))
+      if (
+        visibleValues.length === 0 ||
+        visibleValues.length === TIMEFRAME_BINS.length
+      ) {
+        column.setFilterValue(undefined)
+      } else {
+        column.setFilterValue(visibleValues)
+      }
+    },
+    [table]
+  )
+
+  const timeframeBinColumnFilter = columnFilters.find(
+    (f) => f.id === 'timeframeBin'
+  )?.value as string[] | undefined
+
+  const hiddenSeries = useMemo(() => {
+    if (!timeframeBinColumnFilter || timeframeBinColumnFilter.length === 0) {
+      return new Set<string>()
+    }
+    return new Set(
+      TIMEFRAME_BINS.filter((bin) => !timeframeBinColumnFilter.includes(bin))
+    )
+  }, [timeframeBinColumnFilter])
+
+  const totalCount = useMemo(() => tableFilteredData.length, [
+    tableFilteredData,
+  ])
 
   if (loading) return <Loader />
   if (error) return <ErrorMessage error={error} />
@@ -367,17 +398,17 @@ export default function VesselStrikeTimeframePage() {
             Select Year Range
           </label>
           <YearRangeSlider
-            yearRange={yearRange}
-            minYear={minYear}
-            maxYear={maxYear}
-            onChange={setYearRange}
+            yearRange={yearRangeProps.yearRange}
+            minYear={yearRangeProps.minYear}
+            maxYear={yearRangeProps.maxYear}
+            onChange={yearRangeProps.setYearRange}
           />
         </div>
         <ExportChart
           chartRef={chartRef}
-          filename={`vessel-strike-timeframe-analysis-${yearRange[0]}-${yearRange[1]}.png`}
+          filename={`vessel-strike-timeframe-analysis-${yearRangeProps.yearRange[0]}-${yearRangeProps.yearRange[1]}.png`}
           title='Right Whale Vessel Strike Timeframe Analysis'
-          caption={`Data from ${yearRange[0]} to ${yearRange[1]}`}
+          caption={`Data from ${yearRangeProps.yearRange[0]} to ${yearRangeProps.yearRange[1]}`}
         />
       </div>
 
@@ -387,8 +418,8 @@ export default function VesselStrikeTimeframePage() {
             Vessel Strike Timeframe Analysis
           </h2>
           <p className='text-sm text-slate-500'>
-            Data from {yearRange[0]} to {yearRange[1]} • Total Count:{' '}
-            {totalVesselStrikesInView}
+            Data from {yearRangeProps.yearRange[0]} to{' '}
+            {yearRangeProps.yearRange[1]} • Total Count: {totalCount}
           </p>
         </div>
         <div
@@ -406,9 +437,9 @@ export default function VesselStrikeTimeframePage() {
               stacked={true}
               yAxisLabel='Number of Vessel Strikes'
               customOrder={TIMEFRAME_BINS}
-              showTotal={true}
+              showTotal={false}
               hiddenSeries={hiddenSeries}
-              onHiddenSeriesChange={setHiddenSeries}
+              onHiddenSeriesChange={handleHiddenSeriesChange}
             />
           </div>
           <div>
@@ -421,29 +452,30 @@ export default function VesselStrikeTimeframePage() {
               stacked={true}
               isPercentChart={true}
               customOrder={TIMEFRAME_BINS}
-              showTotal={true}
+              showTotal={false}
               hiddenSeries={hiddenSeries}
-              onHiddenSeriesChange={setHiddenSeries}
+              onHiddenSeriesChange={handleHiddenSeriesChange}
             />
           </div>
         </div>
         <ChartAttribution />
       </div>
+
       <div className='mt-8'>
         <InjuryDownloadButton
-          table={table}
-          filename={`vessel-strike-timeframe-data-${yearRange[0]}-${yearRange[1]}.csv`}
+          table={table as unknown as TanstackTable<WhaleInjury>}
+          filename={`vessel-strike-timeframe-data-${yearRangeProps.yearRange[0]}-${yearRangeProps.yearRange[1]}.csv`}
         />
         <InjuryTableFilters
-          table={table}
-          data={vesselStrikeData || []}
-          yearRange={yearRange}
-          setYearRange={setYearRange}
-          minYear={minYear}
-          maxYear={maxYear}
+          table={table as unknown as TanstackTable<WhaleInjury>}
+          data={processedData}
+          yearRange={yearRangeProps.yearRange}
+          setYearRange={yearRangeProps.setYearRange}
+          minYear={yearRangeProps.minYear}
+          maxYear={yearRangeProps.maxYear}
         />
         <div className='mt-4'>
-          <InjuryTable table={table} />
+          <InjuryTable table={table as unknown as TanstackTable<WhaleInjury>} />
         </div>
       </div>
       <InjuryDetailsPopup
