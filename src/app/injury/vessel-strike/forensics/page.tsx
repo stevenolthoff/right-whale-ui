@@ -183,61 +183,13 @@ export default function VesselStrikeForensicsPage() {
         header: 'Injury Country Origin',
         filterFn: 'equalsString',
       }),
-      columnHelper.accessor('GearOriginDescription', {
-        header: 'Gear Origin',
-        cell: (info) => info.getValue() || 'N/A',
-        filterFn: 'equalsString',
-      }),
-      columnHelper.accessor('GearComplexityDescription', {
-        header: 'Gear Complexity',
-        cell: (info) => info.getValue() || 'N/A',
-        filterFn: 'equalsString',
-      }),
-      columnHelper.accessor('ropeDiameterBin', {
-        header: 'Rope Diameter',
+      columnHelper.accessor('forensicsBin', {
+        header: 'Forensics Completed',
         filterFn: 'arrIncludesSome',
       }),
-      columnHelper.accessor('ConstrictingWrap', {
-        header: 'Constricting Wrap',
-        cell: (info) =>
-          info.getValue() === 'Y'
-            ? 'Yes'
-            : info.getValue() === 'N'
-            ? 'No'
-            : 'Unknown',
-        filterFn: (row, id, value) => {
-          const val = row.getValue(id)
-          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
-          return strVal === value
-        },
-      }),
-      columnHelper.accessor('Disentangled', {
-        header: 'Disentangled',
-        cell: (info) =>
-          info.getValue() === 'Y'
-            ? 'Yes'
-            : info.getValue() === 'N'
-            ? 'No'
-            : 'Unknown',
-        filterFn: (row, id, value) => {
-          const val = row.getValue(id)
-          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
-          return strVal === value
-        },
-      }),
-      columnHelper.accessor('GearRetrieved', {
-        header: 'Gear Retrieved',
-        cell: (info) =>
-          info.getValue() === 'Y'
-            ? 'Yes'
-            : info.getValue() === 'N'
-            ? 'No'
-            : 'Unknown',
-        filterFn: (row, id, value) => {
-          const val = row.getValue(id)
-          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
-          return strVal === value
-        },
+      columnHelper.accessor('vesselSizeBin', {
+        header: 'Vessel Size',
+        filterFn: 'arrIncludesSome',
       }),
       columnHelper.accessor('InjuryTimeFrame', {
         header: 'Timeframe (days)',
@@ -406,13 +358,15 @@ export default function VesselStrikeForensicsPage() {
       FORENSICS_ORDER.filter((bin) => !forensicsBinColumnFilter.includes(bin))
     )
   }, [forensicsBinColumnFilter])
-  
+
   const hiddenVesselSizeSeries = useMemo(() => {
     if (!vesselSizeBinColumnFilter || vesselSizeBinColumnFilter.length === 0) {
       return new Set<string>()
     }
     return new Set(
-      VESSEL_SIZE_ORDER.filter((bin) => !vesselSizeBinColumnFilter.includes(bin))
+      VESSEL_SIZE_ORDER.filter(
+        (bin) => !vesselSizeBinColumnFilter.includes(bin)
+      )
     )
   }, [vesselSizeBinColumnFilter])
 
