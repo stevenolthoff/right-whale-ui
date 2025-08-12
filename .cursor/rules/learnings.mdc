@@ -137,3 +137,57 @@ Last Sighted Alive Year
 Is Dead from Injury
 Cause of Death
 ```
+
+Of course. Here is a distillation of the key learnings from that solution, formatted as an entry for your `learnings.mdc` file.
+
+The task was to implement two-way filtering between charts and a data table on the vessel strike analysis page, ensuring all standard injury filters were available.
+
+@`.cursor/rules/learnings.mdc`
+
+Here is the learning entry to be added:
+
+### Learning: Implementing Two-Way Synchronization Between Charts and a Data Table
+
+**Date:** 2024-07-27
+
+**Feature:** Creating an interactive data exploration experience where filtering the data table updates the charts, and interacting with the chart legends filters the data table. This pattern was applied to `/injury/vessel-strike/type-and-severity`, using `/injury/entanglement/type-and-severity` as a model.
+
+#### Core Architectural Pattern
+
+The key to this feature is establishing the **TanStack Table instance as the single source of truth for the filtered data.** The data flow is unidirectional and cyclical: UI interactions modify the table's state, and the UI components (including the chart) reactively render based on that state.
+
+1.  **Centralized State Management:** The parent page component (e.g., `.../page.tsx`) is responsible for all state management. It initializes and controls the `columnFilters` state for the `useReactTable` hook. State is not managed within the child components.
+
+2.  **Table as the Source of Truth:**
+    *   The `useReactTable` hook receives the full dataset and the `columnFilters` state.
+    *   All filtering logic is handled by the table instance.
+    *   The data table UI (`<InjuryTable>`) and the chart UI (`<DataChart>`) are both consumers of the table's filtered results.
+
+3.  **Data Flow Loop:**
+    *   **UI to Table:** The `<InjuryTableFilters>` component receives the `table` instance and calls `column.setFilterValue()` when a user interacts with a filter control.
+    *   **Table to UI:** This state change causes the table to re-filter its data. A `useMemo` hook in the parent component, which depends on `table.getFilteredRowModel().rows`, re-calculates the data to be displayed in both the table and the charts. This triggers a re-render.
+    *   **Chart to Table:** When a user clicks a chart legend, the `<DataChart>` component fires an `onHiddenSeriesChange` callback. The parent component receives this event, translates the set of "hidden series" into an array of "visible series," and calls `table.getColumn(...).setFilterValue()` to update the table's state, thus completing the loop.
+
+#### Key Implementation Elements
+
+1.  **Parent Component as Orchestrator:** The page component must manage the `useState` for `columnFilters` and pass it to `useReactTable`. It also defines the callback functions that translate UI events into table state changes.
+
+2.  **Derived Chart Data:** The data passed to the `<DataChart>` component is not the raw dataset but is derived from the table's current filtered state. This is a critical step, achieved with `useMemo`:
+    ```javascript
+    const tableFilteredData = useMemo(
+      () => table.getFilteredRowModel().rows.map((row) => row.original),
+      [table.getFilteredRowModel().rows]
+    );
+    ```
+
+3.  **Chart Interaction Callback (`onHiddenSeriesChange`):** The chart component is given a function prop that allows it to communicate user interactions back to the parent. The parent component contains the logic to update the table's filter state.
+    ```javascript
+    const handleHiddenSeriesChange = useCallback((hiddenSeries) => {
+        const column = table.getColumn('columnId');
+        // ... logic to derive filter value from hiddenSeries
+        column.setFilterValue(derivedValue);
+    }, [table]);
+    ```
+
+4.  **Correct `filterFn`:** The column definitions (`columns.ts` or inline) must use the correct `filterFn` for the data type being passed by the filter UI. For multi-select dropdowns that pass an array of strings, `filterFn: 'arrIncludesSome'` is essential to prevent rendering errors.
+
