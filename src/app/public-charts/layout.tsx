@@ -276,10 +276,16 @@ export default function PublicChartsLayout({
     <div className='flex bg-white pt-[70px] overflow-visible min-h-screen'>
       <Sidebar categories={categories} />
       <main className='flex-1 p-2 md:p-12 min-w-0 transition-all duration-200 peer-[.-translate-x-full]:ml-0 bg-white md:border-l md:border-gray-200'>
-        <div className='text-3xl font-bold'>{text[pathname].title}</div>
-        <div className='max-w-[800px] mt-4 mb-8'>
-          {text[pathname].description}
-        </div>
+        {pathname !== '/public-charts/overview' && (
+          <>
+            <div className='text-3xl font-bold max-w-prose'>
+              {text[pathname].title}
+            </div>
+            <div className='max-w-prose mt-4 mb-8'>
+              {text[pathname].description}
+            </div>
+          </>
+        )}
         {children}
       </main>
     </div>

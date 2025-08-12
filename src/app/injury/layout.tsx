@@ -35,9 +35,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { title: string; description: string | React.ReactNode }
   > = {
     '/injury/overview': {
-      title: 'Introduction to the Data',
+      title: '',
       description: (
         <div className='space-y-4'>
+          <div className='text-3xl font-bold mb-6'>
+            Introduction to the Data
+          </div>
           <p className='text-lg text-gray-700 leading-relaxed'>
             The ability to monitor North Atlantic right whale anthropogenic
             injuries and their impacts is entirely dependent on the{' '}
@@ -590,7 +593,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <Sidebar categories={categories} />
       <main className='flex-1 p-2 md:p-12 min-w-0 transition-all duration-200 peer-[.-translate-x-full]:ml-0 bg-white md:border-l md:border-gray-200'>
         <div className='text-3xl font-bold'>{text[pathname].title}</div>
-        <div className='max-w-[800px] mt-4 mb-8'>
+        <div className='max-w-prose mx-auto mt-4 mb-8'>
           {text[pathname].description}
         </div>
         {children}

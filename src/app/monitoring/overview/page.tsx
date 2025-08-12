@@ -4,7 +4,8 @@ import React from 'react'
 
 export default function Overview() {
   return (
-    <div className='min-h-[120vh]'>
+    <div className='min-h-[120vh] max-w-prose mx-auto'>
+      <div className='text-3xl font-bold mb-6'>Introduction to the Data</div>
       <div className='space-y-6 text-gray-700 leading-relaxed'>
         <p className='text-lg'>
           Beginning in 2013, The New England Aquarium initiated an effort to

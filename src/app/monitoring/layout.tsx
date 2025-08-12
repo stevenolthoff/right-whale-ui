@@ -11,7 +11,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     { title: string; description: string | React.ReactNode }
   > = {
     '/monitoring/overview': {
-      title: 'Introduction to the Data',
+      title: '',
       description: '',
     },
     '/monitoring/active': {
