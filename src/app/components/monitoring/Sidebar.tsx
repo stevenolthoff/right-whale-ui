@@ -149,6 +149,7 @@ const Sidebar = ({ categories }: SidebarProps) => {
               : '-translate-x-full md:translate-x-0'
           }
           mt-[70px] md:mt-0
+          md:h-fit md:max-h-[calc(100vh-70px)]
           h-[calc(100vh-70px)]
           overflow-y-auto
           border-r border-gray-200

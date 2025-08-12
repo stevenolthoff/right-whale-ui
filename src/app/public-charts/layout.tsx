@@ -273,7 +273,7 @@ export default function PublicChartsLayout({
   ]
 
   return (
-    <div className='flex bg-white pt-[70px] overflow-visible'>
+    <div className='flex bg-white pt-[70px] overflow-visible min-h-screen'>
       <Sidebar categories={categories} />
       <main className='flex-1 p-2 md:p-12 min-w-0 transition-all duration-200 peer-[.-translate-x-full]:ml-0 bg-white'>
         <div className='text-3xl font-bold'>{text[pathname].title}</div>
