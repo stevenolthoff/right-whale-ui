@@ -96,7 +96,8 @@ export default function EntanglementByGearPage() {
         },
         filterFn: 'includesString',
       }),
-      columnHelper.accessor('CaseId', {
+      columnHelper.accessor((row) => row.CaseId ?? row.InjuryId, {
+        id: 'caseId',
         header: 'Case ID',
         cell: (info) => (
           <button

@@ -70,7 +70,7 @@ const getTableColumns = (
     },
     filterFn: 'includesString',
   }),
-  columnHelper.accessor('CaseId', {
+  columnHelper.accessor((row) => row.CaseId ?? row.InjuryId, {
     header: 'Case ID',
     cell: (info) => (
       <button
