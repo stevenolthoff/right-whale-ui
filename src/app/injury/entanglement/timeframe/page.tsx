@@ -107,7 +107,8 @@ export default function EntanglementTimeframePage() {
         },
         filterFn: 'includesString',
       }),
-      columnHelper.accessor('CaseId', {
+      columnHelper.accessor((row) => row.CaseId ?? row.InjuryId, {
+        id: 'caseId',
         header: 'Case ID',
         cell: (info) => (
           <button

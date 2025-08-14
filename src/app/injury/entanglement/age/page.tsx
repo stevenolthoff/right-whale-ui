@@ -70,8 +70,9 @@ const getTableColumns = (
     },
     filterFn: 'includesString',
   }),
-  columnHelper.accessor('CaseId', {
-    header: 'Case ID',
+  columnHelper.accessor((row) => row.CaseId ?? row.InjuryId, {
+    id: 'caseId',
+    header: 'Injury/Case ID',
     cell: (info) => (
       <button
         onClick={() => setSelectedInjury(info.row.original)}
