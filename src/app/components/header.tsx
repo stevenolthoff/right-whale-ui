@@ -158,7 +158,7 @@ export default function Header() {
         </nav>
 
         <div className='flex items-center gap-3 ml-auto'>
-          {isAuthenticated && (
+          {
             <button
               onClick={() => {
                 if (isAuthenticated) {
@@ -171,7 +171,7 @@ export default function Header() {
             >
               {isAuthenticated ? 'Sign Out' : 'Login'}
             </button>
-          )}
+          }
 
           {/* Mobile Menu Button */}
           <button
