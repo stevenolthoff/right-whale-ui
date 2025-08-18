@@ -2,8 +2,9 @@ import { create } from 'zustand'
 import axios from 'axios'
 import { WhaleInjury, WhaleInjuryResponse } from '../types/whaleInjury'
 
-const API_BASE_URL =
-  'https://stage-rwanthro-backend.srv.axds.co/anthro/api/v1/whale_injuries/?page_size=500'
+const API_BASE_URL = process.env.NEXT_PUBLIC_RWANTHRO_BACKEND_BASE_URL
+  ? `${process.env.NEXT_PUBLIC_RWANTHRO_BACKEND_BASE_URL}/anthro/api/v1/whale_injuries/?page_size=500`
+  : 'https://stage-rwanthro-backend.srv.axds.co/anthro/api/v1/whale_injuries/?page_size=500'
 
 interface WhaleInjuryDataState {
   data: WhaleInjury[]
