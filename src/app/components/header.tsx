@@ -22,9 +22,9 @@ export default function Header() {
   const [lastScrollY, setLastScrollY] = useState(0)
 
   // Check for production environment
-  const isProduction =
-    process.env.NEXT_PUBLIC_RWANTHRO_BACKEND_BASE_URL &&
-    !process.env.NEXT_PUBLIC_RWANTHRO_BACKEND_BASE_URL.includes('stage')
+  // const isProduction =
+  //   process.env.NEXT_PUBLIC_RWANTHRO_BACKEND_BASE_URL &&
+  //   !process.env.NEXT_PUBLIC_RWANTHRO_BACKEND_BASE_URL.includes('stage')
 
   // Add scroll effect
   useEffect(() => {
@@ -158,7 +158,7 @@ export default function Header() {
         </nav>
 
         <div className='flex items-center gap-3 ml-auto'>
-          {(!isProduction || isAuthenticated) && (
+          {isAuthenticated && (
             <button
               onClick={() => {
                 if (isAuthenticated) {
