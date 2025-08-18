@@ -525,7 +525,7 @@ export default function EntanglementTypeAndSeverity() {
           setYearRange={yearRangeProps.setYearRange}
           minYear={yearRangeProps.minYear}
           maxYear={yearRangeProps.maxYear}
-          defaultStartYear={yearRangeProps.minYear}
+          defaultStartYear={1980}
         />
         <div className='mt-4'>
           <InjuryTable table={table} />
