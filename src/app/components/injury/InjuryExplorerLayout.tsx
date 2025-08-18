@@ -101,7 +101,10 @@ export default function InjuryExplorerLayout<T extends WhaleInjury>({
           <label className='block text-sm font-medium text-slate-600 mb-2'>
             Select Year Range
           </label>
-          <YearRangeSlider {...yearRangeProps} onChange={yearRangeProps.setYearRange} />
+          <YearRangeSlider
+            {...yearRangeProps}
+            onChange={yearRangeProps.setYearRange}
+          />
         </div>
         <ExportChart
           chartRef={chartRef}
@@ -115,8 +118,8 @@ export default function InjuryExplorerLayout<T extends WhaleInjury>({
         <div className='text-center'>
           <h2 className='text-2xl font-bold text-blue-900'>{pageTitle}</h2>
           <p className='text-sm text-slate-500'>
-            Data from {yearRangeProps.yearRange[0]} to {yearRangeProps.yearRange[1]} • Total Count:{' '}
-            {totalCountInView}
+            Data from {yearRangeProps.yearRange[0]} to{' '}
+            {yearRangeProps.yearRange[1]} • Total Count: {totalCountInView}
           </p>
         </div>
         <div
@@ -157,6 +160,7 @@ export default function InjuryExplorerLayout<T extends WhaleInjury>({
           data={processedData}
           {...yearRangeProps}
           setYearRange={yearRangeProps.setYearRange}
+          defaultStartYear={1980}
         />
         <div className='mt-4'>
           <InjuryTable table={table as TanstackTable<WhaleInjury>} />
