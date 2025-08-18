@@ -254,6 +254,7 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
 
   const resetFilters = () => {
     table.resetColumnFilters()
+    setYearRange([1980, maxYear])
   }
 
   const filtersConfig = [
