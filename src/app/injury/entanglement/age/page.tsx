@@ -397,9 +397,12 @@ export default function EntanglementByAgePage() {
       </div>
       <div ref={chartRef} className='w-full bg-white p-4'>
         <div className='text-center'>
-          <h2 className='text-2xl font-bold text-blue-900'>Entanglement by Age Class</h2>
+          <h2 className='text-2xl font-bold text-blue-900'>
+            Entanglement by Age Class
+          </h2>
           <p className='text-sm text-slate-500'>
-            Data from {yearRangeProps.yearRange[0]} to {yearRangeProps.yearRange[1]} • Total Count:{' '}
+            Data from {yearRangeProps.yearRange[0]} to{' '}
+            {yearRangeProps.yearRange[1]} • Total Count:{' '}
             {totalEntanglementsInView}
           </p>
         </div>
@@ -453,6 +456,7 @@ export default function EntanglementByAgePage() {
           setYearRange={yearRangeProps.setYearRange}
           minYear={yearRangeProps.minYear}
           maxYear={yearRangeProps.maxYear}
+          defaultStartYear={1980}
         />
         <div className='mt-4'>
           <InjuryTable table={table} />

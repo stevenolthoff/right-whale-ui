@@ -446,6 +446,7 @@ const InjuryType = () => {
           setYearRange={setYearRange}
           minYear={minYear}
           maxYear={maxYear}
+          defaultStartYear={1980}
         />
         <div className='mt-4'>
           <InjuryTable table={table} />

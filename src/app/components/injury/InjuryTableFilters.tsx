@@ -176,11 +176,12 @@ const LastSightedAliveYearFilter: React.FC<{
 
 interface TableFiltersProps {
   table: Table<WhaleInjury>
-  data: any[] // Changed from WhaleInjury[] to any[] to accommodate pre-processed data
+  data: WhaleInjury[] | Record<string, unknown>[] // Support both original and pre-processed data
   yearRange: [number, number]
   setYearRange: (range: [number, number]) => void
   minYear: number
   maxYear: number
+  defaultStartYear?: number
 }
 
 export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
@@ -190,6 +191,7 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
   setYearRange,
   minYear,
   maxYear,
+  defaultStartYear,
 }) => {
   const [isExpanded, setIsExpanded] = React.useState(true)
 
@@ -223,10 +225,10 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
     }
 
     if (data) {
-      data.forEach((item: any) => {
-        // Changed type to any to handle new properties
+      data.forEach((item: Record<string, unknown>) => {
+        // Changed type to handle pre-processed data with additional properties
         Object.keys(options).forEach((key) => {
-          const value = item[key as keyof typeof item]
+          const value = item[key]
           if (typeof value === 'boolean') {
             options[key].add(value ? 'Yes' : 'No')
           } else if (typeof value === 'string' && value) {
@@ -254,6 +256,7 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
 
   const resetFilters = () => {
     table.resetColumnFilters()
+    setYearRange([defaultStartYear ?? minYear, maxYear])
   }
 
   const filtersConfig = [
@@ -325,7 +328,11 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
       type: 'select',
       isMulti: true,
     },
-    { id: 'InjuryTimeFrame', label: 'Timeframe (days)', type: 'timeframe-slider' },
+    {
+      id: 'InjuryTimeFrame',
+      label: 'Timeframe (days)',
+      type: 'timeframe-slider',
+    },
     {
       id: 'LastSightedAliveDate',
       label: 'Last Sighted Alive Year',
