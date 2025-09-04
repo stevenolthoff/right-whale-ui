@@ -61,7 +61,7 @@ export default function VesselStrikeTypeAndSeverity() {
   const columns = useMemo(
     () => [
       columnHelper.accessor('EGNo', {
-        header: 'EG No',
+        header: 'EG NO / Field EG NO',
         cell: (info) => {
           const egNo = info.getValue() as string
           if (!egNo || egNo === '') return 'N/A'
@@ -154,58 +154,6 @@ export default function VesselStrikeTypeAndSeverity() {
         header: 'Injury Country Origin',
         filterFn: 'equalsString',
       }),
-      columnHelper.accessor('GearOriginDescription', {
-        header: 'Gear Origin',
-        cell: (info) => info.getValue() || 'N/A',
-        filterFn: 'equalsString',
-      }),
-      columnHelper.accessor('GearComplexityDescription', {
-        header: 'Gear Complexity',
-        cell: (info) => info.getValue() || 'N/A',
-        filterFn: 'equalsString',
-      }),
-      columnHelper.accessor('ConstrictingWrap', {
-        header: 'Constricting Wrap',
-        cell: (info) =>
-          info.getValue() === 'Y'
-            ? 'Yes'
-            : info.getValue() === 'N'
-            ? 'No'
-            : 'Unknown',
-        filterFn: (row, id, value) => {
-          const val = row.getValue(id)
-          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
-          return strVal === value
-        },
-      }),
-      columnHelper.accessor('Disentangled', {
-        header: 'Disentangled',
-        cell: (info) =>
-          info.getValue() === 'Y'
-            ? 'Yes'
-            : info.getValue() === 'N'
-            ? 'No'
-            : 'Unknown',
-        filterFn: (row, id, value) => {
-          const val = row.getValue(id)
-          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
-          return strVal === value
-        },
-      }),
-      columnHelper.accessor('GearRetrieved', {
-        header: 'Gear Retrieved',
-        cell: (info) =>
-          info.getValue() === 'Y'
-            ? 'Yes'
-            : info.getValue() === 'N'
-            ? 'No'
-            : 'Unknown',
-        filterFn: (row, id, value) => {
-          const val = row.getValue(id)
-          const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
-          return strVal === value
-        },
-      }),
       columnHelper.accessor('ForensicsCompleted', {
         header: 'Forensics Completed',
         cell: (info) =>
@@ -283,9 +231,10 @@ export default function VesselStrikeTypeAndSeverity() {
     table.getColumn('DetectionDate')?.setFilterValue(yearRangeProps.yearRange)
   }, [yearRangeProps.yearRange, table])
 
+  const filteredRows = table.getFilteredRowModel().rows
   const tableFilteredData = useMemo(
-    () => table.getFilteredRowModel().rows.map((row) => row.original),
-    [table.getFilteredRowModel().rows]
+    () => filteredRows.map((row) => row.original),
+    [filteredRows]
   )
 
   const allTypes = useMemo(
@@ -518,6 +467,13 @@ export default function VesselStrikeTypeAndSeverity() {
           minYear={yearRangeProps.minYear}
           maxYear={yearRangeProps.maxYear}
           defaultStartYear={1980}
+          excludedColumns={[
+            'GearOriginDescription',
+            'GearComplexityDescription',
+            'ConstrictingWrap',
+            'Disentangled',
+            'GearRetrieved',
+          ]}
         />
         <div className='mt-4'>
           <InjuryTable table={table} />

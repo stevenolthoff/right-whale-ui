@@ -94,7 +94,7 @@ export default function VesselStrikeForensicsPage() {
   const columns = useMemo(
     () => [
       columnHelper.accessor('EGNo', {
-        header: 'EG No',
+        header: 'EG NO / Field EG NO',
         cell: (info) => {
           const egNo = info.getValue() as string
           if (!egNo || egNo === '') return 'N/A'
@@ -480,6 +480,7 @@ export default function VesselStrikeForensicsPage() {
           minYear={yearRangeProps.minYear}
           maxYear={yearRangeProps.maxYear}
           defaultStartYear={1980}
+          excludedColumns={['ForensicsCompleted', 'VesselSizeDescription']}
         />
         <div className='mt-4'>
           <InjuryTable table={table as unknown as TanstackTable<WhaleInjury>} />
