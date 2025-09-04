@@ -35,10 +35,13 @@ const mapAgeClassToAbbreviation = (ageClass: string | null): string => {
   const trimmedAgeClass = ageClass.trim().toLowerCase()
   switch (trimmedAgeClass) {
     case 'calf':
+    case 'c':
       return 'C'
     case 'juvenile':
+    case 'j':
       return 'J'
     case 'adult':
+    case 'a':
       return 'A'
     default:
       return 'Unknown'
@@ -49,7 +52,7 @@ const getTableColumns = (
   setSelectedInjury: (injury: WhaleInjury | null) => void
 ) => [
   columnHelper.accessor('EGNo', {
-    header: 'EG No',
+    header: 'EG NO / Field EG NO',
     cell: (info) => {
       const egNo = info.getValue() as string
       if (!egNo || egNo === '') return 'N/A'
@@ -138,64 +141,6 @@ const getTableColumns = (
   columnHelper.accessor('CountryOriginDescription', {
     header: 'Injury Country Origin',
     filterFn: 'equalsString',
-  }),
-  columnHelper.accessor('GearOriginDescription', {
-    header: 'Gear Origin',
-    cell: (info) => {
-      const value = info.getValue()
-      return value && value !== '' ? value : 'N/A'
-    },
-    filterFn: 'equalsString',
-  }),
-  columnHelper.accessor('GearComplexityDescription', {
-    header: 'Gear Complexity',
-    cell: (info) => {
-      const value = info.getValue()
-      return value && value !== '' ? value : 'N/A'
-    },
-    filterFn: 'equalsString',
-  }),
-  columnHelper.accessor('ConstrictingWrap', {
-    header: 'Constricting Wrap',
-    cell: (info) =>
-      info.getValue() === 'Y'
-        ? 'Yes'
-        : info.getValue() === 'N'
-        ? 'No'
-        : 'Unknown',
-    filterFn: (row, id, value) => {
-      const val = row.getValue(id)
-      const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
-      return strVal === value
-    },
-  }),
-  columnHelper.accessor('Disentangled', {
-    header: 'Disentangled',
-    cell: (info) =>
-      info.getValue() === 'Y'
-        ? 'Yes'
-        : info.getValue() === 'N'
-        ? 'No'
-        : 'Unknown',
-    filterFn: (row, id, value) => {
-      const val = row.getValue(id)
-      const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
-      return strVal === value
-    },
-  }),
-  columnHelper.accessor('GearRetrieved', {
-    header: 'Gear Retrieved',
-    cell: (info) =>
-      info.getValue() === 'Y'
-        ? 'Yes'
-        : info.getValue() === 'N'
-        ? 'No'
-        : 'Unknown',
-    filterFn: (row, id, value) => {
-      const val = row.getValue(id)
-      const strVal = val === 'Y' ? 'Yes' : val === 'N' ? 'No' : 'Unknown'
-      return strVal === value
-    },
   }),
   columnHelper.accessor('ForensicsCompleted', {
     header: 'Forensics Completed',
@@ -296,14 +241,10 @@ export default function VesselStrikeByAgePage() {
     table.getColumn('DetectionDate')?.setFilterValue(yearRangeProps.yearRange)
   }, [yearRangeProps.yearRange, table])
 
+  const tableFilteredRows = table.getFilteredRowModel().rows
   const tableFilteredData = useMemo(
-    () => table.getFilteredRowModel().rows.map((row) => row.original),
-    [table.getFilteredRowModel().rows]
-  )
-  
-  const allAgeClassesFromData = useMemo(
-    () => Array.from(new Set(vesselStrikeData.map((item) => item.InjuryAgeClass))),
-    [vesselStrikeData]
+    () => tableFilteredRows.map((row) => row.original),
+    [tableFilteredRows]
   )
 
   const chartData = useMemo(() => {
@@ -343,22 +284,22 @@ export default function VesselStrikeByAgePage() {
       const column = table.getColumn('InjuryAgeClass')
       if (!column) return
 
-      const visibleAbbrs = new Set(
-        AGE_CLASS_ORDER.filter((abbr) => !hiddenSeries.has(abbr))
+      const visibleAbbrs = AGE_CLASS_ORDER.filter(
+        (abbr) => !hiddenSeries.has(abbr)
       )
 
-      const visibleValues = allAgeClassesFromData.filter((val) => {
-        const abbr = mapAgeClassToAbbreviation(val)
-        return visibleAbbrs.has(abbr)
-      })
-
-      if (hiddenSeries.size === 0 || hiddenSeries.size === AGE_CLASS_ORDER.length) {
+      // If all chart series are explicitly hidden or none are, clear the filter (show all data)
+      if (
+        hiddenSeries.size === 0 ||
+        hiddenSeries.size === AGE_CLASS_ORDER.length
+      ) {
         column.setFilterValue(undefined)
       } else {
-        column.setFilterValue(visibleValues.length > 0 ? visibleValues : [null]) // Use [null] to filter for nothing if no values match
+        // Otherwise, set the filter value to the visible abbreviations
+        column.setFilterValue(visibleAbbrs)
       }
     },
-    [table, allAgeClassesFromData]
+    [table]
   )
 
   const ageClassColumnFilter = columnFilters.find(
@@ -369,19 +310,20 @@ export default function VesselStrikeByAgePage() {
     if (!ageClassColumnFilter) {
       return new Set<string>()
     }
-    const visibleAbbrs = new Set(
-      ageClassColumnFilter.map((val) => mapAgeClassToAbbreviation(val))
+    // ageClassColumnFilter now directly contains the abbreviated strings.
+    // So, we just filter AGE_CLASS_ORDER to find which are NOT in the filter.
+    return new Set(
+      AGE_CLASS_ORDER.filter((abbr) => !ageClassColumnFilter.includes(abbr))
     )
-    return new Set(AGE_CLASS_ORDER.filter((abbr) => !visibleAbbrs.has(abbr)))
   }, [ageClassColumnFilter])
-  
+
   const totalVesselStrikesInView = useMemo(() => {
     return tableFilteredData.length
   }, [tableFilteredData])
 
   if (loading) return <Loader />
   if (error) return <ErrorMessage error={error} />
-  
+
   return (
     <div className='flex flex-col space-y-4 bg-white p-4'>
       <div className='flex justify-center mb-4'>
@@ -476,6 +418,13 @@ export default function VesselStrikeByAgePage() {
           minYear={yearRangeProps.minYear}
           maxYear={yearRangeProps.maxYear}
           defaultStartYear={1980}
+          excludedColumns={[
+            'GearOriginDescription',
+            'GearComplexityDescription',
+            'ConstrictingWrap',
+            'Disentangled',
+            'GearRetrieved',
+          ]}
         />
         <div className='mt-4'>
           <InjuryTable table={table} />

@@ -14,6 +14,30 @@ import {
 
 type OptionType = { value: string; label: string }
 
+// Constant for age class order and mapping function
+const AGE_CLASS_ORDER = ['C', 'J', 'A', 'Unknown']
+
+const mapAgeClassToAbbreviation = (ageClass: string | null): string => {
+  if (!ageClass) return 'Unknown'
+  const trimmedAgeClass = ageClass.trim().toLowerCase()
+  switch (trimmedAgeClass) {
+    case 'calf':
+    case 'c':
+      return 'C'
+    case 'juvenile':
+    case 'j':
+      return 'J'
+    case 'adult':
+    case 'a':
+      return 'A'
+    case 'unknown':
+    case 'u':
+      return 'Unknown'
+    default:
+      return 'Unknown'
+  }
+}
+
 const DebouncedInput: React.FC<
   {
     value: string | number
@@ -91,11 +115,14 @@ const SelectFilter: React.FC<{
 
 const AgeSliderFilter: React.FC<{
   column: Column<WhaleInjury, unknown>
-  data: WhaleInjury[]
+  data: WhaleInjury[] | Record<string, unknown>[]
 }> = ({ column, data }) => {
   const { minAge, maxAge } = React.useMemo(() => {
     const ages = data
-      .map((item) => (item.InjuryAge ? parseInt(item.InjuryAge, 10) : null))
+      .map((item) => {
+        const injuryAge = (item as WhaleInjury).InjuryAge
+        return injuryAge ? parseInt(injuryAge, 10) : null
+      })
       .filter((age): age is number => age !== null && !isNaN(age))
     return {
       minAge: ages.length > 0 ? Math.min(...ages) : 0,
@@ -118,11 +145,11 @@ const AgeSliderFilter: React.FC<{
 
 const TimeframeSliderFilter: React.FC<{
   column: Column<WhaleInjury, unknown>
-  data: WhaleInjury[]
+  data: WhaleInjury[] | Record<string, unknown>[]
 }> = ({ column, data }) => {
   const { minTimeframe, maxTimeframe } = React.useMemo(() => {
     const timeframes = data
-      .map((d) => d.InjuryTimeFrame)
+      .map((d) => (d as WhaleInjury).InjuryTimeFrame)
       .filter((t): t is number => t !== null && t !== undefined)
     return {
       minTimeframe: timeframes.length > 0 ? Math.min(...timeframes) : 0,
@@ -145,15 +172,14 @@ const TimeframeSliderFilter: React.FC<{
 
 const LastSightedAliveYearFilter: React.FC<{
   column: Column<WhaleInjury, unknown>
-  data: WhaleInjury[]
+  data: WhaleInjury[] | Record<string, unknown>[]
 }> = ({ column, data }) => {
   const { minYear, maxYear } = React.useMemo(() => {
     const years = data
-      .map((item) =>
-        item.LastSightedAliveDate
-          ? new Date(item.LastSightedAliveDate).getFullYear()
-          : null
-      )
+      .map((item) => {
+        const lastSightedDate = (item as WhaleInjury).LastSightedAliveDate
+        return lastSightedDate ? new Date(lastSightedDate).getFullYear() : null
+      })
       .filter((year): year is number => year !== null && !isNaN(year))
     return {
       minYear: years.length > 0 ? Math.min(...years) : 1970,
@@ -182,6 +208,7 @@ interface TableFiltersProps {
   minYear: number
   maxYear: number
   defaultStartYear?: number
+  excludedColumns?: string[] // Array of column IDs to exclude from filters
 }
 
 export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
@@ -192,6 +219,7 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
   minYear,
   maxYear,
   defaultStartYear,
+  excludedColumns = [],
 }) => {
   const [isExpanded, setIsExpanded] = React.useState(true)
 
@@ -219,16 +247,18 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
       DeathCauseDescription: new Set(),
       ForensicsCompleted: new Set(),
       VesselSizeDescription: new Set(),
+      forensicsBin: new Set(), // Added forensicsBin support
+      vesselSizeBin: new Set(), // Added vesselSizeBin support
       timeframeBin: new Set(), // Added timeframeBin support
       gearBin: new Set(), // Added gearBin support
       ropeDiameterBin: new Set(), // Added ropeDiameterBin support
     }
 
     if (data) {
-      data.forEach((item: Record<string, unknown>) => {
+      data.forEach((item: WhaleInjury | Record<string, unknown>) => {
         // Changed type to handle pre-processed data with additional properties
         Object.keys(options).forEach((key) => {
-          const value = item[key]
+          const value = item[key as keyof typeof item]
           if (typeof value === 'boolean') {
             options[key].add(value ? 'Yes' : 'No')
           } else if (typeof value === 'string' && value) {
@@ -241,6 +271,9 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
               if (value === 'Y') options[key].add('Yes')
               else if (value === 'N') options[key].add('No')
               else if (value) options[key].add(value)
+            } else if (key === 'InjuryAgeClass') {
+              // Normalize age class values to standardized abbreviations
+              options[key].add(mapAgeClassToAbbreviation(value))
             } else {
               options[key].add(value)
             }
@@ -250,7 +283,16 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
     }
 
     return Object.fromEntries(
-      Object.entries(options).map(([key, set]) => [key, Array.from(set).sort()])
+      Object.entries(options).map(([key, set]) => [
+        key,
+        Array.from(set).sort((a, b) => {
+          // Custom sort for AGE_CLASS_ORDER if it's the InjuryAgeClass filter
+          if (key === 'InjuryAgeClass') {
+            return AGE_CLASS_ORDER.indexOf(a) - AGE_CLASS_ORDER.indexOf(b)
+          }
+          return a.localeCompare(b)
+        }),
+      ])
     )
   }, [data])
 
@@ -321,6 +363,18 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
       label: 'Vessel Size',
       type: 'select',
     },
+    {
+      id: 'forensicsBin',
+      label: 'Forensics Completed',
+      type: 'select',
+      isMulti: true,
+    },
+    {
+      id: 'vesselSizeBin',
+      label: 'Vessel Size',
+      type: 'select',
+      isMulti: true,
+    },
     // Removed InjuryTimeFrame slider and replaced with timeframeBin multi-select
     {
       id: 'timeframeBin',
@@ -340,7 +394,7 @@ export const InjuryTableFilters: React.FC<TableFiltersProps> = ({
     },
     { id: 'IsDead', label: 'Is Dead from Injury', type: 'select' },
     { id: 'DeathCauseDescription', label: 'Cause of Death', type: 'select' },
-  ]
+  ].filter((filter) => !excludedColumns.includes(filter.id))
 
   return (
     <div className='space-y-4 bg-gray-50 p-4 rounded-lg'>

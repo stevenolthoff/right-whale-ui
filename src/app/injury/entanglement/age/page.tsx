@@ -35,11 +35,17 @@ const mapAgeClassToAbbreviation = (ageClass: string | null): string => {
   const trimmedAgeClass = ageClass.trim().toLowerCase()
   switch (trimmedAgeClass) {
     case 'calf':
+    case 'c':
       return 'C'
     case 'juvenile':
+    case 'j':
       return 'J'
     case 'adult':
+    case 'a':
       return 'A'
+    case 'unknown':
+    case 'u':
+      return 'Unknown'
     default:
       return 'Unknown'
   }
@@ -49,7 +55,7 @@ const getTableColumns = (
   setSelectedInjury: (injury: WhaleInjury | null) => void
 ) => [
   columnHelper.accessor('EGNo', {
-    header: 'EG No',
+    header: 'EG NO / Field EG NO',
     cell: (info) => {
       const egNo = info.getValue() as string
       if (!egNo || egNo === '') return 'N/A'
@@ -113,7 +119,18 @@ const getTableColumns = (
   }),
   columnHelper.accessor('InjuryAgeClass', {
     header: 'Age Class',
-    filterFn: 'arrIncludesSome',
+    filterFn: (row, columnId, filterValue: string[] | undefined) => {
+      // filterValue here is expected to be an array of abbreviations (e.g., ['C', 'J'])
+      if (!filterValue || filterValue.length === 0) {
+        return true // No filter applied or all are visible
+      }
+
+      const rowAgeClassRaw = row.original.InjuryAgeClass
+      const rowAgeClassAbbr = mapAgeClassToAbbreviation(rowAgeClassRaw)
+
+      // Check if the abbreviated form of the row's age class is present in the filterValue
+      return filterValue.includes(rowAgeClassAbbr)
+    },
   }),
   columnHelper.accessor('GenderDescription', {
     header: 'Sex',
@@ -252,10 +269,7 @@ export default function EntanglementByAgePage() {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [selectedInjury, setSelectedInjury] = useState<WhaleInjury | null>(null)
 
-  const columns = useMemo(
-    () => getTableColumns(setSelectedInjury),
-    []
-  )
+  const columns = useMemo(() => getTableColumns(setSelectedInjury), [])
 
   const table = useReactTable({
     data: entanglementData || [],
@@ -283,7 +297,8 @@ export default function EntanglementByAgePage() {
   )
 
   const allAgeClassesFromData = useMemo(
-    () => Array.from(new Set(entanglementData.map((item) => item.InjuryAgeClass))),
+    () =>
+      Array.from(new Set(entanglementData.map((item) => item.InjuryAgeClass))),
     [entanglementData]
   )
 
@@ -324,22 +339,23 @@ export default function EntanglementByAgePage() {
       const column = table.getColumn('InjuryAgeClass')
       if (!column) return
 
-      const visibleAbbrs = new Set(
-        AGE_CLASS_ORDER.filter((abbr) => !hiddenSeries.has(abbr))
+      const visibleAbbrs = AGE_CLASS_ORDER.filter(
+        (abbr) => !hiddenSeries.has(abbr)
       )
 
-      const visibleValues = allAgeClassesFromData.filter((val) => {
-        const abbr = mapAgeClassToAbbreviation(val)
-        return visibleAbbrs.has(abbr)
-      })
-
-      if (hiddenSeries.size === 0 || hiddenSeries.size === AGE_CLASS_ORDER.length) {
+      // If all chart series are explicitly hidden or none are, clear the filter (show all data)
+      if (
+        hiddenSeries.size === 0 ||
+        hiddenSeries.size === AGE_CLASS_ORDER.length
+      ) {
         column.setFilterValue(undefined)
       } else {
-        column.setFilterValue(visibleValues.length > 0 ? visibleValues : [null]) // Use [null] to filter for nothing if no values match
+        // Otherwise, set the filter value to the visible abbreviations
+        // The table's filterFn for InjuryAgeClass now expects these abbreviated values.
+        column.setFilterValue(visibleAbbrs)
       }
     },
-    [table, allAgeClassesFromData]
+    [table]
   )
 
   const ageClassColumnFilter = columnFilters.find(
@@ -350,19 +366,20 @@ export default function EntanglementByAgePage() {
     if (!ageClassColumnFilter) {
       return new Set<string>()
     }
-    const visibleAbbrs = new Set(
-      ageClassColumnFilter.map((val) => mapAgeClassToAbbreviation(val))
+    // ageClassColumnFilter now directly contains the abbreviated strings.
+    // So, we just filter AGE_CLASS_ORDER to find which are NOT in the filter.
+    return new Set(
+      AGE_CLASS_ORDER.filter((abbr) => !ageClassColumnFilter.includes(abbr))
     )
-    return new Set(AGE_CLASS_ORDER.filter((abbr) => !visibleAbbrs.has(abbr)))
   }, [ageClassColumnFilter])
-  
+
   const totalEntanglementsInView = useMemo(() => {
     return tableFilteredData.length
   }, [tableFilteredData])
 
   if (loading) return <Loader />
   if (error) return <ErrorMessage error={error} />
-  
+
   return (
     <div className='flex flex-col space-y-4 bg-white p-4'>
       <div className='flex justify-center mb-4'>

@@ -257,7 +257,7 @@ const WhaleInfoContent: React.FC<{ injuryData: WhaleInjury }> = ({
     {
       label: 'Reproductive Female',
       value: injuryData.Cow ? 'Yes' : 'No',
-      hide: injuryData.GenderDescription?.toLowerCase() !== 'female',
+      hide: !injuryData.Cow,
     },
     { label: 'Is Dead from Injury', value: injuryData.IsDead ? 'Yes' : 'No' },
     {

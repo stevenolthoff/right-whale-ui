@@ -112,7 +112,7 @@ export default function EntanglementByRopeAndAgePage() {
   const columns = useMemo(
     () => [
       columnHelper.accessor('EGNo', {
-        header: 'EG No',
+        header: 'EG NO / Field EG NO',
         cell: (info) => {
           const egNo = info.getValue()
           if (!egNo) return 'N/A'

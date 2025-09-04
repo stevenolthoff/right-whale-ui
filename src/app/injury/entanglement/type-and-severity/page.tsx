@@ -52,7 +52,7 @@ export default function EntanglementTypeAndSeverity() {
   const columns = useMemo(
     () => [
       columnHelper.accessor('EGNo', {
-        header: 'EG No',
+        header: 'EG NO / Field EG NO',
         cell: (info) => {
           const egNo = info.getValue() as string
           if (!egNo || egNo === '') return 'N/A'
